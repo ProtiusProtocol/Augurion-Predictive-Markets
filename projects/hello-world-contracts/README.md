@@ -1,3 +1,54 @@
+# Augurion Predictive Markets
+
+This repository contains the Augurion predictive markets example (smart contracts and demo helpers).
+
+Summary
+- Contract: `smart_contracts/augurion_v2/contracts.algo.ts` (AugurionMarketV2)
+- Key features:
+  - Market lifecycle: `create()`, `bet_yes(amount)`, `bet_no(amount)`, `resolve_market(winningSide)`
+  - Per-user box storage (box-per-user pattern): `yes:` / `no:` boxes store per-account stakes
+  - Claim flow: `claim_payout()` pays user their integer-only share of the payout pool via an inner transaction
+
+Artifacts
+- Compiled artifacts (ARC-56, ARC-32, TEAL, and generated client) are written to `smart_contracts/artifacts/augurion_v2/` by the build pipeline.
+- The preferred ABI/spec file for external tools (like LORA) is the ARC-56 JSON:
+  - `smart_contracts/artifacts/augurion_v2/AugurionMarketV2.arc56.json`
+
+Important notes about `claim` / `claim_payout`
+- The contract implements per-user boxes: `yesBet`, `noBet`, and `claimed` (prefixes `yes:`, `no:`, `claimed:`).
+- The claim method in source is named `claim_payout()`; compiled artifacts should expose `claim` in the ABI (ARC-56 and ARC-32). If a UI (e.g. LORA) doesn't show the method:
+  1. Make sure you load the ARC-56 JSON file (`AugurionMarketV2.arc56.json`).
+ 2. Restart or re-import to clear any cached app spec in the UI.
+ 3. Verify the JSON contains `"claim"` with `node scripts/verify-artifact.js`.
+
+Build & verification
+1. Install dependencies:
+```powershell
+npm ci
+```
+
+2. Build (compile contracts → TEAL and artifacts):
+```powershell
+npm run build
+```
+
+3. Verify local artifacts contain the `claim` method and box maps:
+```powershell
+node .\scripts\verify-artifact.js
+```
+
+Importing into LORA (quick steps)
+- In LORA, import the ARC-56 JSON file: `smart_contracts/artifacts/augurion_v2/AugurionMarketV2.arc56.json`.
+- If LORA doesn't show the `claim` method after import, restart LORA or re-import; check you didn't upload a stale ARC-32 or truncated JSON.
+
+Security / repo hygiene
+- `.gitignore` excludes `smart_contracts/artifacts/` and common secret files. Do not commit mnemonics or private keys.
+
+Repository remote
+- Pushed to: https://github.com/ProtiusProtocol/Augurion-Predictive-Markets.git
+
+Contact / Next steps
+- If you want I can add a simple `README` to the contract folder, a LICENSE, or a CI workflow to build artifacts on push.
 # hello-world-contracts
 
 This project has been generated using AlgoKit. See below for default getting started instructions.
