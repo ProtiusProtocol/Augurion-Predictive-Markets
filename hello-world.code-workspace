@@ -5,66 +5,28 @@
       "name": "ROOT"
     },
     {
-      "path": "./projects/hello-world-contracts"
-    },
-    {
-      "path": "./projects/hello-world-frontend"
+      "path": "projects/hello-world"
     }
   ],
   "settings": {
     "files.exclude": {
       "projects/": true
     },
-    "jest.disabledWorkspaceFolders": ["ROOT", "projects"],
-    "dotenv.enableAutocloaking": false
+    "jest.disabledWorkspaceFolders": [
+      "ROOT",
+      "projects"
+    ]
   },
   "extensions": {
-    "recommendations": ["joshx.workspace-terminals"]
+    "recommendations": [
+      "joshx.workspace-terminals"
+    ]
   },
-  
   "tasks": {
     "version": "2.0.0",
-    "tasks": [
-      {
-        "label": "Build artifacts (+ LocalNet)",
-        "command": "algokit",
-        "args": ["project", "run", "build"],
-        "options": {
-          "cwd": "${workspaceFolder}"
-        },
-        "dependsOn": "Start AlgoKit LocalNet",
-        "problemMatcher": []
-      },
-      {
-        "label": "Start AlgoKit LocalNet",
-        "command": "algokit",
-        "args": ["localnet", "start"],
-        "type": "shell",
-        "options": {
-          "cwd": "${workspaceFolder}"
-        },
-        "problemMatcher": []
-      }
-    ]
+    "tasks": []
   },
   "launch": {
-    "configurations": [],
-    "compounds": [
-      {
-        "preLaunchTask": "Build artifacts (+ LocalNet)",
-        "name": "Run Frontend (+ LocalNet and Smart Contract)",
-        "configurations": [
-          {
-            "name": "Deploy contracts",
-            "folder": "hello-world-contracts"
-          },
-          { "name": "Run dApp", "folder": "hello-world-frontend" }
-        ],
-        "presentation": {
-          "hidden": false,
-          "group": "0. Run workspace"
-        }
-      }
-    ]
+    "configurations": []
   }
-  }
+}

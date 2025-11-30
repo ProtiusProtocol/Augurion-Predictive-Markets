@@ -1,31 +1,3 @@
-# Node / TypeScript
-node_modules/
-dist/
-build/
-coverage/
-npm-debug.log
-yarn-error.log
-
-# Environment
-.env
-.env.local
-
-# Editor, OS
-.vscode/
-.DS_Store
-Thumbs.db
-
-# Logs
-.eslintcache
-logs/
-*.log
-
-# Algorand build artifacts (generated) - usually not committed
-smart_contracts/artifacts/
-
-# Optional: lockfiles if you prefer not to commit
-package-lock.json
-yarn.lock
 # Logs
 logs
 *.log
