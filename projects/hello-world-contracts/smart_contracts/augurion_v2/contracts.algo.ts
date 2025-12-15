@@ -6,145 +6,239 @@ import {
   Bytes,
   itxn,
   Txn,
+  gtxn,
+  Global,
+  assert,
 } from '@algorandfoundation/algorand-typescript'
-import type { uint64, Account } from '@algorandfoundation/algorand-typescript'
+import type { uint64, Account, bytes } from '@algorandfoundation/algorand-typescript'
 
 /**
- * AugurionMarketV2
- * status: 0 = DRAFT, 1 = OPEN, 2 = CLOSED, 3 = RESOLVED
- * winningSide: 0 = NONE, 1 = YES, 2 = NO
+ * AugurionMarketV2_1 (single-market, ALGO collateral, parimutuel pool)
+ *
+ * Lifecycle (status):
+ * 0 = PENDING   (configured but not open)
+ * 1 = OPEN      (accept bets)
+ * 2 = FROZEN    (no more bets; awaiting resolution)
+ * 3 = RESOLVED  (winner set; claims allowed)
+ * 4 = CANCELLED (refunds allowed)
+ *
+ * winningSide:
+ * 0 = NONE
+ * 1 = YES
+ * 2 = NO
  */
-export class AugurionMarketV2 extends Contract {
-  // --- Global state ---
+export class AugurionMarketV4 extends Contract {
+  // -----------------------
+  // Global state
+  // -----------------------
 
-  // Current market status
-  status = GlobalState<uint64>({ initialValue: Uint64(1) }) // start as OPEN
+  status = GlobalState<uint64>({ initialValue: Uint64(0) }) // PENDING
 
-  // Total YES and NO stake
+  // Admin is also oracle in this version
+  admin = GlobalState<Account>({ initialValue: Txn.sender }) // set during create
+
+  // Layer 1 → Layer 2 link (hash/ID of off-chain Outcome Brief / Outcome Spec)
+  outcomeRef = GlobalState<bytes>({ initialValue: Bytes('') })
+
+  // Round after which betting should not be allowed
+  expiryRound = GlobalState<uint64>({ initialValue: Uint64(0) })
+
+  // Totals
   yesTotal = GlobalState<uint64>({ initialValue: Uint64(0) })
   noTotal = GlobalState<uint64>({ initialValue: Uint64(0) })
-
-  // Total staked (YES + NO) – for reporting
   totalBets = GlobalState<uint64>({ initialValue: Uint64(0) })
 
-  // Fee in basis points (e.g. 200 = 2%)
-  feeBps = GlobalState<uint64>({ initialValue: Uint64(0) }) // 0% fee for now
+  // Fee basis points (e.g. 200 = 2%)
+  feeBps = GlobalState<uint64>({ initialValue: Uint64(0) })
 
-  // Winning side after resolution: 0 = none, 1 = YES, 2 = NO
   winningSide = GlobalState<uint64>({ initialValue: Uint64(0) })
 
-  // Version marker – also bumps global uint count so a new app is created
-  claimVersion = GlobalState<uint64>({ initialValue: Uint64(1) })
+  // Version marker
+  claimVersion = GlobalState<uint64>({ initialValue: Uint64(2) })
 
-  // --- Per-user boxes (box-per-user pattern) ---
+  // -----------------------
+  // Per-user boxes
+  // -----------------------
 
-  // Store each user's YES stake (uint64) under prefix "yes:" + sender
   yesBet = BoxMap<Account, uint64>({ keyPrefix: Bytes('yes:') })
-
-  // Store each user's NO stake (uint64) under prefix "no:" + sender
   noBet = BoxMap<Account, uint64>({ keyPrefix: Bytes('no:') })
-
-  // Store whether a user has claimed (0 or 1) under prefix "claimed:" + sender
   claimed = BoxMap<Account, uint64>({ keyPrefix: Bytes('claimed:') })
+  refunded = BoxMap<Account, uint64>({ keyPrefix: Bytes('refunded:') })
 
-  // Called on app creation – initialise state
+  // -----------------------
+  // Helpers
+  // -----------------------
+
+  private onlyAdmin(): void {
+    assert(Txn.sender === this.admin.value, 'Only admin')
+  }
+
+  /**
+   * Returns the app address for payment validation.
+   *
+   * NOTE:
+   * Different versions of algorand-typescript expose this differently.
+   * If this fails to compile, replace the body with the correct helper for your version,
+   * e.g. Global.currentApplicationAddress or similar.
+   */
+  private getAppAddress(): Account {
+    // Many toolchains provide this via Txn.applicationAddress / Global.currentApplicationAddress.
+    // If Txn.applicationAddress doesn't exist in your version, swap to the available equivalent.
+    return Global.currentApplicationAddress
+
+  }
+
+  /**
+   * Require a grouped ALGO payment immediately before the app call.
+   * Pattern:
+   *   gtxn[i-1] = payment (sender -> app address, amount = bet amount)
+   *   gtxn[i]   = app call (bet_yes / bet_no)
+   */
+  private assertGroupedAlgoPayment(amount: uint64): void {
+  // Enforce strict 2-txn group:
+  // gtxn[0] = payment
+  // gtxn[1] = app call (this)
+  assert(Txn.groupIndex === Uint64(1), 'App call must be second transaction in group')
+
+  const payTxn = gtxn.PaymentTxn(0)
+
+  assert(payTxn.sender === Txn.sender, 'Payment sender mismatch')
+  assert(payTxn.amount === amount, 'Payment amount mismatch')
+  assert(payTxn.receiver === this.getAppAddress(), 'Payment must go to app address')
+}
+
+  private assertOpenAndNotExpired(): void {
+  assert(this.status.value === Uint64(1), 'Market is not open')
+
+  const exp = this.expiryRound.value
+  if (exp !== Uint64(0)) {
+    assert(Global.round <= exp, 'Market expired')
+  }
+}
+
+
+  // -----------------------
+  // Lifecycle
+  // -----------------------
+
   create(): void {
-    this.status.value = Uint64(1)      // OPEN
+    this.status.value = Uint64(0) // PENDING
+    this.admin.value = Txn.sender
+
+    this.outcomeRef.value = Bytes('')
+    this.expiryRound.value = Uint64(0)
+
     this.yesTotal.value = Uint64(0)
     this.noTotal.value = Uint64(0)
     this.totalBets.value = Uint64(0)
-    this.feeBps.value = Uint64(0)      // no fee in v2.0
-    this.winningSide.value = Uint64(0) // not resolved yet
-    this.claimVersion.value = Uint64(1)
+
+    this.feeBps.value = Uint64(0)
+    this.winningSide.value = Uint64(0)
+    this.claimVersion.value = Uint64(2)
   }
 
-  // Place a YES bet
-  bet_yes(amount: uint64): string {
-    // Only allow bets when market is OPEN (status = 1)
-    if (this.status.value !== Uint64(1)) {
-      return 'Market is not open'
+  /**
+   * Configure the market metadata before opening.
+   * Can be called multiple times while PENDING to fix wording/refs.
+   */
+  configure_market(outcomeRef: bytes, expiryRound: uint64, feeBps: uint64): string {
+    this.onlyAdmin()
+    if (this.status.value !== Uint64(0)) {
+      return 'Can only configure while PENDING'
     }
 
-    // Update global totals
+    this.outcomeRef.value = outcomeRef
+    this.expiryRound.value = expiryRound
+    this.feeBps.value = feeBps
+
+    return 'Market configured'
+  }
+
+  open_market(): string {
+    this.onlyAdmin()
+    if (this.status.value !== Uint64(0)) return 'Market must be PENDING to open'
+    if (this.outcomeRef.value === Bytes('')) return 'OutcomeRef required'
+    this.status.value = Uint64(1)
+    return 'Market opened'
+  }
+
+  freeze_market(): string {
+    this.onlyAdmin()
+    if (this.status.value !== Uint64(1)) return 'Market must be OPEN to freeze'
+    this.status.value = Uint64(2)
+    return 'Market frozen'
+  }
+
+  cancel_market(): string {
+    this.onlyAdmin()
+    if (this.status.value === Uint64(3)) return 'Already resolved'
+    this.status.value = Uint64(4)
+    return 'Market cancelled'
+  }
+
+  // -----------------------
+  // Bets
+  // -----------------------
+
+  bet_yes(amount: uint64): string {
+    this.assertOpenAndNotExpired()
+    this.assertGroupedAlgoPayment(amount)
+
     this.yesTotal.value = this.yesTotal.value + amount
     this.totalBets.value = this.totalBets.value + amount
 
-    // Increment the per-user YES box by `amount`. Use Txn.sender as the key.
     const senderKey = Txn.sender
     const userYesBox = this.yesBet(senderKey)
-
-    // If the box doesn't exist, create it (create() no-ops if exists)
     userYesBox.create({ size: Uint64(8) })
-
-    // Read current (default 0) and write updated value
     const currentYes: uint64 = userYesBox.get({ default: Uint64(0) })
     userYesBox.value = currentYes + amount
 
-    return `YES bet of ${amount} registered. YES total = ${this.yesTotal.value}, TOTAL = ${this.totalBets.value}`
+    return `YES bet registered: ${amount}`
   }
 
-  // Place a NO bet
   bet_no(amount: uint64): string {
-    if (this.status.value !== Uint64(1)) {
-      return 'Market is not open'
-    }
+    this.assertOpenAndNotExpired()
+    this.assertGroupedAlgoPayment(amount)
 
-    // Update global totals
     this.noTotal.value = this.noTotal.value + amount
     this.totalBets.value = this.totalBets.value + amount
 
-    // Increment the per-user NO box by `amount`.
     const senderKey = Txn.sender
     const userNoBox = this.noBet(senderKey)
     userNoBox.create({ size: Uint64(8) })
     const currentNo: uint64 = userNoBox.get({ default: Uint64(0) })
     userNoBox.value = currentNo + amount
 
-    return `NO bet of ${amount} registered. NO total = ${this.noTotal.value}, TOTAL = ${this.totalBets.value}`
+    return `NO bet registered: ${amount}`
   }
 
-  // Resolve the market: winningSide = 1 (YES) or 2 (NO)
+  // -----------------------
+  // Resolve + Claim
+  // -----------------------
+
+  /**
+   * Admin-as-oracle resolves the market.
+   * Prefer: freeze first, then resolve.
+   */
   resolve_market(winningSide: uint64): string {
-    // Only allow resolve while still OPEN (status = 1)
-    if (this.status.value !== Uint64(1)) {
-      return 'Market must be OPEN to resolve'
+    this.onlyAdmin()
+
+    if (this.status.value !== Uint64(2) && this.status.value !== Uint64(1)) {
+      return 'Market must be OPEN or FROZEN to resolve'
     }
 
-    const yesTotal: uint64 = this.yesTotal.value
-    const noTotal: uint64 = this.noTotal.value
-    const totalPool: uint64 = yesTotal + noTotal
+    if (winningSide !== Uint64(1) && winningSide !== Uint64(2)) {
+      return 'Invalid winning side'
+    }
 
-    // feeBps may be non-zero later; keep the formula in place
-    const feeBpsVal: uint64 = this.feeBps.value
-    const feeAmount: uint64 = (totalPool * feeBpsVal) / Uint64(10_000)
-    const payoutPool: uint64 = totalPool - feeAmount
-
-    // Close market and record winner (3 = RESOLVED)
     this.status.value = Uint64(3)
     this.winningSide.value = winningSide
 
-    // Turn 1/2 into a readable label
-    let sideLabel = 'UNKNOWN'
-    if (winningSide === Uint64(1)) {
-      sideLabel = 'YES'
-    } else if (winningSide === Uint64(2)) {
-      sideLabel = 'NO'
-    }
-
-    return (
-      `Market resolved: ${sideLabel} wins. ` +
-      `(winningSide=${winningSide}, yesTotal=${yesTotal}, noTotal=${noTotal}, ` +
-      `total_pool=${totalPool}, fee_bps=${feeBpsVal}, fee_amount=${feeAmount}, ` +
-      `payout_pool=${payoutPool})`
-    )
+    return winningSide === Uint64(1) ? 'Resolved: YES' : 'Resolved: NO'
   }
 
-  // Claim winnings after resolution. Pays out the user's share of the payout pool.
   claim_payout(): string {
-    // Only callable when RESOLVED (3)
-    if (this.status.value !== Uint64(3)) {
-      return 'Market not resolved'
-    }
+    if (this.status.value !== Uint64(3)) return 'Market not resolved'
 
     const winning: uint64 = this.winningSide.value
     const yesTotalVal: uint64 = this.yesTotal.value
@@ -152,19 +246,24 @@ export class AugurionMarketV2 extends Contract {
     const totalPool: uint64 = yesTotalVal + noTotalVal
     const feeBpsVal: uint64 = this.feeBps.value
 
-    // Determine user's winning bet
     const senderKey = Txn.sender
+
+    // Check claimed
+    const claimedBox = this.claimed(senderKey)
+    const claimedMaybe = claimedBox.maybe()
+    const hasClaimed = claimedMaybe[1] ? (claimedMaybe[0] as uint64) : Uint64(0)
+    if (hasClaimed === Uint64(1)) return 'Already claimed'
+
+    // Determine user's winning bet
     let userWinningBet: uint64 = Uint64(0)
     let totalWinningSide: uint64 = Uint64(0)
 
     if (winning === Uint64(1)) {
-      // YES won
       const b = this.yesBet(senderKey)
       const maybe = b.maybe()
       userWinningBet = maybe[1] ? (maybe[0] as uint64) : Uint64(0)
       totalWinningSide = yesTotalVal
     } else if (winning === Uint64(2)) {
-      // NO won
       const b = this.noBet(senderKey)
       const maybe = b.maybe()
       userWinningBet = maybe[1] ? (maybe[0] as uint64) : Uint64(0)
@@ -173,19 +272,10 @@ export class AugurionMarketV2 extends Contract {
       return 'No winning side set'
     }
 
-    if (userWinningBet === Uint64(0)) {
-      return 'Nothing to claim'
-    }
+    if (userWinningBet === Uint64(0)) return 'Nothing to claim'
+    if (totalWinningSide === Uint64(0)) return 'Invalid totals'
 
-    // Check claimed flag
-    const claimedBox = this.claimed(senderKey)
-    const claimedMaybe = claimedBox.maybe()
-    const hasClaimed = claimedMaybe[1] ? (claimedMaybe[0] as uint64) : Uint64(0)
-    if (hasClaimed === Uint64(1)) {
-      return 'Already claimed'
-    }
-
-    // Compute payout: payoutPool = totalPool - fee
+    // payoutPool = totalPool - fee
     const feeAmount: uint64 = (totalPool * feeBpsVal) / Uint64(10_000)
     const payoutPool: uint64 = totalPool - feeAmount
 
@@ -197,9 +287,46 @@ export class AugurionMarketV2 extends Contract {
     claimedBox.create({ size: Uint64(8) })
     claimedBox.value = Uint64(1)
 
-    // Perform payment from the app account to the user via an inner transaction
     itxn.payment({ receiver: Txn.sender, amount: userShare }).submit()
 
     return `Paid ${userShare}`
+  }
+
+  /**
+   * If market is cancelled, users can refund their YES+NO bets (one-time).
+   */
+  claim_refund(): string {
+    if (this.status.value !== Uint64(4)) return 'Market not cancelled'
+
+    const senderKey = Txn.sender
+
+    // already refunded?
+    const r = this.refunded(senderKey)
+    const rm = r.maybe()
+    const already = rm[1] ? (rm[0] as uint64) : Uint64(0)
+    if (already === Uint64(1)) return 'Already refunded'
+
+    const y = this.yesBet(senderKey).maybe()
+    const n = this.noBet(senderKey).maybe()
+    const yesAmt: uint64 = y[1] ? (y[0] as uint64) : Uint64(0)
+    const noAmt: uint64 = n[1] ? (n[0] as uint64) : Uint64(0)
+
+    const refundAmt: uint64 = yesAmt + noAmt
+    if (refundAmt === Uint64(0)) return 'Nothing to refund'
+
+    r.create({ size: Uint64(8) })
+    r.value = Uint64(1)
+
+    itxn.payment({ receiver: Txn.sender, amount: refundAmt }).submit()
+
+    return `Refunded ${refundAmt}`
+  }
+
+  // -----------------------
+  // Read helpers for UI
+  // -----------------------
+
+  get_market_meta(): string {
+    return `status=${this.status.value}, outcomeRef=${this.outcomeRef.value}, expiryRound=${this.expiryRound.value}, feeBps=${this.feeBps.value}`
   }
 }
