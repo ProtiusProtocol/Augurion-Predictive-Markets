@@ -7,7 +7,10 @@
     "build": "algokit compile ts smart_contracts --output-source-map --out-dir artifacts && algokit generate client smart_contracts/artifacts --output {app_spec_dir}/{contract_name}Client.ts",
     "deploy": "ts-node-dev --transpile-only --watch .env -r dotenv/config smart_contracts/index.ts",
     "deploy:ci": "ts-node --transpile-only -r dotenv/config smart_contracts/index.ts",
-    "check-types": "tsc --noEmit"
+    "check-types": "tsc --noEmit",
+    "bet:yes": "node scripts/place_bet_yes.js",
+    "bet:goal:yes": "node scripts/place_bet_goal.js --side yes",
+    "bet:goal:no": "node scripts/place_bet_goal.js --side no"
   },
   "engines": {
     "node": ">=22.0",

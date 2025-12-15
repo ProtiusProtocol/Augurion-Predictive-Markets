@@ -17,6 +17,16 @@ export async function deploy() {
     onSchemaBreak: 'append',
     onUpdate: 'append',
   })
+
+  // Fund the app account with 10 ALGO for box storage and inner transactions
+  const appAddress = appClient.appClient.appAddress
+  await algorand.send.payment({
+    sender: deployer.addr,
+    receiver: appAddress,
+    amount: 10_000_000, // 10 ALGO in microAlgos (number, not bigint)
+  })
+  console.log(`Funded app ${appClient.appId} with 10 ALGO`)
+
   console.log('Configuring market...')
 
 await appClient.send.configureMarket({
