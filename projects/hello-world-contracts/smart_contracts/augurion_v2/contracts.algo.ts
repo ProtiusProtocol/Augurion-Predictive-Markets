@@ -112,7 +112,7 @@ export class AugurionMarketV4 extends Contract {
 
   const exp = this.expiryRound.value
   if (exp !== Uint64(0)) {
-    assert(Global.round <= exp, 'Market expired')
+    assert(Global.round < exp, 'Market expired')
   }
 }
 
@@ -140,11 +140,16 @@ export class AugurionMarketV4 extends Contract {
   /**
    * Configure the market metadata before opening.
    * Can be called multiple times while PENDING to fix wording/refs.
+   * Configuration fields are immutable after configure_market.
    */
   configure_market(outcomeRef: bytes, expiryRound: uint64, feeBps: uint64): string {
     this.onlyAdmin()
     if (this.status.value !== Uint64(0)) {
       return 'Can only configure while PENDING'
+    }
+
+    if (expiryRound !== Uint64(0)) {
+      assert(Global.round < expiryRound, 'Expiry must be in the future')
     }
 
     this.outcomeRef.value = outcomeRef
@@ -158,6 +163,13 @@ export class AugurionMarketV4 extends Contract {
     this.onlyAdmin()
     if (this.status.value !== Uint64(0)) return 'Market must be PENDING to open'
     if (this.outcomeRef.value === Bytes('')) return 'OutcomeRef required'
+
+    // Do not mutate configuration here; configure_market is the only writer.
+    const exp = this.expiryRound.value
+    if (exp !== Uint64(0)) {
+      assert(Global.round < exp, 'Market expired before open')
+    }
+
     this.status.value = Uint64(1)
     return 'Market opened'
   }

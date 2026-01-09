@@ -13,9 +13,10 @@ export async function deploy() {
     defaultSender: deployer.addr,
   })
 
+  // Force create a NEW app instance to ensure we're running V4
   const { appClient, result } = await factory.deploy({
-    onSchemaBreak: 'append',
-    onUpdate: 'append',
+    onSchemaBreak: 'replace',  // Create new app if schema changed
+    onUpdate: 'replace',        // Create new app if code changed
   })
 
   // Fund the app account with 10 ALGO for box storage and inner transactions
