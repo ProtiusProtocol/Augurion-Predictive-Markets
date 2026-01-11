@@ -1,5 +1,5 @@
 import { AlgorandClient } from '@algorandfoundation/algokit-utils'
-import { KWTokenFactory } from '../artifacts/kw_token/KWTokenClient'
+import { KwTokenFactory } from '../artifacts/kw_token/KWTokenClient'
 import { ProjectRegistryFactory } from '../artifacts/project_registry/ProjectRegistryClient'
 
 /**
@@ -24,7 +24,7 @@ export async function deploy() {
   // For now, we assume it's already deployed
   console.log('Note: Ensure ProjectRegistry is deployed first')
 
-  const factory = algorand.client.getTypedAppFactory(KWTokenFactory, {
+  const factory = algorand.client.getTypedAppFactory(KwTokenFactory, {
     defaultSender: deployer.addr,
   })
 

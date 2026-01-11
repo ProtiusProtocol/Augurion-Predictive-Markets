@@ -24,7 +24,7 @@ export async function deploy() {
   await algorand.send.payment({
     sender: deployer.addr,
     receiver: appAddress,
-    amount: 10_000_000, // 10 ALGO in microAlgos (number, not bigint)
+    amount: (10).algo(),
   })
   console.log(`Funded app ${appClient.appId} with 10 ALGO`)
 

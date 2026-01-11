@@ -1,6 +1,5 @@
-import { AlgoAmount } from '@algorandfoundation/algokit-utils/types/amount'
-import * as algokit from '@algorandfoundation/algokit-utils'
-import { RevenueVaultClient } from '../artifacts/revenue_vault/RevenueVaultClient'
+import { AlgorandClient } from '@algorandfoundation/algokit-utils'
+import { RevenueVaultFactory } from '../artifacts/revenue_vault/RevenueVaultClient'
 
 /**
  * Protius V1 Core: RevenueVault — Entitlements Settlement Workflow
@@ -111,48 +110,32 @@ import { RevenueVaultClient } from '../artifacts/revenue_vault/RevenueVaultClien
  */
 
 // Deployment configuration for RevenueVault contract
-const deploy = async () => {
+export async function deploy() {
   console.log('=== Deploying RevenueVault ===')
 
-  const algod = algokit.getAlgoClient()
-  const indexer = algokit.getAlgoIndexerClient()
+  const algorand = AlgorandClient.fromEnvironment()
+  const deployer = await algorand.account.fromEnvironment('DEPLOYER')
 
-  const deployer = await algokit.getLocalNetAccount('DEPLOYER', algod)
-  console.log(`Deployer: ${deployer.addr}`)
+  const factory = algorand.client.getTypedAppFactory(RevenueVaultFactory, {
+    defaultSender: deployer.addr,
+  })
 
-  // Deploy RevenueVault
-  const vaultClient = new RevenueVaultClient(
-    {
-      sender: deployer,
-      resolveBy: 'id',
-      id: 0,
-    },
-    algod
-  )
+  const { appClient, result } = await factory.deploy({
+    onUpdate: 'replace',
+    onSchemaBreak: 'replace',
+  })
 
-  await vaultClient.create.createApplication({})
-  console.log(`RevenueVault App ID: ${(await vaultClient.appClient.getAppReference()).appId}`)
+  // Fund the app account
+  if (['create', 'replace'].includes(result.operationPerformed)) {
+    await algorand.send.payment({
+      amount: (10).algo(),
+      sender: deployer.addr,
+      receiver: appClient.appAddress,
+    })
+    console.log(`Funded RevenueVault app ${appClient.appId} with 10 ALGO`)
+  }
 
-  // Fund contract
-  await algokit.ensureFunded(
-    {
-      accountToFund: (await vaultClient.appClient.getAppReference()).appAddress,
-      minSpendingBalance: algokit.algos(10),
-    },
-    algod
-  )
-
-  console.log('RevenueVault deployed and funded')
-
-  // TODO: Call initVault() with correct parameters:
-  // - registry: ProjectRegistry address
-  // - kwToken: kWToken address
-  // - kwhReceipt: kWhReceipt address
-  // - treasury: Treasury address
-  // - settlementAssetId: ASA ID or 0 for ALGO
-  // - platformKwhRateBps: e.g., 500 for 5%
+  console.log(`RevenueVault deployed with App ID: ${appClient.appId}`)
 
   console.log('=== RevenueVault Deployment Complete ===')
 }
-
-export default deploy

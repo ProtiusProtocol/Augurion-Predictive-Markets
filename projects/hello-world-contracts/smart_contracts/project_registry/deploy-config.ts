@@ -20,7 +20,7 @@ export async function deploy() {
   // Fund the app account for box storage
   if (['create', 'replace'].includes(result.operationPerformed)) {
     await algorand.send.payment({
-      amount: 5_000_000, // 5 ALGO
+      amount: (5).algo(),
       sender: deployer.addr,
       receiver: appClient.appAddress,
     })

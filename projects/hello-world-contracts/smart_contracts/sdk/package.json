@@ -1,0 +1,38 @@
+{
+  "name": "@protius/sdk",
+  "version": "1.0.0",
+  "description": "Protius SDK - Authorised execution gateway for Protius V1 Core",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "scripts": {
+    "build": "tsc",
+    "operator:init": "ts-node scripts/operator/init.ts",
+    "operator:epoch": "ts-node scripts/operator/07_full_epoch.ts",
+    "claimant:claim": "ts-node scripts/claimant/claim.ts",
+    "test": "echo 'No tests yet'",
+    "lint": "eslint src --ext .ts"
+  },
+  "keywords": [
+    "protius",
+    "algorand",
+    "defi",
+    "renewable-energy",
+    "revenue-distribution"
+  ],
+  "author": "Protius Protocol",
+  "license": "MIT",
+  "dependencies": {
+    "algosdk": "^2.7.0"
+  },
+  "devDependencies": {
+    "@types/node": "^20.0.0",
+    "typescript": "^5.3.0",
+    "ts-node": "^10.9.0",
+    "@typescript-eslint/eslint-plugin": "^6.0.0",
+    "@typescript-eslint/parser": "^6.0.0",
+    "eslint": "^8.0.0"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  }
+}
