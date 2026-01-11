@@ -36,10 +36,10 @@ export interface AlgorandNetworkConfig {
  * Localnet configuration (AlgoKit default)
  */
 export const LOCALNET: AlgorandNetworkConfig = {
-  algodServer: 'http://localhost',
+  algodServer: 'http://127.0.0.1',
   algodToken: 'a'.repeat(64), // AlgoKit default token
   algodPort: 4001,
-  indexerServer: 'http://localhost',
+  indexerServer: 'http://127.0.0.1',
   indexerToken: 'a'.repeat(64),
   indexerPort: 8980,
   genesisId: 'sandnet-v1',

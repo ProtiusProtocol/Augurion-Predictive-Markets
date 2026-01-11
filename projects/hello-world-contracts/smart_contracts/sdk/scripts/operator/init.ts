@@ -74,6 +74,8 @@ async function main() {
   } catch (error: any) {
     console.error()
     console.error('❌ Fatal error:', error.message || error)
+    if (error.stack) console.error('Stack:', error.stack)
+    if (error.response) console.error('Response:', error.response)
     process.exit(1)
   }
 }
