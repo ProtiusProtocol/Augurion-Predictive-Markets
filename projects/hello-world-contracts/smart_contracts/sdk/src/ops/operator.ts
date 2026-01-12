@@ -974,15 +974,18 @@ export class ProtiusOperator {
         console.log()
       }
 
-      // Step 3: Mark epoch as settled in kWhReceipt (optional; requires RevenueVault authority)
+      // Step 3: Compute and anchor entitlements (revenue per kW) in RevenueVault
       try {
-        console.log('→ Marking epoch as settled in kWhReceipt...')
-        const settleResult = await kwhReceiptClient.send.markEpochSettled({ args: { epochId: BigInt(epoch.epochId) } })
-        txIds.push(settleResult.txIds[0])
-        console.log(`✅ kWhReceipt epoch ${epoch.epochId} marked as settled (tx: ${settleResult.txIds[0]})`)
+        console.log('→ Computing and anchoring entitlements...')
+        // For now, we need to know total kW; this is ideally from kWToken.getTotalSupply()
+        // but since we're MVP, we'll use a placeholder or query it
+        // Let's attempt to call computeRevenuePerKw which handles idempotency
+        const computeResult = await revenueVaultClient.send.computeRevenuePerKw({ args: { epochId: BigInt(epoch.epochId) } })
+        txIds.push(computeResult.txIds[0])
+        console.log(`✅ Entitlements computed: ${computeResult.txIds[0]}`)
         console.log()
       } catch (e: any) {
-        console.log('⚠️ Skipping kWhReceipt.markEpochSettled (likely requires RevenueVault caller):', e?.message || e)
+        console.log('⚠️ Skipping entitlements computation (total kW may not be available):', e?.message || e)
         console.log()
       }
 

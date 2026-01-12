@@ -2,6 +2,6 @@
   "epochId": 202501,
   "periodStart": "2025-01-01T00:00:00Z",
   "periodEnd": "2025-01-31T23:59:59Z",
-  "netRevenueMicroAlgos": 50000000,
+  "netRevenueMicroAlgos": 30000000,
   "accrualHash": "sha256:1234567890abcdef1234567890abcdef1234567890abcdef1234567890abcdef"
 }
