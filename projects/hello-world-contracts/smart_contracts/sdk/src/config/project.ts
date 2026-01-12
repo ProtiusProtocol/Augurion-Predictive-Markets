@@ -46,14 +46,14 @@ export interface ProtiusProjectConfig {
  * Default configuration for localnet testing
  */
 export const LOCALNET_CONFIG: ProtiusProjectConfig = {
-  registryAppId: 1015n,
-  kwTokenAppId: 1013n,
-  kwhReceiptAppId: 1011n,
-  revenueVaultAppId: 1017n,
+  registryAppId: 1002n,
+  kwTokenAppId: 1003n,
+  kwhReceiptAppId: 1004n,
+  revenueVaultAppId: 1005n,
   kwAssetId: 0n,
   kwhAssetId: 0n,
-  adminAddress: '', // Set from deployer account
-  treasuryAddress: '', // Set from treasury account
+  adminAddress: 'ISR5CAAAKXMRJ6G5YD2O24AGKF32XEBXXWGYESQ3BQA4OH7WUIBFTY47EA', // Deployer/operator
+  treasuryAddress: 'ISR5CAAAKXMRJ6G5YD2O24AGKF32XEBXXWGYESQ3BQA4OH7WUIBFTY47EA', // Using admin as treasury for testing
   revenueAssetId: 0n, // ALGO for localnet
   projectId: 'protius-localnet',
 }

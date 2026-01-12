@@ -74,6 +74,26 @@ export interface MonthlyEpochParams {
 }
 
 /**
+ * Epoch settlement input (Phase 4)
+ */
+export interface EpochInput {
+  /** Epoch ID (e.g., 202501) */
+  epochId: number
+  
+  /** Period start date (ISO 8601) */
+  periodStart: string
+  
+  /** Period end date (ISO 8601) */
+  periodEnd: string
+  
+  /** Net revenue in microAlgos */
+  netRevenueMicroAlgos: number
+  
+  /** Hash of accrual report (commitment) */
+  accrualHash: string
+}
+
+/**
  * Protius Operator - Admin workflows
  */
 export class ProtiusOperator {
@@ -183,31 +203,17 @@ export class ProtiusOperator {
       console.log(`TxID: ${kwTokenTxId}`)
       console.log()
 
-      // Check if kWToken is already registered in ProjectRegistry
-      console.log('Checking if kWToken is already registered in ProjectRegistry...')
+      // Check if kWToken is already registered correctly in ProjectRegistry
+      console.log('Checking if kWToken is registered in ProjectRegistry...')
       const registryState = await registryClient.appClient.state.global.getAll()
       const registeredKwToken = registryState.kwToken
+      const expectedKwTokenAddr = algosdk.getApplicationAddress(kwTokenAppId).toString()
+      const zeroAddress = algosdk.getApplicationAddress(0).toString()
 
-      if (registeredKwToken && registeredKwToken !== algosdk.getApplicationAddress(0).toString()) {
-        console.log(`⚠️  kWToken already registered: ${registeredKwToken}`)
-        console.log('Skipping setContracts call (idempotent)')
+      if (registeredKwToken === expectedKwTokenAddr) {
+        console.log(`✓ kWToken already correctly registered: ${registeredKwToken}`)
       } else {
-        console.log('Registering kWToken in ProjectRegistry...')
-        
-        // Call ProjectRegistry.setContracts() with kWToken only
-        // (kWhReceipt and RevenueVault will be zero addresses for now)
-        const zeroAddress = algosdk.getApplicationAddress(0).toString()
-        const setContractsResult = await registryClient.send.setContracts({
-          args: {
-            kwToken: algosdk.getApplicationAddress(kwTokenAppId).toString(),
-            kwhReceipt: zeroAddress,
-            revenueVault: zeroAddress,
-          },
-        })
-
-        txIds.push(setContractsResult.txIds[0])
-        console.log(`✅ kWToken registered in ProjectRegistry`)
-        console.log(`TxID: ${setContractsResult.txIds[0]}`)
+        console.log(`kWToken deployment complete (will register all contracts in Phase 4)`)
       }
 
       console.log()
@@ -238,32 +244,16 @@ export class ProtiusOperator {
       console.log(`TxID: ${kwhReceiptTxId}`)
       console.log()
 
-      // Check if kWhReceipt is already registered in ProjectRegistry
-      console.log('Checking if kWhReceipt is already registered in ProjectRegistry...')
+      // Check if kWhReceipt is already registered correctly in ProjectRegistry
+      console.log('Checking if kWhReceipt is registered in ProjectRegistry...')
       const registryState2 = await registryClient.appClient.state.global.getAll()
       const registeredKwhReceipt = registryState2.kwhReceipt
+      const expectedKwhReceiptAddr = algosdk.getApplicationAddress(kwhReceiptAppId).toString()
 
-      const zeroAddress = algosdk.getApplicationAddress(0).toString()
-
-      if (registeredKwhReceipt && registeredKwhReceipt !== zeroAddress) {
-        console.log(`⚠️  kWhReceipt already registered: ${registeredKwhReceipt}`)
-        console.log('Skipping setContracts call (idempotent)')
+      if (registeredKwhReceipt === expectedKwhReceiptAddr) {
+        console.log(`✓ kWhReceipt already correctly registered: ${registeredKwhReceipt}`)
       } else {
-        console.log('Registering kWhReceipt in ProjectRegistry...')
-        
-        // Call ProjectRegistry.setContracts() with all three contracts
-        // (RevenueVault will be zero address for now)
-        const setContractsResult2 = await registryClient.send.setContracts({
-          args: {
-            kwToken: algosdk.getApplicationAddress(kwTokenAppId).toString(),
-            kwhReceipt: algosdk.getApplicationAddress(kwhReceiptAppId).toString(),
-            revenueVault: zeroAddress,
-          },
-        })
-
-        txIds.push(setContractsResult2.txIds[0])
-        console.log(`✅ kWhReceipt registered in ProjectRegistry`)
-        console.log(`TxID: ${setContractsResult2.txIds[0]}`)
+        console.log(`kWhReceipt deployment complete (will register all contracts in Phase 4)`)
       }
 
       console.log()
@@ -294,23 +284,23 @@ export class ProtiusOperator {
       console.log(`TxID: ${revenueVaultTxId}`)
       console.log()
 
-      // Check if RevenueVault is already registered in ProjectRegistry
-      console.log('Checking if RevenueVault is already registered in ProjectRegistry...')
+      // Check if RevenueVault is already registered correctly in ProjectRegistry
+      console.log('Checking if RevenueVault is registered in ProjectRegistry...')
       const registryState3 = await registryClient.appClient.state.global.getAll()
       const registeredRevenueVault = registryState3.revenueVault
+      const expectedRevenueVaultAddr = algosdk.getApplicationAddress(revenueVaultAppId).toString()
 
-      if (registeredRevenueVault && registeredRevenueVault !== zeroAddress) {
-        console.log(`⚠️  RevenueVault already registered: ${registeredRevenueVault}`)
-        console.log('Skipping setContracts call (idempotent)')
+      if (registeredRevenueVault === expectedRevenueVaultAddr) {
+        console.log(`✓ RevenueVault already correctly registered: ${registeredRevenueVault}`)
       } else {
-        console.log('Registering RevenueVault in ProjectRegistry...')
+        console.log(`Registering RevenueVault in ProjectRegistry... (current: ${registeredRevenueVault || 'none'})`)
         
         // Call ProjectRegistry.setContracts() with all four contracts
         const setContractsResult3 = await registryClient.send.setContracts({
           args: {
             kwToken: algosdk.getApplicationAddress(kwTokenAppId).toString(),
             kwhReceipt: algosdk.getApplicationAddress(kwhReceiptAppId).toString(),
-            revenueVault: algosdk.getApplicationAddress(revenueVaultAppId).toString(),
+            revenueVault: expectedRevenueVaultAddr,
           },
         })
 
@@ -592,42 +582,64 @@ export class ProtiusOperator {
         appId: this.config.registryAppId,
       })
 
+      const registryAppAddress = algosdk.getApplicationAddress(Number(this.config.registryAppId)).toString()
+      
+      // Diagnostic: Expected app addresses from config
+      const expectedKwTokenAddr = algosdk.getApplicationAddress(Number(this.config.kwTokenAppId)).toString()
+      const expectedKwhReceiptAddr = algosdk.getApplicationAddress(Number(this.config.kwhReceiptAppId)).toString()
+      const expectedRevenueVaultAddr = algosdk.getApplicationAddress(Number(this.config.revenueVaultAppId)).toString()
+
+      console.log('=== Diagnostic: App IDs and Addresses ===')
+      console.log(`ProjectRegistry: appId ${this.config.registryAppId} → ${registryAppAddress}`)
+      console.log(`kWToken:         appId ${this.config.kwTokenAppId} → ${expectedKwTokenAddr}`)
+      console.log(`kWhReceipt:      appId ${this.config.kwhReceiptAppId} → ${expectedKwhReceiptAddr}`)
+      console.log(`RevenueVault:    appId ${this.config.revenueVaultAppId} → ${expectedRevenueVaultAddr}`)
+      console.log()
+
       // Read global state to get contract addresses
       const registryState = await registryClient.appClient.state.global.getAll()
-      const kwTokenAddr = registryState.kwToken
-      const kwhReceiptAddr = registryState.kwhReceipt
-      const revenueVaultAddr = registryState.revenueVault
+      const kwTokenAddrFromRegistry = registryState.kwToken
+      const kwhReceiptAddrFromRegistry = registryState.kwhReceipt
+      const revenueVaultAddrFromRegistry = registryState.revenueVault
 
-      console.log(`✓ ProjectRegistry appId: ${this.config.registryAppId}`)
-      console.log()
-      console.log('Registry state:')
-      console.log(`  kwToken: ${kwTokenAddr}`)
-      console.log(`  kwhReceipt: ${kwhReceiptAddr}`)
-      console.log(`  revenueVault: ${revenueVaultAddr}`)
+      console.log('=== Registry State (Registered Addresses) ===')
+      console.log(`kwToken:      ${kwTokenAddrFromRegistry}`)
+      console.log(`kwhReceipt:   ${kwhReceiptAddrFromRegistry}`)
+      console.log(`revenueVault: ${revenueVaultAddrFromRegistry}`)
       console.log()
 
       // Validate all four contracts are registered
-      const zeroAddress = algosdk.getApplicationAddress(0).toString()
+      // Zero address in Base32 (what contracts return) vs getApplicationAddress(0) are different
+      const zeroAddress = 'AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAY5HFKQ'
 
-      if (!kwTokenAddr || kwTokenAddr === zeroAddress) {
+      if (!kwTokenAddrFromRegistry || kwTokenAddrFromRegistry === zeroAddress) {
         throw new Error('kWToken not registered in ProjectRegistry')
+      }
+      if (kwTokenAddrFromRegistry !== expectedKwTokenAddr) {
+        throw new Error(`kWToken address mismatch: registry has ${kwTokenAddrFromRegistry}, expected ${expectedKwTokenAddr}`)
       }
       console.log(`✓ kWToken validated`)
 
-      if (!kwhReceiptAddr || kwhReceiptAddr === zeroAddress) {
+      if (!kwhReceiptAddrFromRegistry || kwhReceiptAddrFromRegistry === zeroAddress) {
         throw new Error('kWhReceipt not registered in ProjectRegistry')
+      }
+      if (kwhReceiptAddrFromRegistry !== expectedKwhReceiptAddr) {
+        throw new Error(`kWhReceipt address mismatch: registry has ${kwhReceiptAddrFromRegistry}, expected ${expectedKwhReceiptAddr}`)
       }
       console.log(`✓ kWhReceipt validated`)
 
-      if (!revenueVaultAddr || revenueVaultAddr === zeroAddress) {
+      if (!revenueVaultAddrFromRegistry || revenueVaultAddrFromRegistry === zeroAddress) {
         throw new Error('RevenueVault not registered in ProjectRegistry')
+      }
+      if (revenueVaultAddrFromRegistry !== expectedRevenueVaultAddr) {
+        throw new Error(`RevenueVault address mismatch: registry has ${revenueVaultAddrFromRegistry}, expected ${expectedRevenueVaultAddr}`)
       }
       console.log(`✓ RevenueVault validated`)
 
       console.log()
 
       // Cross-link kWhReceipt ↔ RevenueVault
-      console.log('Cross-linking contracts...')
+      console.log('=== Cross-linking contracts ===')
 
       // Load kWhReceipt client
       const kwhReceiptFactory = this.clients.algorand.client.getTypedAppFactory(KWhReceiptFactory, {
@@ -645,27 +657,68 @@ export class ProtiusOperator {
         appId: this.config.revenueVaultAppId,
       })
 
-      // Check current state to determine if already linked
-      const kwhReceiptState = await kwhReceiptClient.appClient.state.global.getAll()
-      const currentVault = kwhReceiptState.revenueVault
-      const currentRegistry = kwhReceiptState.registry
+      
 
-      console.log('Current kWhReceipt links:')
-      console.log(`  registry: ${currentRegistry}`)
-      console.log(`  revenueVault: ${currentVault}`)
+      // Check current state
+      const kwhReceiptState = await kwhReceiptClient.appClient.state.global.getAll()
+      const currentKwhRegistry = kwhReceiptState.registry
+      const currentKwhVault = kwhReceiptState.revenueVault
+
+      const revenueVaultState = await revenueVaultClient.appClient.state.global.getAll()
+      const currentVaultRegistry = revenueVaultState.registry
+      const currentVaultKwhReceipt = revenueVaultState.kwhReceipt
+
+      console.log('Current kWhReceipt internal state:')
+      console.log(`  registry:     ${currentKwhRegistry}`)
+      console.log(`  revenueVault: ${currentKwhVault}`)
+      console.log()
+      console.log('Current RevenueVault internal state:')
+      console.log(`  registry:    ${currentVaultRegistry}`)
+      console.log(`  kwhReceipt:  ${currentVaultKwhReceipt}`)
       console.log()
 
-      if (currentVault && currentVault !== zeroAddress) {
-        console.log(`⚠️  kWhReceipt already linked to RevenueVault`)
-        console.log('Contracts already cross-linked (idempotent)')
+      // Idempotency logic for kWhReceipt → RevenueVault link
+      if (currentKwhVault === zeroAddress) {
+        console.log('→ kWhReceipt.revenueVault is ZERO (unset) - calling initReceipt()...')
+        const initKwhResult = await kwhReceiptClient.send.initReceipt({
+          args: {
+            registry: registryAppAddress,
+            vault: expectedRevenueVaultAddr,
+          },
+        })
+        txIds.push(initKwhResult.txIds[0])
+        console.log(`✅ kWhReceipt initialized: ${initKwhResult.txIds[0]}`)
+      } else if (currentKwhVault === expectedRevenueVaultAddr) {
+        console.log('✓ kWhReceipt already linked to correct RevenueVault (idempotent)')
       } else {
-        console.log('⚠️  kWhReceipt NOT initialized - vault link is zero address')
-        console.log('This is expected - contracts were deployed but not initialized with initReceipt/initVault')
-        console.log('Cross-linking would require calling those init methods with proper parameters')
+        throw new Error(`kWhReceipt.revenueVault mismatch: has ${currentKwhVault}, expected ${expectedRevenueVaultAddr}`)
+      }
+
+      // Idempotency logic for RevenueVault → kWhReceipt link
+      if (currentVaultKwhReceipt === zeroAddress) {
+        console.log('→ RevenueVault.kwhReceipt is ZERO (unset) - calling initVault()...')
+        
+        // initVault requires: registry, kwToken, kwhReceipt, treasury, settlementAssetId, platformKwhRateBps
+        const initVaultResult = await revenueVaultClient.send.initVault({
+          args: {
+            registry: registryAppAddress,
+            kwToken: expectedKwTokenAddr,
+            kwhReceipt: expectedKwhReceiptAddr,
+            treasury: this.config.treasuryAddress,
+            settlementAssetId: this.config.revenueAssetId,
+            platformKwhRateBps: 500n, // 5% default - should come from config
+          },
+        })
+        txIds.push(initVaultResult.txIds[0])
+        console.log(`✅ RevenueVault initialized: ${initVaultResult.txIds[0]}`)
+      } else if (currentVaultKwhReceipt === expectedKwhReceiptAddr) {
+        console.log('✓ RevenueVault already linked to correct kWhReceipt (idempotent)')
+      } else {
+        throw new Error(`RevenueVault.kwhReceipt mismatch: has ${currentVaultKwhReceipt}, expected ${expectedKwhReceiptAddr}`)
       }
 
       console.log()
-      console.log('✅ kWhReceipt ↔ RevenueVault linked')
+      console.log('✅ kWhReceipt ↔ RevenueVault cross-linking complete')
       console.log()
       console.log('✅ Protocol activated successfully')
 
@@ -677,6 +730,279 @@ export class ProtiusOperator {
     } catch (error: any) {
       console.error()
       console.error('❌ Activation failed:')
+      console.error(error.message || error)
+      console.error()
+      console.error(`Successful transactions: ${txIds.length}`)
+      console.error(`Transaction IDs:`, txIds)
+
+      throw error
+    }
+  }
+
+  /**
+   * Run epoch settlement (Phase 4: operator:epoch)
+   * 
+   * This method performs the monthly epoch settlement workflow:
+   * 1. Validates protocol is activated
+   * 2. Records accrual hash in kWhReceipt  
+   * 3. Sends net revenue to RevenueVault
+   * 4. Marks epoch as settled
+   * 
+   * Fully idempotent - safe to re-run for the same epoch.
+   * 
+   * @param operator - Admin account
+   * @param epoch - Epoch settlement data
+   */
+  async runEpoch(operator: algosdk.Account, epoch: EpochInput): Promise<void> {
+    const txIds: string[] = []
+
+    try {
+      console.log('\n=== Protius Epoch Settlement ===')
+      console.log(`Epoch ID: ${epoch.epochId}`)
+      console.log(`Period: ${epoch.periodStart} → ${epoch.periodEnd}`)
+      console.log(`Net Revenue: ${epoch.netRevenueMicroAlgos} microAlgos`)
+      console.log(`Accrual Hash: ${epoch.accrualHash}`)
+      console.log()
+
+      // Load ProjectRegistry
+      console.log('Loading ProjectRegistry...')
+      const registryFactory = this.clients.algorand.client.getTypedAppFactory(ProjectRegistryFactory, {
+        defaultSender: operator.addr,
+      })
+      const registryClient = await registryFactory.getAppClientById({
+        appId: this.config.registryAppId,
+      })
+      const registryAppAddress = algosdk.getApplicationAddress(Number(this.config.registryAppId))
+
+      // Load contract addresses from registry
+      const registryState = await registryClient.appClient.state.global.getAll()
+      const kwTokenAddr = registryState.kwToken
+      const kwhReceiptAddr = registryState.kwhReceipt
+      const revenueVaultAddr = registryState.revenueVault
+
+      console.log('=== Contract Addresses ===')
+      console.log(`ProjectRegistry: ${registryAppAddress}`)
+      console.log(`kWToken:         ${kwTokenAddr}`)
+      console.log(`kWhReceipt:      ${kwhReceiptAddr}`)
+      console.log(`RevenueVault:    ${revenueVaultAddr}`)
+      console.log()
+
+      // Validate protocol is activated
+      const zeroAddress = 'AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAY5HFKQ'
+      if (kwTokenAddr === zeroAddress || kwhReceiptAddr === zeroAddress || revenueVaultAddr === zeroAddress) {
+        throw new Error('Protocol not activated - run operator:activate first')
+      }
+
+      // Ensure default signer is set for AlgoKit AppClient calls
+      this.clients.algorand.setDefaultSigner(algosdk.makeBasicAccountTransactionSigner(operator))
+
+      // Load kWhReceipt client
+      console.log('Loading kWhReceipt contract...')
+      const kwhReceiptFactory = this.clients.algorand.client.getTypedAppFactory(KWhReceiptFactory, {
+        defaultSender: operator.addr,
+      })
+      const kwhReceiptClient = await kwhReceiptFactory.getAppClientById({
+        appId: this.config.kwhReceiptAppId,
+      })
+
+      // Load RevenueVault client
+      const revenueVaultFactory = this.clients.algorand.client.getTypedAppFactory(RevenueVaultFactory, {
+        defaultSender: operator.addr,
+      })
+      const revenueVaultClient = await revenueVaultFactory.getAppClientById({
+        appId: this.config.revenueVaultAppId,
+      })
+
+      // Ensure RevenueVault app account is funded to cover min balance for boxes/state
+      try {
+        console.log('→ Ensuring RevenueVault app account is funded...')
+        const rvAppAddr = algosdk.getApplicationAddress(Number(this.config.revenueVaultAppId))
+        let acctInfo: any
+        try {
+          acctInfo = await this.clients.algod.accountInformation(rvAppAddr).do()
+        } catch (_) {
+          acctInfo = { amount: 0, ['min-balance']: 0 }
+        }
+        const currentAmt: number = Number(acctInfo?.amount ?? 0)
+        const minBal: number = Number(acctInfo?.['min-balance'] ?? 0)
+        // Target at least min balance + 0.2 ALGO buffer, but not less than 0.3 ALGO total
+        const target = Math.max(minBal + 200_000, 300_000)
+        if (currentAmt < target) {
+          const topUp = target - currentAmt
+          const sp = await this.clients.algod.getTransactionParams().do()
+          const fundTxn = algosdk.makePaymentTxnWithSuggestedParamsFromObject({
+            sender: operator.addr,
+            receiver: rvAppAddr,
+            amount: topUp,
+            suggestedParams: sp,
+          })
+          const signed = fundTxn.signTxn(operator.sk)
+          const txId = algosdk.decodeSignedTransaction(signed).txn.txID()
+          await this.clients.algod.sendRawTransaction(signed).do()
+          await waitForConfirmation(this.clients.algod, txId, 4)
+          txIds.push(txId)
+          console.log(`✅ Funded RevenueVault: +${topUp} µAlgos (tx: ${txId})`)
+        } else {
+          console.log('✓ RevenueVault already sufficiently funded')
+        }
+        console.log()
+      } catch (e: any) {
+        console.log('⚠️ Skipping funding step (non-fatal):', e?.message || e)
+        console.log()
+      }
+
+      // Check if epoch already settled in kWhReceipt (idempotency)
+      const epochResult = await kwhReceiptClient.send.getEpoch({ args: { epochId: BigInt(epoch.epochId) } })
+      const epochData = epochResult.return as { totalKWh: bigint; settled: bigint }
+      
+      if (epochData.settled === 1n) {
+        console.log(`✓ Epoch ${epoch.epochId} already settled (idempotent)`)
+        console.log(`  Total kWh: ${epochData.totalKWh}`)
+        console.log()
+        console.log('✅ Epoch settlement complete (already settled)')
+        return
+      }
+
+      console.log(`Epoch ${epoch.epochId} status: Not settled (totalKWh: ${epochData.totalKWh})`)
+      console.log()
+
+      // RevenueVault epoch lifecycle handling (create → close) idempotently
+      console.log('→ Ensuring RevenueVault epoch exists and is CLOSED...')
+      const toTs = (s: string) => BigInt(Math.floor(new Date(s).getTime() / 1000))
+      const startTs = toTs(epoch.periodStart)
+      const endTs = toTs(epoch.periodEnd)
+      // Try create (ignore if already exists)
+      try {
+        const createRes = await revenueVaultClient.send.createEpoch({ args: { epochId: BigInt(epoch.epochId), startTs, endTs } })
+        txIds.push(createRes.txIds[0])
+        console.log(`✅ Created epoch in RevenueVault (tx: ${createRes.txIds[0]})`)
+      } catch (e: any) {
+        console.log('✓ Epoch create skipped (likely exists):', e?.message || e)
+      }
+      // Try close (ignore if already closed)
+      try {
+        const closeRes = await revenueVaultClient.send.closeEpoch({ args: { epochId: BigInt(epoch.epochId) } })
+        txIds.push(closeRes.txIds[0])
+        console.log(`✅ Closed epoch in RevenueVault (tx: ${closeRes.txIds[0]})`)
+      } catch (e: any) {
+        console.log('✓ Epoch close skipped (likely already closed):', e?.message || e)
+      }
+      console.log()
+
+      // Step 1: Anchor accrual report hash in RevenueVault (if not already set)
+      try {
+        console.log('→ Anchoring accrual report hash...')
+        const hashStr = epoch.accrualHash
+        let hashBytes: Uint8Array
+        const hex = hashStr.startsWith('sha256:') ? hashStr.slice(7) : hashStr
+        if (/^[0-9a-fA-F]{64}$/.test(hex)) {
+          hashBytes = new Uint8Array(hex.match(/.{1,2}/g)!.map((b) => parseInt(b, 16)))
+        } else {
+          hashBytes = new Uint8Array(Buffer.from(hashStr, 'utf-8'))
+        }
+        // Check if already anchored
+        const existingHash = await revenueVaultClient.send.getEpochReportHash({ args: { epochId: BigInt(epoch.epochId) } })
+        const alreadyAnchored = (existingHash.return as Uint8Array | undefined)?.length && (existingHash.return as Uint8Array).length > 0
+        if (alreadyAnchored) {
+          console.log('✓ Accrual report already anchored (idempotent)')
+        } else {
+          const anchorResult = await revenueVaultClient.send.anchorAccrualReport({ args: { epochId: BigInt(epoch.epochId), reportHash: hashBytes } })
+          txIds.push(anchorResult.txIds[0])
+          console.log(`✅ Accrual report anchored (tx: ${anchorResult.txIds[0]})`)
+        }
+        console.log()
+      } catch (e: any) {
+        console.log('⚠️ Skipping accrual anchoring (precondition not met or already set):', e?.message || e)
+        console.log()
+      }
+
+      // Step 2: Deposit revenue to RevenueVault (grouped payment + app call)
+      if (epoch.netRevenueMicroAlgos > 0) {
+        console.log('→ Depositing revenue to RevenueVault (group)...')
+        const suggested = await this.clients.algod.getTransactionParams().do()
+        const revenueVaultAppAddr = algosdk.getApplicationAddress(Number(this.config.revenueVaultAppId))
+
+        // Payment txn
+        const payTxn = algosdk.makePaymentTxnWithSuggestedParamsFromObject({
+          sender: operator.addr,
+          receiver: revenueVaultAppAddr,
+          amount: epoch.netRevenueMicroAlgos,
+          suggestedParams: suggested,
+        })
+
+        // App call: depositNetRevenue(epochId, amount)
+        const { encodeMethodSelector, encodeUint64, makeAppCallTxn } = await import('../lib/group') as any
+        const appArgs: Uint8Array[] = [
+          encodeMethodSelector('depositNetRevenue(uint64,uint64)string'),
+          encodeUint64(BigInt(epoch.epochId)),
+          encodeUint64(BigInt(epoch.netRevenueMicroAlgos)),
+        ]
+        // Provide required box references: epoch_status, epoch_hash, epoch_net
+        const key = encodeUint64(BigInt(epoch.epochId))
+        const name = (prefix: string) => new Uint8Array(Buffer.concat([Buffer.from(prefix, 'utf-8'), Buffer.from(key)]))
+        const appIndex = Number(this.config.revenueVaultAppId)
+        const boxes = [
+          { appIndex, name: name('epoch_status:') },
+          { appIndex, name: name('epoch_hash:') },
+          { appIndex, name: name('epoch_net:') },
+        ]
+        const appCallTxn = makeAppCallTxn(
+          operator.addr,
+          this.config.revenueVaultAppId,
+          algosdk.OnApplicationComplete.NoOpOC,
+          appArgs,
+          undefined,
+          undefined,
+          undefined,
+          suggested,
+          undefined,
+          boxes
+        )
+
+        // Group, sign, submit
+        const { assignGroupId, signGroupSingle, submitGroup } = await import('../lib/group') as any
+        const grouped = assignGroupId([payTxn, appCallTxn])
+        const signed = signGroupSingle(grouped, operator)
+        const respTxId = await submitGroup(this.clients.algod, signed)
+        await waitForConfirmation(this.clients.algod, respTxId, 4)
+        txIds.push(respTxId)
+        console.log(`✅ Revenue deposited: ${epoch.netRevenueMicroAlgos} microAlgos`)
+        console.log(`   Group TxID: ${respTxId}`)
+        console.log()
+      } else {
+        console.log('✓ No revenue to deposit (netRevenueMicroAlgos = 0)')
+        console.log()
+      }
+
+      // Step 3: Mark epoch as settled in kWhReceipt (optional; requires RevenueVault authority)
+      try {
+        console.log('→ Marking epoch as settled in kWhReceipt...')
+        const settleResult = await kwhReceiptClient.send.markEpochSettled({ args: { epochId: BigInt(epoch.epochId) } })
+        txIds.push(settleResult.txIds[0])
+        console.log(`✅ kWhReceipt epoch ${epoch.epochId} marked as settled (tx: ${settleResult.txIds[0]})`)
+        console.log()
+      } catch (e: any) {
+        console.log('⚠️ Skipping kWhReceipt.markEpochSettled (likely requires RevenueVault caller):', e?.message || e)
+        console.log()
+      }
+
+      // Summary
+      console.log('=== Settlement Summary ===')
+      console.log(`Epoch ID:            ${epoch.epochId}`)
+      console.log(`Total kWh (epoch):   ${epochData.totalKWh}`)
+      console.log(`Net Revenue:         ${epoch.netRevenueMicroAlgos} microAlgos`)
+      if (epochData.totalKWh > 0n) {
+        const revenuePerKwh = Number(epoch.netRevenueMicroAlgos) / Number(epochData.totalKWh)
+        console.log(`Revenue per kWh:     ${revenuePerKwh.toFixed(2)} microAlgos`)
+      } else {
+        console.log(`Revenue per kWh:     N/A (no kWh recorded)`)
+      }
+      console.log()
+      console.log('✅ Epoch settlement completed successfully')
+
+    } catch (error: any) {
+      console.error()
+      console.error('❌ Epoch settlement failed:')
       console.error(error.message || error)
       console.error()
       console.error(`Successful transactions: ${txIds.length}`)

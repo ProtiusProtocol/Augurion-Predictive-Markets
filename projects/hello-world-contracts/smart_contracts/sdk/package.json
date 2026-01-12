@@ -9,7 +9,7 @@
     "deploy:protius": "ts-node-dev --transpile-only -r dotenv/config ../deploy/deploy-protius.ts",
     "operator:init": "ts-node scripts/operator/init.ts",
     "operator:activate": "ts-node scripts/operator/activate.ts",
-    "operator:epoch": "ts-node scripts/operator/07_full_epoch.ts",
+    "operator:epoch": "ts-node scripts/operator/epoch.ts",
     "claimant:claim": "ts-node scripts/claimant/claim.ts",
     "test": "echo 'No tests yet'",
     "lint": "eslint src --ext .ts"
