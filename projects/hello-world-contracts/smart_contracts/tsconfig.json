@@ -1,0 +1,17 @@
+{
+  "compilerOptions": {
+    "target": "es2020",
+    "module": "esnext",
+    "moduleResolution": "node",
+    "esModuleInterop": true,
+    "strict": false,
+    "allowSyntheticDefaultImports": true,
+    "skipLibCheck": true,
+    "types": ["vitest/globals"],
+    "noEmit": true
+  },
+  "include": [
+    "**/*.spec.ts",
+    "**/*.algo.ts"
+  ]
+}

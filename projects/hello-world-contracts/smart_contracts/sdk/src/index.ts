@@ -25,17 +25,17 @@ export { assignGroupId, signGroupSingle, signGroupMultiple, submitGroup, buildAn
 export { toCanonicalJson, sha256, hashCanonicalJson, computeEntitlementsHash, verifyEntitlementsHash } from './lib/hash'
 export { ValidationError, validateAddress, validateEpochId, validateProjectConfig } from './lib/validate'
 
-// Clients
-export { VaultClient, createVaultClient } from './clients/vault.client'
-export { KWTokenClient, createKWTokenClient } from './clients/kwtoken.client'
-export { RegistryClient, createRegistryClient } from './clients/registry.client'
-export { KWhReceiptClient, createKWhReceiptClient } from './clients/kwhreceipt.client'
+// Clients - Re-exports from generated artifacts
+export { RevenueVaultClient, RevenueVaultFactory } from '../../artifacts/revenue_vault/RevenueVaultClient'
+export { KwTokenClient, KwTokenFactory } from '../../artifacts/kw_token/KWTokenClient'
+export { ProjectRegistryClient, ProjectRegistryFactory } from '../../artifacts/project_registry/ProjectRegistryClient'
+export { KWhReceiptClient, KWhReceiptFactory } from '../../artifacts/kwh_receipt/KWhReceiptClient'
 
 // Builders
 export { DepositParams, buildDepositGroup } from './builders/deposit'
 export { computeEntitlements, batchEntitlements, saveEntitlementsToFile } from './builders/entitlements'
 export { SettleParams, buildSettleTxn } from './builders/settle'
-export { ClaimParams, buildClaimTxn, queryClaimable } from './builders/claim'
+export { ClaimParams } from './builders/claim'
 
 // Operations
 export { ProtiusOperator, FinancialCloseParams, MonthlyEpochParams } from './ops/operator'

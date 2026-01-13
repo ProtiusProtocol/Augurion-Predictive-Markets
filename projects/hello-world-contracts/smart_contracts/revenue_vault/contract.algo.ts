@@ -667,8 +667,23 @@ export class RevenueVault extends Contract {
    * Client submits grouped transaction:
    * - Txn A: RevenueVault.claim(epochId) → returns claimAmount
    * - Txn B: Asset/ALGO transfer (vault → Txn.sender, amount=claimAmount)
+   *   * PROTOCOL-LEVEL GUARANTEES (v0.2.0+):
+   * ────────────────────────────────────────
+   * 1. FULL REMAINING CLAIM ONLY
+   *    - No partial claims allowed. Claimant receives computed entitlement in full.
+   *    - Amount is read-only (no client-side amount parameter).
+   *    - Contract enforces: claimAmount = entitlements[epochId][caller]
    *
-   * CONSERVATION INVARIANT:
+   * 2. IDEMPOTENT EXECUTION
+   *    - Subsequent calls after successful claim return "AlreadyClaimed" error.
+   *    - External systems (UI, operators, auditors) must treat this as success.
+   *    - Safe to retry: no double-payment, no state corruption.
+   *
+   * 3. ATOMIC (NO PARTIALS)
+   *    - All-or-nothing: either full entitlement transferred or error thrown.
+   *    - No dust left in contract for claimant.
+   *    - Claim mark (epochClaimed box) ensures idempotency.
+   *   * CONSERVATION INVARIANT:
    * All entitlements are set before settlement such that sumEntitlements == netDeposited.
    * Rounding/remainder is allocated to Treasury by the off-chain entitlements calculator.
    * On-chain verification ensures no dust is lost.
