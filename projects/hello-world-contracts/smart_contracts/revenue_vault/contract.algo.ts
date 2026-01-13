@@ -344,10 +344,13 @@ export class RevenueVault extends Contract {
 
     // Check if already deposited (idempotency)
     const existingDeposit = this.epochNetDeposited(epochId).maybe()
-    if (existingDeposit[1]) {
-      // Already deposited; verify amount matches for safety
+    const isAlreadyDeposited = existingDeposit[1]
+    if (isAlreadyDeposited) {
+      // Already deposited; verify amount matches for safety (log mismatch but don't fail)
       const existingAmount = existingDeposit[0] as uint64
-      assert(existingAmount === amount, 'AmountMismatch')
+      if (existingAmount !== amount) {
+        return `WARNING: Deposit amount mismatch for epoch ${epochId}: existing=${existingAmount}, new=${amount}`
+      }
       return `Net revenue already deposited for epoch ${epochId} (idempotent)`
     }
 

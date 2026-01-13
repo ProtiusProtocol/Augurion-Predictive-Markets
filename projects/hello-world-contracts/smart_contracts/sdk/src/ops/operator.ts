@@ -919,57 +919,68 @@ export class ProtiusOperator {
       // Step 2: Deposit revenue to RevenueVault (grouped payment + app call)
       if (epoch.netRevenueMicroAlgos > 0) {
         console.log('→ Depositing revenue to RevenueVault (group)...')
-        const suggested = await this.clients.algod.getTransactionParams().do()
-        const revenueVaultAppAddr = algosdk.getApplicationAddress(Number(this.config.revenueVaultAppId))
+        
+        try {
+          const suggested = await this.clients.algod.getTransactionParams().do()
+          const revenueVaultAppAddr = algosdk.getApplicationAddress(Number(this.config.revenueVaultAppId))
 
-        // Payment txn
-        const payTxn = algosdk.makePaymentTxnWithSuggestedParamsFromObject({
-          sender: operator.addr,
-          receiver: revenueVaultAppAddr,
-          amount: epoch.netRevenueMicroAlgos,
-          suggestedParams: suggested,
-        })
+          // Payment txn
+          const payTxn = algosdk.makePaymentTxnWithSuggestedParamsFromObject({
+            sender: operator.addr,
+            receiver: revenueVaultAppAddr,
+            amount: epoch.netRevenueMicroAlgos,
+            suggestedParams: suggested,
+          })
 
-        // App call: depositNetRevenue(epochId, amount)
-        const { encodeMethodSelector, encodeUint64, makeAppCallTxn } = await import('../lib/group') as any
-        const appArgs: Uint8Array[] = [
-          encodeMethodSelector('depositNetRevenue(uint64,uint64)string'),
-          encodeUint64(BigInt(epoch.epochId)),
-          encodeUint64(BigInt(epoch.netRevenueMicroAlgos)),
-        ]
-        // Provide required box references: epoch_status, epoch_hash, epoch_net, epoch_net_deposited
-        const key = encodeUint64(BigInt(epoch.epochId))
-        const name = (prefix: string) => new Uint8Array(Buffer.concat([Buffer.from(prefix, 'utf-8'), Buffer.from(key)]))
-        const appIndex = Number(this.config.revenueVaultAppId)
-        const boxes = [
-          { appIndex, name: name('epoch_status:') },
-          { appIndex, name: name('epoch_hash:') },
-          { appIndex, name: name('epoch_net:') },
-          { appIndex, name: name('epoch_net_deposited:') },
-        ]
-        const appCallTxn = makeAppCallTxn(
-          operator.addr,
-          this.config.revenueVaultAppId,
-          algosdk.OnApplicationComplete.NoOpOC,
-          appArgs,
-          undefined,
-          undefined,
-          undefined,
-          suggested,
-          undefined,
-          boxes
-        )
+          // App call: depositNetRevenue(epochId, amount)
+          const { encodeMethodSelector, encodeUint64, makeAppCallTxn } = await import('../lib/group') as any
+          const appArgs: Uint8Array[] = [
+            encodeMethodSelector('depositNetRevenue(uint64,uint64)string'),
+            encodeUint64(BigInt(epoch.epochId)),
+            encodeUint64(BigInt(epoch.netRevenueMicroAlgos)),
+          ]
+          // Provide required box references: epoch_status, epoch_hash, epoch_net, epoch_net_deposited
+          const key = encodeUint64(BigInt(epoch.epochId))
+          const name = (prefix: string) => new Uint8Array(Buffer.concat([Buffer.from(prefix, 'utf-8'), Buffer.from(key)]))
+          const appIndex = Number(this.config.revenueVaultAppId)
+          const boxes = [
+            { appIndex, name: name('epoch_status:') },
+            { appIndex, name: name('epoch_hash:') },
+            { appIndex, name: name('epoch_net:') },
+            { appIndex, name: name('epoch_net_deposited:') },
+          ]
+          const appCallTxn = makeAppCallTxn(
+            operator.addr,
+            this.config.revenueVaultAppId,
+            algosdk.OnApplicationComplete.NoOpOC,
+            appArgs,
+            undefined,
+            undefined,
+            undefined,
+            suggested,
+            undefined,
+            boxes
+          )
 
-        // Group, sign, submit
-        const { assignGroupId, signGroupSingle, submitGroup } = await import('../lib/group') as any
-        const grouped = assignGroupId([payTxn, appCallTxn])
-        const signed = signGroupSingle(grouped, operator)
-        const respTxId = await submitGroup(this.clients.algod, signed)
-        await waitForConfirmation(this.clients.algod, respTxId, 4)
-        txIds.push(respTxId)
-        console.log(`✅ Revenue deposited: ${epoch.netRevenueMicroAlgos} microAlgos`)
-        console.log(`   Group TxID: ${respTxId}`)
-        console.log()
+          // Group, sign, submit
+          const { assignGroupId, signGroupSingle, submitGroup } = await import('../lib/group') as any
+          const grouped = assignGroupId([payTxn, appCallTxn])
+          const signed = signGroupSingle(grouped, operator)
+          const respTxId = await submitGroup(this.clients.algod, signed)
+          await waitForConfirmation(this.clients.algod, respTxId, 4)
+          txIds.push(respTxId)
+          console.log(`✅ Revenue deposited: ${epoch.netRevenueMicroAlgos} microAlgos`)
+          console.log(`   Group TxID: ${respTxId}`)
+          console.log()
+        } catch (error: any) {
+          // Check if this is an idempotency error (already deposited)
+          if (error.message?.includes('Net revenue already deposited for epoch')) {
+            console.log('✓ Revenue already deposited (idempotent)')
+            console.log()
+          } else {
+            throw error
+          }
+        }
       } else {
         console.log('✓ No revenue to deposit (netRevenueMicroAlgos = 0)')
         console.log()
