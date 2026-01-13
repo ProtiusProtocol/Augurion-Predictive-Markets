@@ -937,7 +937,7 @@ export class ProtiusOperator {
           encodeUint64(BigInt(epoch.epochId)),
           encodeUint64(BigInt(epoch.netRevenueMicroAlgos)),
         ]
-        // Provide required box references: epoch_status, epoch_hash, epoch_net
+        // Provide required box references: epoch_status, epoch_hash, epoch_net, epoch_net_deposited
         const key = encodeUint64(BigInt(epoch.epochId))
         const name = (prefix: string) => new Uint8Array(Buffer.concat([Buffer.from(prefix, 'utf-8'), Buffer.from(key)]))
         const appIndex = Number(this.config.revenueVaultAppId)
@@ -945,6 +945,7 @@ export class ProtiusOperator {
           { appIndex, name: name('epoch_status:') },
           { appIndex, name: name('epoch_hash:') },
           { appIndex, name: name('epoch_net:') },
+          { appIndex, name: name('epoch_net_deposited:') },
         ]
         const appCallTxn = makeAppCallTxn(
           operator.addr,

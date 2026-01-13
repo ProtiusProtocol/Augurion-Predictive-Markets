@@ -342,9 +342,14 @@ export class RevenueVault extends Contract {
     // SSOT: Amount must be valid
     assert(amount > Uint64(0), 'InvalidDepositAmount')
 
-    // SSOT: Deposit must be fresh (no prior deposit)
+    // Check if already deposited (idempotency)
     const existingDeposit = this.epochNetDeposited(epochId).maybe()
-    assert(existingDeposit[1] === false, 'RevenueAlreadyDeposited')
+    if (existingDeposit[1]) {
+      // Already deposited; verify amount matches for safety
+      const existingAmount = existingDeposit[0] as uint64
+      assert(existingAmount === amount, 'AmountMismatch')
+      return `Net revenue already deposited for epoch ${epochId} (idempotent)`
+    }
 
     // TODO (Client Integration):
     // Verify grouped asset transfer occurred before this call:
@@ -355,9 +360,12 @@ export class RevenueVault extends Contract {
     // Current implementation: Client verifies off-chain; contract asserts amount.
     // For production, add hardened group transaction verification logic.
 
-    // Store deposited amount
+    // Store deposited amount (create only if doesn't exist)
     const depositBox = this.epochNetDeposited(epochId)
-    depositBox.create({ size: Uint64(8) })
+    const existingDepositBox = depositBox.maybe()
+    if (!existingDepositBox[1]) {
+      depositBox.create({ size: Uint64(8) })
+    }
     depositBox.value = amount
 
     return `Net revenue ${amount} deposited for epoch ${epochId}`
@@ -427,17 +435,24 @@ export class RevenueVault extends Contract {
     // Compute revenue per kW (integer division)
     const revenuePerKw: uint64 = netDeposited / totalKw
 
-    // Store revenuePerKw
+    // Store revenuePerKw (create only if doesn't exist)
     const revBox = this.epochRevenuePerKw(epochId)
-    revBox.create({ size: Uint64(8) })
+    const existingRevBox = revBox.maybe()
+    if (!existingRevBox[1]) {
+      revBox.create({ size: Uint64(8) })
+    }
     revBox.value = revenuePerKw
 
-    // Mark epoch as settled
+    // Mark epoch as settled (create only if doesn't exist)
     const settledBox = this.epochSettled(epochId)
-    settledBox.create({ size: Uint64(8) })
+    const existingSettledBox = settledBox.maybe()
+    if (!existingSettledBox[1]) {
+      settledBox.create({ size: Uint64(8) })
+    }
     settledBox.value = Uint64(1)
 
     return `Entitlements settled for epoch ${epochId}: computeRevenuePerKw complete`
+
   }
 
   // -----------------------
