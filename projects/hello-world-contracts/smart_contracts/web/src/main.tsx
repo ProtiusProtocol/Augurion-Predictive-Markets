@@ -4,9 +4,10 @@ import OperatorConsole from './OperatorConsole'
 import ProjectOverview from './ProjectOverview'
 import ClaimantPreview from './ClaimantPreview'
 import ClaimExecution from './ClaimExecution'
+import EquityInvestment from './EquityInvestment'
 
 function App() {
-  const [screen, setScreen] = useState<'overview' | 'operator' | 'claimant' | 'claim-exec'>('overview')
+  const [screen, setScreen] = useState<'overview' | 'operator' | 'claimant' | 'claim-exec' | 'invest'>('overview')
 
   return (
     <div>
@@ -28,20 +29,20 @@ function App() {
             fontWeight: 'bold'
           }}
         >
-          Project Overview
+          1. Project Overview
         </button>
         <button 
-          onClick={() => setScreen('operator')}
+          onClick={() => setScreen('invest')}
           style={{ 
-            background: screen === 'operator' ? '#333' : '#fff',
-            color: screen === 'operator' ? '#fff' : '#333',
+            background: screen === 'invest' ? '#333' : '#fff',
+            color: screen === 'invest' ? '#fff' : '#333',
             border: '1px solid #ddd',
             padding: '8px 12px',
             cursor: 'pointer',
             fontWeight: 'bold'
           }}
         >
-          Operator Console
+          2. Equity Investment
         </button>
         <button 
           onClick={() => setScreen('claimant')}
@@ -54,7 +55,7 @@ function App() {
             fontWeight: 'bold'
           }}
         >
-          Claimant Preview
+          3. Claim Notification
         </button>
         <button 
           onClick={() => setScreen('claim-exec')}
@@ -67,13 +68,27 @@ function App() {
             fontWeight: 'bold'
           }}
         >
-          Claim Execution
+          4. Claim Execution
+        </button>
+        <button 
+          onClick={() => setScreen('operator')}
+          style={{ 
+            background: screen === 'operator' ? '#333' : '#fff',
+            color: screen === 'operator' ? '#fff' : '#333',
+            border: '1px solid #ddd',
+            padding: '8px 12px',
+            cursor: 'pointer',
+            fontWeight: 'bold'
+          }}
+        >
+          🔧 Operator Console
         </button>
       </nav>
       {screen === 'overview' && <ProjectOverview />}
-      {screen === 'operator' && <OperatorConsole />}
+      {screen === 'invest' && <EquityInvestment />}
       {screen === 'claimant' && <ClaimantPreview />}
       {screen === 'claim-exec' && <ClaimExecution />}
+      {screen === 'operator' && <OperatorConsole />}
     </div>
   )
 }

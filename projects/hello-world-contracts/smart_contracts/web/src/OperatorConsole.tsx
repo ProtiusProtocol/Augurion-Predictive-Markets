@@ -6,6 +6,7 @@ const CONFIG = {
   algodServer: 'http://127.0.0.1',
   algodPort: 4001,
   algodToken: 'a'.repeat(64),
+  projectRegistryAppId: 1002,
   revenueVaultAppId: 1005,
   adminAddress: 'ISR5CAAAKXMRJ6G5YD2O24AGKF32XEBXXWGYESQ3BQA4OH7WUIBFTY47EA',
   adminMnemonic: 'elephant edge panel cushion oblige hurt toilet ridge lift great light hybrid domain foster clap fault screen index judge seed town idle powder able vessel'
@@ -31,6 +32,18 @@ export default function OperatorConsole() {
   const [currentEpochId, setCurrentEpochId] = useState<number>(202501)
   const [loading, setLoading] = useState<string | null>(null)
   const [actionLog, setActionLog] = useState<string[]>([])
+
+  // Project initialization form state
+  const [projectForm, setProjectForm] = useState({
+    projectId: 'PROTIUS-001',
+    installedAcKw: '1000',
+    treasury: '',
+    platformKwBps: '500',
+    platformKwhRateBps: '100',
+    admin: CONFIG.adminAddress,
+    peoFile: null as File | null,
+    peoNumber: ''
+  })
 
   const algodClient = new algosdk.Algodv2(CONFIG.algodToken, CONFIG.algodServer, CONFIG.algodPort)
   const adminAccount = algosdk.mnemonicToSecretKey(CONFIG.adminMnemonic)
@@ -114,6 +127,49 @@ export default function OperatorConsole() {
     } finally {
       setLoading(null)
     }
+  }
+
+  const initializeProject = async () => {
+    // TODO: In production, validate PEO is attached and completed via Infrapilot
+    // TODO: Store PEO in backend database with unique number
+    if (projectForm.peoFile) {
+      log(`📎 PEO attached: ${projectForm.peoFile.name} (${projectForm.peoNumber || 'auto-generated ID'})`)
+      // TODO: Upload PEO to backend storage service
+    }
+
+    const suggestedParams = await algodClient.getTransactionParams().do()
+    
+    // Encode project ID as bytes (UTF-8)
+    const projectIdBytes = new Uint8Array(Buffer.from(projectForm.projectId, 'utf-8'))
+    const installedKw = algosdk.encodeUint64(Number(projectForm.installedAcKw))
+    const platformKwBps = algosdk.encodeUint64(Number(projectForm.platformKwBps))
+    const platformKwhRateBps = algosdk.encodeUint64(Number(projectForm.platformKwhRateBps))
+
+    // Method: init_registry(bytes,uint64,account,uint64,uint64,account)
+    const methodSelector = new Uint8Array(Buffer.from('init_registry', 'utf-8').slice(0, 4))
+
+    const txn = algosdk.makeApplicationCallTxnFromObject({
+      from: adminAccount.addr,
+      appIndex: CONFIG.projectRegistryAppId,
+      onComplete: algosdk.OnApplicationComplete.NoOpOC,
+      appArgs: [
+        methodSelector,
+        projectIdBytes,
+        installedKw,
+        platformKwBps,
+        platformKwhRateBps,
+      ],
+      accounts: [
+        projectForm.treasury || adminAccount.addr,
+        projectForm.admin || adminAccount.addr,
+      ],
+      suggestedParams,
+    })
+
+    const signedTxn = txn.signTxn(adminAccount.sk)
+    const { txId } = await algodClient.sendRawTransaction(signedTxn).do()
+    await algosdk.waitForConfirmation(algodClient, txId, 4)
+    log(`✅ Project initialized: ${projectForm.projectId} (PEO: ${projectForm.peoNumber || 'N/A'}) → ${txId.slice(0, 8)}`)
   }
 
   const createEpoch = async () => {
@@ -315,6 +371,161 @@ export default function OperatorConsole() {
             )}
           </tbody>
         </table>
+      </section>
+
+      <hr />
+
+      {/* Project Management */}
+      <section>
+        <h2>🏗️ Project Management</h2>
+        <div style={{ 
+          backgroundColor: '#fff3cd', 
+          border: '2px solid #ff9800',
+          borderRadius: '4px',
+          padding: '12px',
+          marginBottom: '15px'
+        }}>
+          <strong>⚠️ Testing Tool Only</strong>
+          <p style={{ fontSize: '12px', margin: '8px 0 0 0' }}>
+            <strong>Production:</strong> Projects must come from <strong>Infrapilot</strong> with completed <strong>PEO (Project Entry Object)</strong> before onboarding to investment pool.
+            This form is for LocalNet testing and development only.
+          </p>
+        </div>
+        <p style={{ fontSize: '12px', color: '#666' }}>
+          Initialize a new project in the ProjectRegistry contract. This sets immutable project parameters.
+        </p>
+        
+        <div style={{ 
+          backgroundColor: '#f9f9f9', 
+          padding: '15px', 
+          border: '1px solid #ddd',
+          borderRadius: '4px',
+          marginBottom: '15px'
+        }}>
+          <div style={{ marginBottom: '10px' }}>
+            <label style={{ display: 'block', fontWeight: 'bold', marginBottom: '5px' }}>
+              📎 Project Entry Object (PEO):
+            </label>
+            <div style={{ marginBottom: '8px' }}>
+              <input
+                type="text"
+                value={projectForm.peoNumber}
+                onChange={(e) => setProjectForm({ ...projectForm, peoNumber: e.target.value })}
+                style={{ width: '100%', padding: '6px', fontFamily: 'monospace', marginBottom: '6px' }}
+                placeholder="PEO Unique Number (auto-generated if empty)"
+              />
+              <input
+                type="file"
+                accept=".pdf,.doc,.docx,.json"
+                onChange={(e) => setProjectForm({ ...projectForm, peoFile: e.target.files?.[0] || null })}
+                style={{ width: '100%', padding: '6px', fontSize: '12px' }}
+              />
+              {projectForm.peoFile && (
+                <div style={{ fontSize: '11px', color: '#2e7d32', marginTop: '4px' }}>
+                  ✓ Attached: {projectForm.peoFile.name}
+                </div>
+              )}
+            </div>
+            <p style={{ fontSize: '11px', color: '#666', margin: '4px 0 0 0' }}>
+              In production, PEO is validated from Infrapilot and stored in backend database.
+            </p>
+          </div>
+
+          <div style={{ marginBottom: '10px' }}>
+            <label style={{ display: 'block', fontWeight: 'bold', marginBottom: '5px' }}>
+              Project ID (string):
+            </label>
+            <input
+              type="text"
+              value={projectForm.projectId}
+              onChange={(e) => setProjectForm({ ...projectForm, projectId: e.target.value })}
+              style={{ width: '100%', padding: '6px', fontFamily: 'monospace' }}
+              placeholder="e.g., PROTIUS-001"
+            />
+          </div>
+
+          <div style={{ marginBottom: '10px' }}>
+            <label style={{ display: 'block', fontWeight: 'bold', marginBottom: '5px' }}>
+              Installed AC Capacity (kW):
+            </label>
+            <input
+              type="number"
+              value={projectForm.installedAcKw}
+              onChange={(e) => setProjectForm({ ...projectForm, installedAcKw: e.target.value })}
+              style={{ width: '100%', padding: '6px', fontFamily: 'monospace' }}
+              placeholder="e.g., 1000"
+            />
+          </div>
+
+          <div style={{ marginBottom: '10px' }}>
+            <label style={{ display: 'block', fontWeight: 'bold', marginBottom: '5px' }}>
+              Treasury Address (optional, defaults to admin):
+            </label>
+            <input
+              type="text"
+              value={projectForm.treasury}
+              onChange={(e) => setProjectForm({ ...projectForm, treasury: e.target.value })}
+              style={{ width: '100%', padding: '6px', fontFamily: 'monospace', fontSize: '11px' }}
+              placeholder="Algorand address (leave empty for admin)"
+            />
+          </div>
+
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px', marginBottom: '10px' }}>
+            <div>
+              <label style={{ display: 'block', fontWeight: 'bold', marginBottom: '5px' }}>
+                Platform kW Fee (BPS, 0-10000):
+              </label>
+              <input
+                type="number"
+                value={projectForm.platformKwBps}
+                onChange={(e) => setProjectForm({ ...projectForm, platformKwBps: e.target.value })}
+                style={{ width: '100%', padding: '6px', fontFamily: 'monospace' }}
+                placeholder="500 = 5%"
+              />
+            </div>
+            <div>
+              <label style={{ display: 'block', fontWeight: 'bold', marginBottom: '5px' }}>
+                Platform kWh Rate (BPS, 0-10000):
+              </label>
+              <input
+                type="number"
+                value={projectForm.platformKwhRateBps}
+                onChange={(e) => setProjectForm({ ...projectForm, platformKwhRateBps: e.target.value })}
+                style={{ width: '100%', padding: '6px', fontFamily: 'monospace' }}
+                placeholder="100 = 1%"
+              />
+            </div>
+          </div>
+
+          <div style={{ marginBottom: '15px' }}>
+            <label style={{ display: 'block', fontWeight: 'bold', marginBottom: '5px' }}>
+              Admin Address:
+            </label>
+            <input
+              type="text"
+              value={projectForm.admin}
+              onChange={(e) => setProjectForm({ ...projectForm, admin: e.target.value })}
+              style={{ width: '100%', padding: '6px', fontFamily: 'monospace', fontSize: '11px' }}
+            />
+          </div>
+
+          <button
+            onClick={() => executeAction('INIT_PROJECT', initializeProject)}
+            disabled={!network.connected || !!loading || !projectForm.projectId || !projectForm.installedAcKw}
+            style={{
+              padding: '12px 24px',
+              cursor: network.connected && !loading && projectForm.projectId && projectForm.installedAcKw ? 'pointer' : 'not-allowed',
+              backgroundColor: network.connected && !loading ? '#2196f3' : '#ccc',
+              color: '#fff',
+              border: 'none',
+              borderRadius: '4px',
+              fontWeight: 'bold',
+              fontSize: '14px'
+            }}
+          >
+            {loading === 'INIT_PROJECT' ? '⏳ Initializing...' : '🚀 Initialize Project'}
+          </button>
+        </div>
       </section>
 
       <hr />
