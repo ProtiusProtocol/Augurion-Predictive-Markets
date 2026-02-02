@@ -1,12 +1,13 @@
 import { useState, useEffect } from 'react'
 import algosdk from 'algosdk'
+import ProjectStatusPanel from './ProjectStatusPanel'
 
 // Hardcoded config - matches deployed localnet contracts
 const CONFIG = {
   algodServer: 'http://127.0.0.1',
   algodPort: 4001,
   algodToken: 'a'.repeat(64),
-  projectRegistryAppId: 1002,
+  projectRegistryAppId: 1003,
   revenueVaultAppId: 1005,
   adminAddress: 'ISR5CAAAKXMRJ6G5YD2O24AGKF32XEBXXWGYESQ3BQA4OH7WUIBFTY47EA',
   adminMnemonic: 'elephant edge panel cushion oblige hurt toilet ridge lift great light hybrid domain foster clap fault screen index judge seed town idle powder able vessel'
@@ -327,6 +328,13 @@ export default function OperatorConsole() {
     <div style={{ fontFamily: 'monospace', padding: '20px', maxWidth: '1200px', margin: '0 auto' }}>
       <h1>Protius Protocol Control UI</h1>
       <p style={{ color: '#666' }}>Phase 1: Operator Console (state-gated actions only)</p>
+      
+      {/* Project State Machine Panel */}
+      <ProjectStatusPanel
+        projectRegistryAppId={CONFIG.projectRegistryAppId}
+        algodClient={algodClient}
+        readOnly={false}
+      />
       
       <hr />
 

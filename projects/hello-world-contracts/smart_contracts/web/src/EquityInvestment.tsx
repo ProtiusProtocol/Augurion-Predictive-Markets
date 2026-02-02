@@ -6,7 +6,7 @@ const CONFIG = {
   algodToken: 'a'.repeat(64),
   algodServer: 'http://127.0.0.1',
   algodPort: 4001,
-  projectRegistryAppId: 1002,
+  projectRegistryAppId: 1003,
   kwTokenAppId: 1003,
 }
 

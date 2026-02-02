@@ -5,9 +5,11 @@ import ProjectOverview from './ProjectOverview'
 import ClaimantPreview from './ClaimantPreview'
 import ClaimExecution from './ClaimExecution'
 import EquityInvestment from './EquityInvestment'
+import ProductionRecording from './ProductionRecording'
+import BuyerPortal from './BuyerPortal'
 
 function App() {
-  const [screen, setScreen] = useState<'overview' | 'operator' | 'claimant' | 'claim-exec' | 'invest'>('overview')
+  const [screen, setScreen] = useState<'overview' | 'operator' | 'claimant' | 'claim-exec' | 'invest' | 'production' | 'buyer'>('overview')
 
   return (
     <div>
@@ -83,12 +85,40 @@ function App() {
         >
           🔧 Operator Console
         </button>
+        <button 
+          onClick={() => setScreen('production')}
+          style={{ 
+            background: screen === 'production' ? '#333' : '#fff',
+            color: screen === 'production' ? '#fff' : '#333',
+            border: '1px solid #ddd',
+            padding: '8px 12px',
+            cursor: 'pointer',
+            fontWeight: 'bold'
+          }}
+        >
+          📊 Production Recording
+        </button>
+        <button 
+          onClick={() => setScreen('buyer')}
+          style={{ 
+            background: screen === 'buyer' ? '#333' : '#fff',
+            color: screen === 'buyer' ? '#fff' : '#333',
+            border: '1px solid #ddd',
+            padding: '8px 12px',
+            cursor: 'pointer',
+            fontWeight: 'bold'
+          }}
+        >
+          ⚡ PPA Buyer Portal
+        </button>
       </nav>
       {screen === 'overview' && <ProjectOverview />}
       {screen === 'invest' && <EquityInvestment />}
       {screen === 'claimant' && <ClaimantPreview />}
       {screen === 'claim-exec' && <ClaimExecution />}
       {screen === 'operator' && <OperatorConsole />}
+      {screen === 'production' && <ProductionRecording />}
+      {screen === 'buyer' && <BuyerPortal />}
     </div>
   )
 }

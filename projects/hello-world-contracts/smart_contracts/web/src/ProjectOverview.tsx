@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react'
 import algosdk from 'algosdk'
+import ProjectStatusPanel from './ProjectStatusPanel'
 
 // Hardcoded config - matches deployed localnet contracts
 const CONFIG = {
@@ -239,6 +240,13 @@ export default function ProjectOverview() {
     <div style={{ fontFamily: 'monospace', padding: '20px', maxWidth: '1200px', margin: '0 auto' }}>
       <h1>Protius Protocol Overview</h1>
       <p style={{ color: '#666' }}>Read-only system state view. No actions. No wallets. All data from on-chain.</p>
+
+      {/* Project State Machine Panel (Read-Only) */}
+      <ProjectStatusPanel
+        projectRegistryAppId={CONFIG.registryAppId}
+        algodClient={algodClient}
+        readOnly={true}
+      />
 
       <div style={{ marginBottom: '20px' }}>
         <button 
