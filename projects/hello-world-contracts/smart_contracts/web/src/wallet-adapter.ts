@@ -33,14 +33,25 @@ class PeraWalletAdapter implements WalletAdapter {
 
   async connect(): Promise<string[]> {
     try {
+      // If already connected, reconnect to resume existing session
+      const accounts = await this.peraWallet.reconnectSession()
+      if (accounts && accounts.length > 0) {
+        this.accounts = accounts
+        return accounts
+      }
+    } catch {
+      // No existing session, proceed to fresh connect
+    }
+
+    try {
       const accounts = await this.peraWallet.connect()
       this.accounts = accounts
-      
+
       // Listen for disconnect events
       this.peraWallet.connector?.on('disconnect', () => {
         this.accounts = []
       })
-      
+
       return accounts
     } catch (error) {
       console.error('Wallet connection failed:', error)

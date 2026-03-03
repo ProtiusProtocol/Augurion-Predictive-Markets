@@ -1,5 +1,5 @@
 import { AlgorandClient } from '@algorandfoundation/algokit-utils'
-import { ProjectRegistryFactory } from '../artifacts/project_registry/ProjectRegistryClient'
+import { ProjectRegistryFactory } from '../artifacts/project_registry/ProjectRegistryClient.ts'
 
 // Deploy the ProjectRegistry app; initialization can be called separately once inputs are confirmed
 export async function deploy() {

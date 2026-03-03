@@ -22,10 +22,10 @@ import { KWhReceiptClient } from './artifacts/kwh_receipt/KWhReceiptClient'
 import { RevenueVaultClient } from './artifacts/revenue_vault/RevenueVaultClient'
 
 // CONFIGURATION - UPDATE WITH ACTUAL VALUES
-const REGISTRY_ID = 1026n
-const KW_TOKEN_ID = 1028n
-const KWH_RECEIPT_ID = 1030n
-const REVENUE_VAULT_ID = 1032n
+const REGISTRY_ID = 756074148n
+const KW_TOKEN_ID = 756134211n
+const KWH_RECEIPT_ID = 756074340n
+const REVENUE_VAULT_ID = 756074359n
 
 // Localnet test values
 const PROJECT_ID = 'TestProject'

@@ -1,13 +1,6 @@
 import { useState, useEffect } from 'react'
 import algosdk from 'algosdk'
-
-// Config - adjust to match your deployment
-const CONFIG = {
-  algodServer: 'http://127.0.0.1',
-  algodPort: 4001,
-  algodToken: 'a'.repeat(64),
-  kwhReceiptAppId: 1004, // Update with your actual app ID
-}
+import { CONFIG } from './config'
 
 interface MeterReading {
   id: number

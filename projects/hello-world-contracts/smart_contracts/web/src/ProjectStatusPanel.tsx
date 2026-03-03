@@ -67,7 +67,7 @@ export default function ProjectStatusPanel({
       setError(null)
 
       const appInfo = await algodClient.getApplicationByID(projectRegistryAppId).do()
-      const globalState = appInfo.params['global-state']
+      const globalState: any[] = (appInfo.params as any)['global-state'] || (appInfo.params as any).globalState || []
 
       // Parse global state
       let currentState = 0

@@ -1,17 +1,13 @@
 import { useState, useEffect } from 'react'
 import algosdk from 'algosdk'
 import ProjectStatusPanel from './ProjectStatusPanel'
+import { CONFIG } from './config'
+import { projectStore, ProjectSubmission } from './projectStore'
+import { ARTIFACTS } from './contractArtifacts'
 
-// Hardcoded config - matches deployed localnet contracts
-const CONFIG = {
-  algodServer: 'http://127.0.0.1',
-  algodPort: 4001,
-  algodToken: 'a'.repeat(64),
-  projectRegistryAppId: 1003,
-  revenueVaultAppId: 1005,
-  adminAddress: 'ISR5CAAAKXMRJ6G5YD2O24AGKF32XEBXXWGYESQ3BQA4OH7WUIBFTY47EA',
-  adminMnemonic: 'elephant edge panel cushion oblige hurt toilet ridge lift great light hybrid domain foster clap fault screen index judge seed town idle powder able vessel'
-}
+// LocalNet test credentials (only used for local development)
+const LOCAL_ADMIN_ADDRESS = 'ISR5CAAAKXMRJ6G5YD2O24AGKF32XEBXXWGYESQ3BQA4OH7WUIBFTY47EA'
+const LOCAL_ADMIN_MNEMONIC = 'solar funny mass kiss film argue journey enroll income caution jewel artist escape brother rebuild model dinosaur talk cave survey address type air able shy'
 
 interface EpochState {
   epochId: number
@@ -19,6 +15,15 @@ interface EpochState {
   netDeposited: bigint
   revenuePerKw: bigint
   reportHash: string | null
+}
+
+interface FCStatus {
+  fcOpen: boolean
+  fcFinalized: boolean
+  transfersEnabled: boolean
+  investorMintedAmount: bigint
+  totalSupply: bigint
+  loaded: boolean
 }
 
 interface NetworkStatus {
@@ -33,21 +38,42 @@ export default function OperatorConsole() {
   const [currentEpochId, setCurrentEpochId] = useState<number>(202501)
   const [loading, setLoading] = useState<string | null>(null)
   const [actionLog, setActionLog] = useState<string[]>([])
+  const [fcStatus, setFcStatus] = useState<FCStatus>({
+    fcOpen: false, fcFinalized: false, transfersEnabled: false,
+    investorMintedAmount: 0n, totalSupply: 0n, loaded: false,
+  })
+  const [fcForm, setFcForm] = useState({
+    installedAcKw: '1000',
+    platformKwBps: '200',
+    treasury: LOCAL_ADMIN_ADDRESS,
+    singleInvestor: '',
+  })
+  const [pendingSubmissions, setPendingSubmissions] = useState<ProjectSubmission[]>(() => projectStore.getPending())
+  const [approvalForms, setApprovalForms] = useState<Record<string, { registryAppId: string; kwTokenAppId: string; revenueVaultAppId: string; kwhReceiptAppId: string }>>({})
+
+  // Project state machine
+  const [registryStateInfo, setRegistryStateInfo] = useState<{ current: number; label: string } | null>(null)
+  const [targetState, setTargetState] = useState<number>(1)
+  const REGISTRY_PROJECTS = [
+    { label: 'PROTIUS-001 (staking open)', appId: 756428038 },
+    { label: 'PROTIUS-002 (equity raise)', appId: 756428065 },
+  ]
+  const [selectedRegistryAppId, setSelectedRegistryAppId] = useState<number>(REGISTRY_PROJECTS[0].appId)
 
   // Project initialization form state
   const [projectForm, setProjectForm] = useState({
     projectId: 'PROTIUS-001',
     installedAcKw: '1000',
     treasury: '',
-    platformKwBps: '500',
+    platformKwBps: '200',
     platformKwhRateBps: '100',
-    admin: CONFIG.adminAddress,
+    admin: LOCAL_ADMIN_ADDRESS,
     peoFile: null as File | null,
     peoNumber: ''
   })
 
   const algodClient = new algosdk.Algodv2(CONFIG.algodToken, CONFIG.algodServer, CONFIG.algodPort)
-  const adminAccount = algosdk.mnemonicToSecretKey(CONFIG.adminMnemonic)
+  const adminAccount = algosdk.mnemonicToSecretKey(LOCAL_ADMIN_MNEMONIC)
 
   // Read network status
   useEffect(() => {
@@ -168,8 +194,9 @@ export default function OperatorConsole() {
     })
 
     const signedTxn = txn.signTxn(adminAccount.sk)
-    const { txId } = await algodClient.sendRawTransaction(signedTxn).do()
-    await algosdk.waitForConfirmation(algodClient, txId, 4)
+    const _r1 = await algodClient.sendRawTransaction(signedTxn).do()
+    const txId = (_r1 as any).txid || (_r1 as any).txId
+    await algosdk.waitForConfirmation(algodClient, txId, 8)
     log(`✅ Project initialized: ${projectForm.projectId} (PEO: ${projectForm.peoNumber || 'N/A'}) → ${txId.slice(0, 8)}`)
   }
 
@@ -191,8 +218,9 @@ export default function OperatorConsole() {
     })
 
     const signedTxn = txn.signTxn(adminAccount.sk)
-    const { txId } = await algodClient.sendRawTransaction(signedTxn).do()
-    await algosdk.waitForConfirmation(algodClient, txId, 4)
+    const _r2 = await algodClient.sendRawTransaction(signedTxn).do()
+    const txId = (_r2 as any).txid || (_r2 as any).txId
+    await algosdk.waitForConfirmation(algodClient, txId, 8)
     log(`✅ createEpoch(${currentEpochId}) → ${txId.slice(0, 8)}`)
   }
 
@@ -211,8 +239,9 @@ export default function OperatorConsole() {
     })
 
     const signedTxn = txn.signTxn(adminAccount.sk)
-    const { txId } = await algodClient.sendRawTransaction(signedTxn).do()
-    await algosdk.waitForConfirmation(algodClient, txId, 4)
+    const _r3 = await algodClient.sendRawTransaction(signedTxn).do()
+    const txId = (_r3 as any).txid || (_r3 as any).txId
+    await algosdk.waitForConfirmation(algodClient, txId, 8)
     log(`✅ closeEpoch(${currentEpochId}) → ${txId.slice(0, 8)}`)
   }
 
@@ -247,8 +276,9 @@ export default function OperatorConsole() {
     algosdk.assignGroupID(txnGroup)
 
     const signedGroup = txnGroup.map(txn => txn.signTxn(adminAccount.sk))
-    const { txId } = await algodClient.sendRawTransaction(signedGroup).do()
-    await algosdk.waitForConfirmation(algodClient, txId, 4)
+    const _r4 = await algodClient.sendRawTransaction(signedGroup).do()
+    const txId = (_r4 as any).txid || (_r4 as any).txId
+    await algosdk.waitForConfirmation(algodClient, txId, 8)
     log(`✅ depositRevenue(${currentEpochId}, ${revenueAmount}µA) → ${txId.slice(0, 8)}`)
   }
 
@@ -267,15 +297,384 @@ export default function OperatorConsole() {
     })
 
     const signedTxn = txn.signTxn(adminAccount.sk)
-    const { txId } = await algodClient.sendRawTransaction(signedTxn).do()
-    await algosdk.waitForConfirmation(algodClient, txId, 4)
+    const _r5 = await algodClient.sendRawTransaction(signedTxn).do()
+    const txId = (_r5 as any).txid || (_r5 as any).txId
+    await algosdk.waitForConfirmation(algodClient, txId, 8)
     log(`✅ computeEntitlements(${currentEpochId}) → ${txId.slice(0, 8)}`)
   }
+
+  // ── FC helpers ────────────────────────────────────────────────────────────
+  const makeBalBoxName = (address: string): Uint8Array => {
+    const pubKey = algosdk.decodeAddress(address).publicKey
+    const prefix = new TextEncoder().encode('bal:')
+    const key = new Uint8Array(prefix.length + pubKey.length)
+    key.set(prefix)
+    key.set(pubKey, prefix.length)
+    return key
+  }
+
+  const readFCStatus = async () => {
+    try {
+      const appInfo = await algodClient.getApplicationByID(CONFIG.kwTokenAppId).do()
+      const gs: Array<{ key: string; value: { type: number; uint: number; bytes: string } }> =
+        (appInfo.params as any)['global-state'] || (appInfo.params as any).globalState || []
+      const decodeUint = (k: string): bigint => {
+        const entry = gs.find((e: any) => {
+          const decoded = (() => { try { return e.key instanceof Uint8Array ? new TextDecoder().decode(e.key) : atob(e.key) } catch { return null } })()
+          return decoded === k
+        })
+        return entry ? BigInt(entry.value?.uint ?? entry.value?.Uint ?? 0) : 0n
+      }
+      setFcStatus({
+        fcOpen: decodeUint('fcOpen') === 1n,
+        fcFinalized: decodeUint('fcFinalized') === 1n,
+        transfersEnabled: decodeUint('transfersEnabled') === 1n,
+        investorMintedAmount: decodeUint('investorMintedAmount'),
+        totalSupply: decodeUint('totalSupply'),
+        loaded: true,
+      })
+    } catch (err: any) {
+      log(`❌ Failed to read FC status: ${err.message}`)
+    }
+  }
+
+  const closeFCWithAllocation = async () => {
+    await executeAction('closeFinancialClose', async () => {
+      const adminAccount = algosdk.mnemonicToSecretKey(LOCAL_ADMIN_MNEMONIC)
+      const sp = await algodClient.getTransactionParams().do()
+      const installedAcKw = BigInt(fcForm.installedAcKw)
+      const platformKwBps = BigInt(fcForm.platformKwBps)
+      const treasury = fcForm.treasury
+      const selector = new Uint8Array([0x07, 0x42, 0x95, 0x6b])
+      const u64a = new Uint8Array(8); new DataView(u64a.buffer).setBigUint64(0, installedAcKw)
+      const u64b = new Uint8Array(8); new DataView(u64b.buffer).setBigUint64(0, platformKwBps)
+      const addrArg = new Uint8Array([1])
+      const txn = algosdk.makeApplicationCallTxnFromObject({
+        sender: adminAccount.addr,
+        suggestedParams: sp,
+        appIndex: CONFIG.kwTokenAppId,
+        onComplete: algosdk.OnApplicationComplete.NoOpOC,
+        appArgs: [selector, u64a, u64b, addrArg],
+        accounts: [treasury],
+        boxes: [{ appIndex: 0, name: makeBalBoxName(treasury) }],
+      })
+      const signed = txn.signTxn(adminAccount.sk)
+      const _r = await algodClient.sendRawTransaction(signed).do()
+      const txId = (_r as any).txid || (_r as any).txId
+      await algosdk.waitForConfirmation(algodClient, txId, 8)
+      log(`✅ closeFinancialClose → ${txId.slice(0, 8)}`)
+      await readFCStatus()
+    })
+  }
+
+  const finalizeFCSimple = async () => {
+    await executeAction('finalizeFinancialCloseSimple', async () => {
+      const adminAccount = algosdk.mnemonicToSecretKey(LOCAL_ADMIN_MNEMONIC)
+      const sp = await algodClient.getTransactionParams().do()
+      const installedAcKw = BigInt(fcForm.installedAcKw)
+      const platformKwBps = BigInt(fcForm.platformKwBps)
+      const treasury = fcForm.treasury
+      const investor = fcForm.singleInvestor
+      const selector = new Uint8Array([0xe7, 0x26, 0x63, 0x8e])
+      const u64a = new Uint8Array(8); new DataView(u64a.buffer).setBigUint64(0, installedAcKw)
+      const u64b = new Uint8Array(8); new DataView(u64b.buffer).setBigUint64(0, platformKwBps)
+      const addrArg1 = new Uint8Array([1])
+      const addrArg2 = new Uint8Array([2])
+      const txn = algosdk.makeApplicationCallTxnFromObject({
+        sender: adminAccount.addr,
+        suggestedParams: sp,
+        appIndex: CONFIG.kwTokenAppId,
+        onComplete: algosdk.OnApplicationComplete.NoOpOC,
+        appArgs: [selector, u64a, u64b, addrArg1, addrArg2],
+        accounts: [treasury, investor],
+        boxes: [
+          { appIndex: 0, name: makeBalBoxName(treasury) },
+          { appIndex: 0, name: makeBalBoxName(investor) },
+        ],
+      })
+      const signed = txn.signTxn(adminAccount.sk)
+      const _r = await algodClient.sendRawTransaction(signed).do()
+      const txId = (_r as any).txid || (_r as any).txId
+      await algosdk.waitForConfirmation(algodClient, txId, 8)
+      log(`✅ finalizeFinancialCloseSimple → ${txId.slice(0, 8)}`)
+      await readFCStatus()
+    })
+  }
+  // ── End FC helpers ─────────────────────────────────────────────────────────
+
+  // ── Project Approval ────────────────────────────────────────────────────────
+  const refreshPending = () => setPendingSubmissions(projectStore.getPending())
+
+  const approveSubmission = async (sub: ProjectSubmission) => {
+    const f = approvalForms[sub.submissionId] || {}
+    const registryAppId = Number(f.registryAppId)
+    const kwTokenAppId = Number(f.kwTokenAppId)
+    const revenueVaultAppId = Number(f.revenueVaultAppId)
+    const kwhReceiptAppId = Number(f.kwhReceiptAppId)
+    if (!registryAppId || !kwTokenAppId || !revenueVaultAppId || !kwhReceiptAppId) {
+      log('❌ All 4 App IDs are required before approving.')
+      return
+    }
+    await executeAction(`APPROVE_${sub.submissionId}`, async () => {
+      const adminAccount = algosdk.mnemonicToSecretKey(LOCAL_ADMIN_MNEMONIC)
+      const sp = await algodClient.getTransactionParams().do()
+      // ARC-4 selector for init_registry(byte[],uint64,address,uint64,uint64,address)string
+      const selector = new Uint8Array([0x2b, 0xce, 0x98, 0xeb])
+      // ARC-4 byte[]: 2-byte big-endian length prefix + UTF-8 bytes
+      const idBytes = new TextEncoder().encode(sub.displayName)
+      const idLen = new Uint8Array(2)
+      new DataView(idLen.buffer).setUint16(0, idBytes.length)
+      const idArg = new Uint8Array([...idLen, ...idBytes])
+      const kw = new Uint8Array(8); new DataView(kw.buffer).setBigUint64(0, BigInt(Math.round(sub.installedAcKw)))
+      const kwBps = new Uint8Array(8); new DataView(kwBps.buffer).setBigUint64(0, BigInt(sub.platformKwBps))
+      const kwhBps = new Uint8Array(8); new DataView(kwhBps.buffer).setBigUint64(0, BigInt(sub.platformKwhRateBps))
+      const treasuryAddr = sub.treasuryAddress || adminAccount.addr
+      const adminAddr = adminAccount.addr
+      const txn = algosdk.makeApplicationCallTxnFromObject({
+        sender: adminAccount.addr,
+        suggestedParams: sp,
+        appIndex: registryAppId,
+        onComplete: algosdk.OnApplicationComplete.NoOpOC,
+        appArgs: [selector, idArg, kw, new Uint8Array([1]), kwBps, kwhBps, new Uint8Array([2])],
+        accounts: [treasuryAddr, adminAddr],
+      })
+      const signed = txn.signTxn(adminAccount.sk)
+      const _r = await algodClient.sendRawTransaction(signed).do()
+      const txId = (_r as any).txid || (_r as any).txId
+      await algosdk.waitForConfirmation(algodClient, txId, 8)
+      log(`✅ Project approved on-chain: ${sub.displayName} → registry ${registryAppId} (${txId.slice(0, 8)})`)
+      projectStore.approve(sub.submissionId, { registryAppId, kwTokenAppId, revenueVaultAppId, kwhReceiptAppId }, txId)
+      refreshPending()
+      window.dispatchEvent(new CustomEvent('protius:project-approved'))
+    })
+  }
+
+  const rejectSubmission = (sub: ProjectSubmission) => {
+    const note = window.prompt(`Reason for rejecting "${sub.displayName}"?`, '')
+    if (note === null) return
+    projectStore.reject(sub.submissionId, note)
+    refreshPending()
+    log(`❌ Rejected: ${sub.displayName}`)
+  }
+
+  const STATE_LABELS: Record<number, string> = {
+    0: 'DRAFT', 1: 'REGISTERED', 2: 'FUNDED', 3: 'UNDER_CONSTRUCTION',
+    4: 'COMMISSIONING', 5: 'OPERATING', 6: 'SUSPENDED', 7: 'EXITED',
+  }
+
+  // Safely decode a global-state key (handles both base64 string and Uint8Array from algosdk v3)
+  const decodeGsKey = (key: any): string | null => {
+    try {
+      if (key instanceof Uint8Array) return new TextDecoder().decode(key)
+      if (typeof key === 'string') return atob(key)
+    } catch { /* binary key, not a utf8 string */ }
+    return null
+  }
+
+  const readRegistryState = async () => {
+    try {
+      const appInfo = await algodClient.getApplicationByID(selectedRegistryAppId).do()
+      const gs: Array<any> =
+        (appInfo.params as any)['global-state'] || (appInfo.params as any).globalState || []
+      let current = 0
+      for (const kv of gs) {
+        const k = decodeGsKey(kv.key)
+        if (k === 'projectState') {
+          current = Number(kv.value?.uint ?? kv.value?.Uint ?? 0)
+          break
+        }
+      }
+      setRegistryStateInfo({ current, label: STATE_LABELS[current] ?? 'UNKNOWN' })
+    } catch (err: any) {
+      log(`❌ Failed to read registry state: ${err.message}`)
+    }
+  }
+
+  const transitionProjectState = async () => {
+    await executeAction('TRANSITION_STATE', async () => {
+      const admin = algosdk.mnemonicToSecretKey(LOCAL_ADMIN_MNEMONIC)
+      const transMethod = new algosdk.ABIMethod({
+        name: 'transitionState',
+        args: [{ type: 'uint64', name: 'newState' }],
+        returns: { type: 'string' },
+      })
+      const signer = algosdk.makeBasicAccountTransactionSigner(admin)
+      const atc = new algosdk.AtomicTransactionComposer()
+      atc.addMethodCall({
+        appID: selectedRegistryAppId,
+        method: transMethod,
+        methodArgs: [targetState],
+        sender: admin.addr.toString(),
+        signer,
+        suggestedParams: await algodClient.getTransactionParams().do(),
+      })
+      const result = await atc.execute(algodClient, 4)
+      log(`✅ transitionState → ${result.methodResults[0].returnValue} (App ${selectedRegistryAppId})`)
+      await readRegistryState()
+    })
+  }
+
+  const exportSubmissionConfig = (sub: ProjectSubmission) => {
+    const config = {
+      submissionId: sub.submissionId,
+      displayName: sub.displayName,
+      energyType: sub.energyType,
+      location: sub.location,
+      installedAcKw: sub.installedAcKw,
+      platformKwBps: sub.platformKwBps,
+      platformKwhRateBps: sub.platformKwhRateBps,
+      treasuryAddress: sub.treasuryAddress || '',
+      permits: sub.permits || '',
+      description: sub.description || '',
+    }
+    const blob = new Blob([JSON.stringify(config, null, 2)], { type: 'application/json' })
+    const url = URL.createObjectURL(blob)
+    const a = document.createElement('a')
+    a.href = url
+    a.download = `${sub.displayName.replace(/\s+/g, '-').toLowerCase()}-deploy-config.json`
+    a.click()
+    URL.revokeObjectURL(url)
+    log(`⬇️ Exported deploy config for ${sub.displayName}`)
+  }
+
+  const setApprovalField = (id: string, field: string, value: string) =>
+    setApprovalForms(prev => ({ ...prev, [id]: { ...(prev[id] || {}), [field]: value } }))
+
+  // ── Browser-based Deploy & Register ─────────────────────────────────────────
+  const deployAndRegister = async (sub: ProjectSubmission) => {
+    await executeAction(`DEPLOY_${sub.submissionId}`, async () => {
+      const admin = algosdk.mnemonicToSecretKey(LOCAL_ADMIN_MNEMONIC)
+
+      /** Compile TEAL source via algod and return bytes */
+      const compileTeal = async (tealSource: string): Promise<Uint8Array> => {
+        const r = await (algodClient.compile(tealSource) as any).do()
+        return Uint8Array.from(atob(r.result), c => c.charCodeAt(0))
+      }
+
+      /** Deploy one application and fund its account */
+      const deployApp = async (artifact: typeof ARTIFACTS.projectRegistry) => {
+        log(`   Compiling ${artifact.globalInts}u/${artifact.globalBytes}b contract...`)
+        const approval = await compileTeal(artifact.approval)
+        const clear = await compileTeal(artifact.clear)
+        const sp = await algodClient.getTransactionParams().do()
+        const createTxn = algosdk.makeApplicationCreateTxnFromObject({
+          sender: admin.addr,
+          suggestedParams: sp,
+          onComplete: algosdk.OnApplicationComplete.NoOpOC,
+          approvalProgram: approval,
+          clearProgram: clear,
+          numGlobalInts: artifact.globalInts,
+          numGlobalByteSlices: artifact.globalBytes,
+          numLocalInts: artifact.localInts,
+          numLocalByteSlices: artifact.localBytes,
+        })
+        const signedCreate = createTxn.signTxn(admin.sk)
+        const createRes = await algodClient.sendRawTransaction(signedCreate).do()
+        const createTxId = (createRes as any).txid || (createRes as any).txId
+        const createConf = await algosdk.waitForConfirmation(algodClient, createTxId, 8)
+        const appId = Number((createConf as any)['application-index'])
+        const appAddr = algosdk.getApplicationAddress(appId)
+        // Fund the application account
+        const sp2 = await algodClient.getTransactionParams().do()
+        const fundTxn = algosdk.makePaymentTxnWithSuggestedParamsFromObject({
+          sender: admin.addr,
+          receiver: appAddr,
+          amount: artifact.fundAlgo * 1_000_000,
+          suggestedParams: sp2,
+        })
+        const signedFund = fundTxn.signTxn(admin.sk)
+        const fundRes = await algodClient.sendRawTransaction(signedFund).do()
+        const fundTxId = (fundRes as any).txid || (fundRes as any).txId
+        await algosdk.waitForConfirmation(algodClient, fundTxId, 8)
+        log(`   App ${appId} deployed & funded ${artifact.fundAlgo} ALGO`)
+        return { appId, appAddr: appAddr.toString() }
+      }
+
+      log('🚀 [1/4] Deploying ProjectRegistry...')
+      const registry = await deployApp(ARTIFACTS.projectRegistry)
+      log('🚀 [2/4] Deploying KWToken...')
+      const kwToken = await deployApp(ARTIFACTS.kwToken)
+      log('🚀 [3/4] Deploying RevenueVault...')
+      const revenueVault = await deployApp(ARTIFACTS.revenueVault)
+      log('🚀 [4/4] Deploying KWhReceipt...')
+      const kwhReceipt = await deployApp(ARTIFACTS.kwhReceipt)
+
+      // ── setContracts(kwToken, kwhReceipt, revenueVault) ──────────────────
+      log('🔗 Wiring contracts via setContracts...')
+      const sp3 = await algodClient.getTransactionParams().do()
+      const setContractsSel = new Uint8Array([0x85, 0xe0, 0x36, 0x8f])
+      const kwTokenPk = algosdk.decodeAddress(kwToken.appAddr).publicKey
+      const kwhReceiptPk = algosdk.decodeAddress(kwhReceipt.appAddr).publicKey
+      const revenueVaultPk = algosdk.decodeAddress(revenueVault.appAddr).publicKey
+      const setContractsTxn = algosdk.makeApplicationCallTxnFromObject({
+        sender: admin.addr,
+        suggestedParams: sp3,
+        appIndex: registry.appId,
+        onComplete: algosdk.OnApplicationComplete.NoOpOC,
+        appArgs: [setContractsSel, kwTokenPk, kwhReceiptPk, revenueVaultPk],
+        accounts: [kwToken.appAddr, kwhReceipt.appAddr, revenueVault.appAddr],
+      })
+      const signedSC = setContractsTxn.signTxn(admin.sk)
+      const scRes = await algodClient.sendRawTransaction(signedSC).do()
+      const scTxId = (scRes as any).txid || (scRes as any).txId
+      await algosdk.waitForConfirmation(algodClient, scTxId, 8)
+      log(`✅ setContracts OK`)
+
+      // ── init_registry ─────────────────────────────────────────────────────
+      log('📋 Calling init_registry...')
+      const sp4 = await algodClient.getTransactionParams().do()
+      const selector = new Uint8Array([0x2b, 0xce, 0x98, 0xeb])
+      const idBytes = new TextEncoder().encode(sub.displayName)
+      const idLen = new Uint8Array(2)
+      new DataView(idLen.buffer).setUint16(0, idBytes.length)
+      const idArg = new Uint8Array([...idLen, ...idBytes])
+      const kw = new Uint8Array(8); new DataView(kw.buffer).setBigUint64(0, BigInt(Math.round(sub.installedAcKw)))
+      const kwBps = new Uint8Array(8); new DataView(kwBps.buffer).setBigUint64(0, BigInt(sub.platformKwBps))
+      const kwhBps = new Uint8Array(8); new DataView(kwhBps.buffer).setBigUint64(0, BigInt(sub.platformKwhRateBps))
+      const treasuryAddr = sub.treasuryAddress || admin.addr.toString()
+      const adminAddr = admin.addr.toString()
+      const initTxn = algosdk.makeApplicationCallTxnFromObject({
+        sender: admin.addr,
+        suggestedParams: sp4,
+        appIndex: registry.appId,
+        onComplete: algosdk.OnApplicationComplete.NoOpOC,
+        appArgs: [selector, idArg, kw, new Uint8Array([1]), kwBps, kwhBps, new Uint8Array([2])],
+        accounts: [treasuryAddr, adminAddr],
+      })
+      const signedInit = initTxn.signTxn(admin.sk)
+      const initRes = await algodClient.sendRawTransaction(signedInit).do()
+      const initTxId = (initRes as any).txid || (initRes as any).txId
+      await algosdk.waitForConfirmation(algodClient, initTxId, 8)
+      log(`✅ init_registry OK (txId: ${initTxId.slice(0, 8)}...)`)
+
+      // ── Auto-fill form + mark approved ────────────────────────────────────
+      const updates = {
+        registryAppId: String(registry.appId),
+        kwTokenAppId: String(kwToken.appId),
+        revenueVaultAppId: String(revenueVault.appId),
+        kwhReceiptAppId: String(kwhReceipt.appId),
+      }
+      setApprovalForms(prev => ({ ...prev, [sub.submissionId]: updates }))
+      projectStore.approve(sub.submissionId, {
+        registryAppId: registry.appId,
+        kwTokenAppId: kwToken.appId,
+        revenueVaultAppId: revenueVault.appId,
+        kwhReceiptAppId: kwhReceipt.appId,
+      }, initTxId)
+      refreshPending()
+      window.dispatchEvent(new CustomEvent('protius:project-approved'))
+      log(`🎉 All done! ProjectRegistry App ID: ${registry.appId}`)
+    })
+  }
+  // ── End Deploy & Register ───────────────────────────────────────────────────
+
+  // ── End Project Approval ────────────────────────────────────────────────────
 
   // Initial load
   useEffect(() => {
     if (network.connected) {
       readEpochState(currentEpochId)
+      readFCStatus()
     }
   }, [network.connected, currentEpochId])
 
@@ -538,6 +937,265 @@ export default function OperatorConsole() {
 
       <hr />
 
+      {/* Project Approval Queue */}
+      <section>
+        <h2>📥 Project Approval Queue</h2>
+        <p style={{ fontSize: '13px', color: '#555', marginTop: 0 }}>
+          Projects submitted via the Registration form appear here. Use the <strong>Deploy &amp; Register Contracts</strong> button to deploy all 4 contracts and activate a project in one click.
+        </p>
+        <div style={{ background: '#eef6ff', border: '1px solid #b0d0f0', borderRadius: '6px', padding: '12px', marginBottom: '16px', fontSize: '12px' }}>
+          <strong>How to approve a project:</strong>
+          <ol style={{ margin: '6px 0 0 0', paddingLeft: '20px', lineHeight: '1.9' }}>
+            <li><strong>Option A (recommended):</strong> Click the green <strong>Deploy &amp; Register Contracts</strong> button on the submission — deploys all 4 contracts and initialises the registry directly from this page. No terminal needed.</li>
+            <li><strong>Option B (manual):</strong> Deploy the contracts separately, enter the 4 App IDs into the fields, then click <strong>Approve &amp; Initialize On-Chain</strong>.</li>
+          </ol>
+        </div>
+        <button onClick={refreshPending} style={{ marginBottom: '16px', padding: '6px 14px', fontSize: '12px', cursor: 'pointer' }}>🔄 Refresh</button>
+
+        {pendingSubmissions.length === 0 ? (
+          <p style={{ color: '#888', fontStyle: 'italic' }}>No pending submissions.</p>
+        ) : (
+          pendingSubmissions.map(sub => {
+            const f = approvalForms[sub.submissionId] || {}
+            const canApprove = !!(f.registryAppId && f.kwTokenAppId && f.revenueVaultAppId && f.kwhReceiptAppId)
+            return (
+              <div key={sub.submissionId} style={{ border: '1px solid #ddd', borderRadius: '8px', padding: '16px', marginBottom: '16px', background: '#fafafa' }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '12px' }}>
+                  <div>
+                    <div style={{ fontWeight: 700, fontSize: '16px' }}>{sub.displayName}</div>
+                    <div style={{ fontSize: '12px', color: '#666' }}>{sub.energyType} · {sub.location} · Submitted {new Date(sub.submittedAt).toLocaleString()}</div>
+                  </div>
+                  <span style={{ background: '#fff3cd', border: '1px solid #ffc107', borderRadius: '12px', padding: '2px 10px', fontSize: '12px', fontWeight: 600 }}>PENDING</span>
+                </div>
+
+                <table style={{ fontSize: '13px', borderCollapse: 'collapse', width: '100%', marginBottom: '14px' }}>
+                  <tbody>
+                    {[
+                      ['Capacity', `${sub.installedAcKw} kW`],
+                      ['Platform kW Fee', `${sub.platformKwBps} BPS (${(sub.platformKwBps / 100).toFixed(2)}%)`],
+                      ['Platform kWh Rate', `${sub.platformKwhRateBps} BPS`],
+                      ['Treasury', sub.treasuryAddress || '(use admin default)'],
+                      ['Permits', sub.permits || '—'],
+                      ['Description', sub.description || '—'],
+                    ].map(([label, value]) => (
+                      <tr key={label} style={{ borderBottom: '1px solid #eee' }}>
+                        <td style={{ padding: '4px 10px 4px 0', fontWeight: 600, width: '160px', color: '#444' }}>{label}</td>
+                        <td style={{ padding: '4px 0', wordBreak: 'break-all' }}>{value}</td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+
+                <div style={{ background: '#f0f4ff', border: '1px solid #c0d0f0', borderRadius: '6px', padding: '12px', marginBottom: '12px' }}>
+                  <div style={{ fontWeight: 700, fontSize: '13px', marginBottom: '10px' }}>🔢 Enter pre-deployed App IDs</div>
+                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px' }}>
+                    {[
+                      ['registryAppId', 'ProjectRegistry App ID'],
+                      ['kwTokenAppId', 'KWToken App ID'],
+                      ['revenueVaultAppId', 'RevenueVault App ID'],
+                      ['kwhReceiptAppId', 'KWhReceipt App ID'],
+                    ].map(([field, label]) => (
+                      <label key={field} style={{ display: 'flex', flexDirection: 'column', gap: '3px', fontSize: '12px', fontWeight: 600 }}>
+                        {label}
+                        <input
+                          type="number"
+                          value={f[field as keyof typeof f] || ''}
+                          onChange={e => setApprovalField(sub.submissionId, field, e.target.value)}
+                          placeholder="App ID"
+                          style={{ padding: '6px', fontFamily: 'monospace', border: '1px solid #bbb', borderRadius: '4px' }}
+                        />
+                      </label>
+                    ))}
+                  </div>
+                </div>
+
+                {/* One-click Deploy & Register */}
+                <div style={{ background: '#eaf4eb', border: '1px solid #a8d5b0', borderRadius: '6px', padding: '12px', marginBottom: '12px' }}>
+                  <div style={{ fontWeight: 700, fontSize: '13px', marginBottom: '6px' }}>🚀 One-click Deploy</div>
+                  <p style={{ fontSize: '12px', color: '#444', margin: '0 0 10px 0' }}>
+                    Deploys all 4 contracts from the browser, wires them together, and initialises the registry — no terminal required.
+                    The App IDs will be auto-filled below.
+                  </p>
+                  <button
+                    onClick={() => deployAndRegister(sub)}
+                    disabled={!!loading}
+                    style={{
+                      padding: '10px 22px', fontWeight: 700, fontSize: '13px', border: 'none', borderRadius: '6px',
+                      cursor: !loading ? 'pointer' : 'not-allowed',
+                      background: !loading ? '#0a5c1a' : '#888', color: '#fff',
+                    }}
+                  >
+                    {loading === `DEPLOY_${sub.submissionId}` ? '⏳ Deploying… (watch Action Log below)' : '🚀 Deploy & Register Contracts'}
+                  </button>
+                </div>
+
+                <div style={{ display: 'flex', gap: '10px' }}>
+                  <button
+                    onClick={() => approveSubmission(sub)}
+                    disabled={!canApprove || !!loading}
+                    style={{
+                      padding: '10px 20px', fontWeight: 700, fontSize: '13px', border: 'none', borderRadius: '6px', cursor: canApprove && !loading ? 'pointer' : 'not-allowed',
+                      background: canApprove && !loading ? '#1a6b2a' : '#aaa', color: '#fff',
+                    }}
+                  >
+                    {loading === `APPROVE_${sub.submissionId}` ? '⏳ Approving…' : '✅ Approve & Initialize On-Chain'}
+                  </button>
+                  <button
+                    onClick={() => rejectSubmission(sub)}
+                    disabled={!!loading}
+                    style={{ padding: '10px 20px', fontSize: '13px', border: '1px solid #c00', borderRadius: '6px', cursor: 'pointer', background: '#fff', color: '#c00', fontWeight: 600 }}
+                  >
+                    ❌ Reject
+                  </button>
+                  <button
+                    onClick={() => exportSubmissionConfig(sub)}
+                    style={{ padding: '10px 20px', fontSize: '13px', border: '1px solid #0066cc', borderRadius: '6px', cursor: 'pointer', background: '#fff', color: '#0066cc', fontWeight: 600 }}
+                  >
+                    ⬇️ Export Config
+                  </button>
+                </div>
+              </div>
+            )
+          })
+        )}
+      </section>
+
+      <hr />
+
+      {/* Financial Close Management */}
+      <section>
+        <h2>🔒 Financial Close Management</h2>
+        <div style={{ marginBottom: '16px' }}>
+          <strong>KWToken App ID:</strong> {CONFIG.kwTokenAppId}
+          <button
+            onClick={readFCStatus}
+            style={{ marginLeft: '12px', padding: '4px 10px', fontSize: '12px' }}
+            disabled={!!loading}
+          >
+            Refresh FC Status
+          </button>
+        </div>
+
+        {fcStatus.loaded ? (
+          <table style={{ borderCollapse: 'collapse', marginBottom: '16px', width: '100%' }}>
+            <tbody>
+              {[
+                ['FC Open', fcStatus.fcOpen ? '✅ Yes' : '❌ No'],
+                ['FC Finalized', fcStatus.fcFinalized ? '✅ Yes' : '⏳ No'],
+                ['Transfers Enabled', fcStatus.transfersEnabled ? '✅ Yes' : '❌ No'],
+                ['Investor Minted (kW)', fcStatus.investorMintedAmount.toString()],
+                ['Total Supply (kW)', fcStatus.totalSupply.toString()],
+              ].map(([label, value]) => (
+                <tr key={label} style={{ borderBottom: '1px solid #eee' }}>
+                  <td style={{ padding: '6px 12px', fontWeight: 500, width: '220px' }}>{label}</td>
+                  <td style={{ padding: '6px 12px' }}>{value}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        ) : (
+          <p style={{ color: '#666' }}>Loading FC status…</p>
+        )}
+
+        <div style={{ display: 'grid', gap: '8px', maxWidth: '480px', marginBottom: '16px' }}>
+          <label style={{ display: 'flex', flexDirection: 'column', gap: '2px' }}>
+            <span>Installed AC kW</span>
+            <input
+              type="number"
+              value={fcForm.installedAcKw}
+              onChange={e => setFcForm(f => ({ ...f, installedAcKw: e.target.value }))}
+              style={{ padding: '6px', fontFamily: 'monospace' }}
+            />
+          </label>
+          <label style={{ display: 'flex', flexDirection: 'column', gap: '2px' }}>
+            <span>Platform kW BPS</span>
+            <input
+              type="number"
+              value={fcForm.platformKwBps}
+              onChange={e => setFcForm(f => ({ ...f, platformKwBps: e.target.value }))}
+              style={{ padding: '6px', fontFamily: 'monospace' }}
+            />
+          </label>
+          <label style={{ display: 'flex', flexDirection: 'column', gap: '2px' }}>
+            <span>Treasury Address</span>
+            <input
+              type="text"
+              value={fcForm.treasury}
+              onChange={e => setFcForm(f => ({ ...f, treasury: e.target.value }))}
+              style={{ padding: '6px', fontFamily: 'monospace', fontSize: '12px' }}
+            />
+          </label>
+        </div>
+
+        <div style={{ marginBottom: '8px' }}>
+          {fcStatus.loaded && (() => {
+            const expected = BigInt(fcForm.installedAcKw || '0') - BigInt(fcForm.installedAcKw || '0') * BigInt(fcForm.platformKwBps || '0') / 10000n
+            const ok = fcStatus.investorMintedAmount === expected
+            return (
+              <p style={{ fontSize: '13px', color: ok ? '#2a7a2a' : '#9a3a3a' }}>
+                {`closeFinancialClose precondition: investorMinted=${fcStatus.investorMintedAmount} kW, expected=${expected} kW ${ok ? '✅ PASS' : '❌ FAIL'}`}
+              </p>
+            )
+          })()}
+        </div>
+
+        <div style={{ display: 'flex', gap: '12px', flexWrap: 'wrap' }}>
+          <button
+            onClick={closeFCWithAllocation}
+            disabled={!!loading || !fcStatus.fcOpen || fcStatus.fcFinalized}
+            style={{
+              padding: '10px 18px',
+              background: (!loading && fcStatus.fcOpen && !fcStatus.fcFinalized) ? '#1a6b2a' : '#aaa',
+              color: '#fff',
+              border: 'none',
+              borderRadius: '6px',
+              cursor: (!loading && fcStatus.fcOpen && !fcStatus.fcFinalized) ? 'pointer' : 'not-allowed',
+            }}
+          >
+            {loading === 'closeFinancialClose' ? '⏳ Closing…' : '🔒 Close FC (respects invest() allocations)'}
+          </button>
+        </div>
+
+        <details style={{ marginTop: '16px' }}>
+          <summary style={{ cursor: 'pointer', color: '#c05000', fontWeight: 600 }}>
+            ⚠️ Force Close FC (single-investor override — overwrites existing balances)
+          </summary>
+          <div style={{ background: '#fff3e0', border: '1px solid #e6a020', borderRadius: '6px', padding: '12px', marginTop: '8px' }}>
+            <p style={{ fontSize: '13px', color: '#7a4000', marginTop: 0 }}>
+              This calls <code>finalizeFinancialCloseSimple</code>. It ignores existing <code>invest()</code>
+              positions and overwrites both the treasury and investor allocations from scratch.
+              Use only if you want to bypass the investorMintedAmount precondition.
+            </p>
+            <label style={{ display: 'flex', flexDirection: 'column', gap: '2px', maxWidth: '480px', marginBottom: '12px' }}>
+              <span>Single Investor Address</span>
+              <input
+                type="text"
+                value={fcForm.singleInvestor}
+                onChange={e => setFcForm(f => ({ ...f, singleInvestor: e.target.value }))}
+                placeholder="ALGO address of the single investor"
+                style={{ padding: '6px', fontFamily: 'monospace', fontSize: '12px' }}
+              />
+            </label>
+            <button
+              onClick={finalizeFCSimple}
+              disabled={!!loading || !fcStatus.fcOpen || fcStatus.fcFinalized || !fcForm.singleInvestor}
+              style={{
+                padding: '10px 18px',
+                background: (!loading && fcStatus.fcOpen && !fcStatus.fcFinalized && fcForm.singleInvestor) ? '#b83a00' : '#aaa',
+                color: '#fff',
+                border: 'none',
+                borderRadius: '6px',
+                cursor: 'pointer',
+              }}
+            >
+              {loading === 'finalizeFinancialCloseSimple' ? '⏳ Finalizing…' : '⚡ Force Close FC (override)'}
+            </button>
+          </div>
+        </details>
+      </section>
+
+      <hr />
+
       {/* Epoch State */}
       <section>
         <h2>Epoch State</h2>
@@ -727,6 +1385,71 @@ export default function OperatorConsole() {
               {loading === 'COMPUTE_ENTITLEMENTS' ? '⏳ Computing...' : '4. Compute Entitlements'}
             </button>
           </div>
+        </div>
+      </section>
+
+      <hr />
+
+      {/* Project State Machine */}
+      <section>
+        <h2>Project State Machine</h2>
+        <p style={{ fontSize: '12px', color: '#666', marginBottom: '12px' }}>
+          Advance the on-chain projectState. Transitions are enforced by the contract (DRAFT→REGISTERED→FUNDED→…).
+        </p>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '10px', flexWrap: 'wrap' }}>
+          <label style={{ fontSize: '13px', fontWeight: 'bold' }}>Project:</label>
+          <select
+            value={selectedRegistryAppId}
+            onChange={e => { setSelectedRegistryAppId(Number(e.target.value)); setRegistryStateInfo(null) }}
+            style={{ padding: '6px 10px', border: '1px solid #ddd', borderRadius: '4px', fontSize: '13px' }}
+          >
+            {REGISTRY_PROJECTS.map(p => (
+              <option key={p.appId} value={p.appId}>{p.label} (App {p.appId})</option>
+            ))}
+          </select>
+        </div>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '12px', flexWrap: 'wrap' }}>
+          <button
+            onClick={readRegistryState}
+            style={{ padding: '6px 14px', border: '1px solid #ddd', cursor: 'pointer', borderRadius: '4px' }}
+          >
+            🔍 Read Current State
+          </button>
+          {registryStateInfo && (
+            <span style={{ fontFamily: 'monospace', fontSize: '13px', background: '#f0f0f0', padding: '4px 10px', borderRadius: '4px' }}>
+              Current: <strong>{registryStateInfo.current} — {registryStateInfo.label}</strong>
+            </span>
+          )}
+        </div>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginTop: '12px', flexWrap: 'wrap' }}>
+          <label style={{ fontSize: '13px', fontWeight: 'bold' }}>Transition to:</label>
+          <select
+            value={targetState}
+            onChange={e => setTargetState(Number(e.target.value))}
+            style={{ padding: '6px 10px', border: '1px solid #ddd', borderRadius: '4px', fontSize: '13px' }}
+          >
+            <option value={1}>1 — REGISTERED (staking open)</option>
+            <option value={2}>2 — FUNDED (equity raise)</option>
+            <option value={3}>3 — UNDER CONSTRUCTION</option>
+            <option value={4}>4 — COMMISSIONING</option>
+            <option value={5}>5 — OPERATING</option>
+            <option value={6}>6 — SUSPENDED</option>
+          </select>
+          <button
+            onClick={transitionProjectState}
+            disabled={loading !== null}
+            style={{
+              padding: '8px 18px',
+              cursor: loading ? 'not-allowed' : 'pointer',
+              backgroundColor: loading ? '#f5f5f5' : '#e3f2fd',
+              color: loading ? '#999' : '#1565c0',
+              border: '1px solid #90caf9',
+              borderRadius: '4px',
+              fontWeight: 'bold',
+            }}
+          >
+            {loading === 'TRANSITION_STATE' ? '⏳ Transitioning...' : '▶ Execute Transition'}
+          </button>
         </div>
       </section>
 

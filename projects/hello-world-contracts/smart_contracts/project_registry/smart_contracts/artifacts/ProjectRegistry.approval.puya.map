@@ -904,7 +904,7 @@
       "op": "retsub"
     },
     "605": {
-      "subroutine": "project_registry/contract.algo.ts::ProjectRegistry.create[routing]",
+      "subroutine": "smart_contracts/project_registry/contract.algo.ts::ProjectRegistry.create[routing]",
       "params": {},
       "block": "create",
       "stack_in": [],
@@ -1185,7 +1185,7 @@
       "stack_out": []
     },
     "657": {
-      "subroutine": "project_registry/contract.algo.ts::ProjectRegistry.init_registry[routing]",
+      "subroutine": "smart_contracts/project_registry/contract.algo.ts::ProjectRegistry.init_registry[routing]",
       "params": {},
       "block": "init_registry",
       "stack_in": [],
@@ -1797,7 +1797,7 @@
       ]
     },
     "717": {
-      "callsub": "project_registry/contract.algo.ts::ProjectRegistry.onlyAdmin",
+      "callsub": "smart_contracts/project_registry/contract.algo.ts::ProjectRegistry.onlyAdmin",
       "op": "callsub onlyAdmin"
     },
     "720": {
@@ -2432,7 +2432,7 @@
       "stack_out": []
     },
     "816": {
-      "subroutine": "project_registry/contract.algo.ts::ProjectRegistry.setContracts[routing]",
+      "subroutine": "smart_contracts/project_registry/contract.algo.ts::ProjectRegistry.setContracts[routing]",
       "params": {},
       "block": "setContracts",
       "stack_in": [],
@@ -2642,7 +2642,7 @@
       ]
     },
     "840": {
-      "callsub": "project_registry/contract.algo.ts::ProjectRegistry.onlyAdmin",
+      "callsub": "smart_contracts/project_registry/contract.algo.ts::ProjectRegistry.onlyAdmin",
       "op": "callsub onlyAdmin"
     },
     "843": {
@@ -2997,7 +2997,7 @@
       "stack_out": []
     },
     "909": {
-      "subroutine": "project_registry/contract.algo.ts::ProjectRegistry.transitionState[routing]",
+      "subroutine": "smart_contracts/project_registry/contract.algo.ts::ProjectRegistry.transitionState[routing]",
       "params": {},
       "block": "transitionState",
       "stack_in": [],
@@ -6455,7 +6455,7 @@
       ]
     },
     "1426": {
-      "callsub": "project_registry/contract.algo.ts::ProjectRegistry.onlyAdmin",
+      "callsub": "smart_contracts/project_registry/contract.algo.ts::ProjectRegistry.onlyAdmin",
       "op": "callsub onlyAdmin"
     },
     "1429": {
@@ -6627,7 +6627,7 @@
       ]
     },
     "1468": {
-      "callsub": "project_registry/contract.algo.ts::ProjectRegistry.onlyAdmin",
+      "callsub": "smart_contracts/project_registry/contract.algo.ts::ProjectRegistry.onlyAdmin",
       "op": "callsub onlyAdmin"
     },
     "1471": {
@@ -6729,7 +6729,7 @@
       "op": "b transitionState_bool_merge@41"
     },
     "1502": {
-      "subroutine": "project_registry/contract.algo.ts::ProjectRegistry.setOracle[routing]",
+      "subroutine": "smart_contracts/project_registry/contract.algo.ts::ProjectRegistry.setOracle[routing]",
       "params": {},
       "block": "setOracle",
       "stack_in": [],
@@ -6879,7 +6879,7 @@
       ]
     },
     "1519": {
-      "callsub": "project_registry/contract.algo.ts::ProjectRegistry.onlyAdmin",
+      "callsub": "smart_contracts/project_registry/contract.algo.ts::ProjectRegistry.onlyAdmin",
       "op": "callsub onlyAdmin"
     },
     "1522": {
@@ -7073,11 +7073,11 @@
       "stack_out": []
     },
     "1567": {
-      "subroutine": "project_registry/contract.algo.ts::ProjectRegistry.markCOD[routing]",
+      "subroutine": "smart_contracts/project_registry/contract.algo.ts::ProjectRegistry.markCOD[routing]",
       "params": {},
       "block": "markCOD",
       "stack_in": [],
-      "callsub": "project_registry/contract.algo.ts::ProjectRegistry.onlyAdmin",
+      "callsub": "smart_contracts/project_registry/contract.algo.ts::ProjectRegistry.onlyAdmin",
       "op": "callsub onlyAdmin"
     },
     "1570": {
@@ -7261,7 +7261,7 @@
       "stack_out": []
     },
     "1613": {
-      "subroutine": "project_registry/contract.algo.ts::ProjectRegistry.markFCFinalised[routing]",
+      "subroutine": "smart_contracts/project_registry/contract.algo.ts::ProjectRegistry.markFCFinalised[routing]",
       "params": {},
       "block": "markFCFinalised",
       "stack_in": [],
@@ -7558,7 +7558,7 @@
       "stack_out": []
     },
     "1676": {
-      "subroutine": "project_registry/contract.algo.ts::ProjectRegistry.setPlatformKwhRateBps[routing]",
+      "subroutine": "smart_contracts/project_registry/contract.algo.ts::ProjectRegistry.setPlatformKwhRateBps[routing]",
       "params": {},
       "block": "setPlatformKwhRateBps",
       "stack_in": [],
@@ -7633,7 +7633,7 @@
       ]
     },
     "1685": {
-      "callsub": "project_registry/contract.algo.ts::ProjectRegistry.onlyAdmin",
+      "callsub": "smart_contracts/project_registry/contract.algo.ts::ProjectRegistry.onlyAdmin",
       "op": "callsub onlyAdmin"
     },
     "1688": {
@@ -7945,7 +7945,7 @@
       "stack_out": []
     },
     "1759": {
-      "subroutine": "project_registry/contract.algo.ts::ProjectRegistry.setTreasury[routing]",
+      "subroutine": "smart_contracts/project_registry/contract.algo.ts::ProjectRegistry.setTreasury[routing]",
       "params": {},
       "block": "setTreasury",
       "stack_in": [],
@@ -8011,7 +8011,7 @@
       ]
     },
     "1767": {
-      "callsub": "project_registry/contract.algo.ts::ProjectRegistry.onlyAdmin",
+      "callsub": "smart_contracts/project_registry/contract.algo.ts::ProjectRegistry.onlyAdmin",
       "op": "callsub onlyAdmin"
     },
     "1770": {
@@ -8164,7 +8164,7 @@
       "stack_out": []
     },
     "1813": {
-      "subroutine": "project_registry/contract.algo.ts::ProjectRegistry.updateAdmin[routing]",
+      "subroutine": "smart_contracts/project_registry/contract.algo.ts::ProjectRegistry.updateAdmin[routing]",
       "params": {},
       "block": "updateAdmin",
       "stack_in": [],
@@ -8230,7 +8230,7 @@
       ]
     },
     "1821": {
-      "callsub": "project_registry/contract.algo.ts::ProjectRegistry.onlyAdmin",
+      "callsub": "smart_contracts/project_registry/contract.algo.ts::ProjectRegistry.onlyAdmin",
       "op": "callsub onlyAdmin"
     },
     "1824": {
@@ -8316,7 +8316,7 @@
       "stack_out": []
     },
     "1857": {
-      "subroutine": "project_registry/contract.algo.ts::ProjectRegistry.updateOperator[routing]",
+      "subroutine": "smart_contracts/project_registry/contract.algo.ts::ProjectRegistry.updateOperator[routing]",
       "params": {},
       "block": "updateOperator",
       "stack_in": [],
@@ -8382,7 +8382,7 @@
       ]
     },
     "1865": {
-      "callsub": "project_registry/contract.algo.ts::ProjectRegistry.onlyAdmin",
+      "callsub": "smart_contracts/project_registry/contract.algo.ts::ProjectRegistry.onlyAdmin",
       "op": "callsub onlyAdmin"
     },
     "1868": {
@@ -8468,7 +8468,7 @@
       "stack_out": []
     },
     "1904": {
-      "subroutine": "project_registry/contract.algo.ts::ProjectRegistry.getProjectId[routing]",
+      "subroutine": "smart_contracts/project_registry/contract.algo.ts::ProjectRegistry.getProjectId[routing]",
       "params": {},
       "block": "getProjectId",
       "stack_in": [],
@@ -8614,7 +8614,7 @@
       "stack_out": []
     },
     "1923": {
-      "subroutine": "project_registry/contract.algo.ts::ProjectRegistry.getInstalledAcKw[routing]",
+      "subroutine": "smart_contracts/project_registry/contract.algo.ts::ProjectRegistry.getInstalledAcKw[routing]",
       "params": {},
       "block": "getInstalledAcKw",
       "stack_in": [],
@@ -8709,7 +8709,7 @@
       "stack_out": []
     },
     "1935": {
-      "subroutine": "project_registry/contract.algo.ts::ProjectRegistry.getTreasury[routing]",
+      "subroutine": "smart_contracts/project_registry/contract.algo.ts::ProjectRegistry.getTreasury[routing]",
       "params": {},
       "block": "getTreasury",
       "stack_in": [],
@@ -8795,7 +8795,7 @@
       "stack_out": []
     },
     "1945": {
-      "subroutine": "project_registry/contract.algo.ts::ProjectRegistry.getPlatformKwBps[routing]",
+      "subroutine": "smart_contracts/project_registry/contract.algo.ts::ProjectRegistry.getPlatformKwBps[routing]",
       "params": {},
       "block": "getPlatformKwBps",
       "stack_in": [],
@@ -8890,7 +8890,7 @@
       "stack_out": []
     },
     "1957": {
-      "subroutine": "project_registry/contract.algo.ts::ProjectRegistry.getPlatformKwhRateBps[routing]",
+      "subroutine": "smart_contracts/project_registry/contract.algo.ts::ProjectRegistry.getPlatformKwhRateBps[routing]",
       "params": {},
       "block": "getPlatformKwhRateBps",
       "stack_in": [],
@@ -8985,7 +8985,7 @@
       "stack_out": []
     },
     "1969": {
-      "subroutine": "project_registry/contract.algo.ts::ProjectRegistry.isCOD[routing]",
+      "subroutine": "smart_contracts/project_registry/contract.algo.ts::ProjectRegistry.isCOD[routing]",
       "params": {},
       "block": "isCOD",
       "stack_in": [],
@@ -9080,7 +9080,7 @@
       "stack_out": []
     },
     "1980": {
-      "subroutine": "project_registry/contract.algo.ts::ProjectRegistry.isFCFinalised[routing]",
+      "subroutine": "smart_contracts/project_registry/contract.algo.ts::ProjectRegistry.isFCFinalised[routing]",
       "params": {},
       "block": "isFCFinalised",
       "stack_in": [],
@@ -9175,7 +9175,7 @@
       "stack_out": []
     },
     "1992": {
-      "subroutine": "project_registry/contract.algo.ts::ProjectRegistry.isOracle[routing]",
+      "subroutine": "smart_contracts/project_registry/contract.algo.ts::ProjectRegistry.isOracle[routing]",
       "params": {},
       "block": "isOracle",
       "stack_in": [],
@@ -9409,7 +9409,7 @@
       "op": "b isOracle_ternary_merge@4"
     },
     "2023": {
-      "subroutine": "project_registry/contract.algo.ts::ProjectRegistry.getKWToken[routing]",
+      "subroutine": "smart_contracts/project_registry/contract.algo.ts::ProjectRegistry.getKWToken[routing]",
       "params": {},
       "block": "getKWToken",
       "stack_in": [],
@@ -9495,7 +9495,7 @@
       "stack_out": []
     },
     "2034": {
-      "subroutine": "project_registry/contract.algo.ts::ProjectRegistry.getKWhReceipt[routing]",
+      "subroutine": "smart_contracts/project_registry/contract.algo.ts::ProjectRegistry.getKWhReceipt[routing]",
       "params": {},
       "block": "getKWhReceipt",
       "stack_in": [],
@@ -9581,7 +9581,7 @@
       "stack_out": []
     },
     "2045": {
-      "subroutine": "project_registry/contract.algo.ts::ProjectRegistry.getRevenueVault[routing]",
+      "subroutine": "smart_contracts/project_registry/contract.algo.ts::ProjectRegistry.getRevenueVault[routing]",
       "params": {},
       "block": "getRevenueVault",
       "stack_in": [],
@@ -9667,7 +9667,7 @@
       "stack_out": []
     },
     "2056": {
-      "subroutine": "project_registry/contract.algo.ts::ProjectRegistry.getProjectState[routing]",
+      "subroutine": "smart_contracts/project_registry/contract.algo.ts::ProjectRegistry.getProjectState[routing]",
       "params": {},
       "block": "getProjectState",
       "stack_in": [],
@@ -9762,7 +9762,7 @@
       "stack_out": []
     },
     "2067": {
-      "subroutine": "project_registry/contract.algo.ts::ProjectRegistry.getStateEnteredAt[routing]",
+      "subroutine": "smart_contracts/project_registry/contract.algo.ts::ProjectRegistry.getStateEnteredAt[routing]",
       "params": {},
       "block": "getStateEnteredAt",
       "stack_in": [],
@@ -9857,7 +9857,7 @@
       "stack_out": []
     },
     "2079": {
-      "subroutine": "project_registry/contract.algo.ts::ProjectRegistry.getLastStateTransition[routing]",
+      "subroutine": "smart_contracts/project_registry/contract.algo.ts::ProjectRegistry.getLastStateTransition[routing]",
       "params": {},
       "block": "getLastStateTransition",
       "stack_in": [],
@@ -9952,7 +9952,7 @@
       "stack_out": []
     },
     "2091": {
-      "subroutine": "project_registry/contract.algo.ts::ProjectRegistry.getOperator[routing]",
+      "subroutine": "smart_contracts/project_registry/contract.algo.ts::ProjectRegistry.getOperator[routing]",
       "params": {},
       "block": "getOperator",
       "stack_in": [],
@@ -10038,7 +10038,7 @@
       "stack_out": []
     },
     "2102": {
-      "subroutine": "project_registry/contract.algo.ts::ProjectRegistry.isOperational[routing]",
+      "subroutine": "smart_contracts/project_registry/contract.algo.ts::ProjectRegistry.isOperational[routing]",
       "params": {},
       "block": "isOperational",
       "stack_in": [],
@@ -10271,7 +10271,7 @@
       "op": "b isOperational_bool_merge@5"
     },
     "2135": {
-      "subroutine": "project_registry/contract.algo.ts::ProjectRegistry.onlyAdmin",
+      "subroutine": "smart_contracts/project_registry/contract.algo.ts::ProjectRegistry.onlyAdmin",
       "params": {},
       "block": "onlyAdmin",
       "stack_in": [],

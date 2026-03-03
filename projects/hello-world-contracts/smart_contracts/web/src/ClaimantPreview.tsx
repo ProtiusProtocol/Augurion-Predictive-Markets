@@ -1,14 +1,6 @@
 import { useState, useEffect } from 'react'
 import algosdk from 'algosdk'
-
-// Hardcoded config - matches deployed localnet contracts
-const CONFIG = {
-  algodServer: 'http://127.0.0.1',
-  algodPort: 4001,
-  algodToken: 'a'.repeat(64),
-  kwTokenAppId: 1003,
-  revenueVaultAppId: 1005,
-}
+import { CONFIG } from './config'
 
 interface ClaimantState {
   address: string

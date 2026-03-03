@@ -1,0 +1,2040 @@
+#pragma version 11
+#pragma typetrack false
+
+// @algorandfoundation/algorand-typescript/arc4/index.d.ts::Contract.approvalProgram() -> uint64:
+main:
+    intcblock 0 1 8 32 10000
+    bytecblock 0x151f7c75 "totalSupply" "fcFinalized" "fcOpen" "investorMintedAmount" "transfersEnabled" "currentSnapshotId" "registry" "treasuryMinted" "revenueVault" "admin" "tokenName" "tokenSymbol" "allow:" 0x30313233343536373839 "epoch:" "supply:" "snap:" "bal:"
+    txn ApplicationID
+    bnz main_after_if_else@2
+    // kw_token/contract.algo.ts:29
+    // registry = GlobalState<Account>({ initialValue: Global.zeroAddress })
+    bytec 7 // "registry"
+    global ZeroAddress
+    app_global_put
+    // kw_token/contract.algo.ts:30
+    // tokenName = GlobalState<bytes>({ initialValue: Bytes('') })
+    bytec 11 // "tokenName"
+    pushbytes ""
+    app_global_put
+    // kw_token/contract.algo.ts:31
+    // tokenSymbol = GlobalState<bytes>({ initialValue: Bytes('') })
+    bytec 12 // "tokenSymbol"
+    pushbytes ""
+    app_global_put
+    // kw_token/contract.algo.ts:34
+    // totalSupply = GlobalState<uint64>({ initialValue: Uint64(0) })
+    bytec_1 // "totalSupply"
+    intc_0 // 0
+    app_global_put
+    // kw_token/contract.algo.ts:37
+    // fcFinalized = GlobalState<uint64>({ initialValue: Uint64(0) }) // 0=false, 1=true
+    bytec_2 // "fcFinalized"
+    intc_0 // 0
+    app_global_put
+    // kw_token/contract.algo.ts:38
+    // fcOpen = GlobalState<uint64>({ initialValue: Uint64(1) }) // 1=true until closed
+    bytec_3 // "fcOpen"
+    intc_1 // 1
+    app_global_put
+    // kw_token/contract.algo.ts:39
+    // treasuryMinted = GlobalState<uint64>({ initialValue: Uint64(0) })
+    bytec 8 // "treasuryMinted"
+    intc_0 // 0
+    app_global_put
+    // kw_token/contract.algo.ts:40
+    // investorMintedAmount = GlobalState<uint64>({ initialValue: Uint64(0) })
+    bytec 4 // "investorMintedAmount"
+    intc_0 // 0
+    app_global_put
+    // kw_token/contract.algo.ts:43
+    // revenueVault = GlobalState<Account>({ initialValue: Global.zeroAddress })
+    bytec 9 // "revenueVault"
+    global ZeroAddress
+    app_global_put
+    // kw_token/contract.algo.ts:46
+    // currentSnapshotId = GlobalState<uint64>({ initialValue: Uint64(0) })
+    bytec 6 // "currentSnapshotId"
+    intc_0 // 0
+    app_global_put
+    // kw_token/contract.algo.ts:49
+    // admin = GlobalState<Account>({ initialValue: Txn.sender })
+    bytec 10 // "admin"
+    txn Sender
+    app_global_put
+    // kw_token/contract.algo.ts:50
+    // transfersEnabled = GlobalState<uint64>({ initialValue: Uint64(0) }) // enabled post-FC
+    bytec 5 // "transfersEnabled"
+    intc_0 // 0
+    app_global_put
+
+main_after_if_else@2:
+    // kw_token/contract.algo.ts:24
+    // export class KWToken extends Contract {
+    txn NumAppArgs
+    bz main___algots__.defaultCreate@35
+    txn OnCompletion
+    !
+    assert // OnCompletion must be NoOp
+    txn ApplicationID
+    assert
+    pushbytess 0x4c5c61ba 0x46393808 0x7b78bbc1 0xe726638e 0xc88a6e40 0x0742956b 0xb111c474 0xe31ab5ff 0x3e66c8b2 0xbf2dd5af 0x6c1ecf24 0x687dd43d 0xe7a4012e 0x9a8a6bdd 0x6787bdeb 0x0ecad8d0 0x46727f28 0x17050abd 0x467bc7a4 0x7d3b6d4f 0xce3372fe 0x0f9f079e 0x6999303c 0x78428bdc 0xda674b1f 0xd4d15975 // method "create()void", method "initToken(address,byte[],byte[])string", method "invest()string", method "finalizeFinancialCloseSimple(uint64,uint64,address,address)string", method "mintAllocation(address,uint64)string", method "closeFinancialClose(uint64,uint64,address)string", method "setRevenueVault(address)string", method "toggleTransfers(uint64)string", method "updateAdmin(address)string", method "snapshotEpoch(uint64)string", method "transfer(address,uint64)string", method "approve(address,uint64)string", method "transferFrom(address,address,uint64)string", method "getName()byte[]", method "getSymbol()byte[]", method "getDecimals()uint64", method "getTotalSupply()uint64", method "balanceOf(address)uint64", method "allowance(address,address)uint64", method "getRegistry()address", method "getRevenueVault()address", method "isFinancialCloseFinalized()uint64", method "transfersEnabledStatus()uint64", method "snapshotIdForEpoch(uint64)uint64", method "balanceOfAt(address,uint64)uint64", method "totalSupplyAt(uint64)uint64"
+    txna ApplicationArgs 0
+    match create initToken invest finalizeFinancialCloseSimple mintAllocation closeFinancialClose setRevenueVault toggleTransfers updateAdmin snapshotEpoch transfer approve transferFrom getName getSymbol main_getDecimals_route@21 getTotalSupply balanceOf allowance getRegistry getRevenueVault isFinancialCloseFinalized transfersEnabledStatus snapshotIdForEpoch balanceOfAt totalSupplyAt
+    err
+
+main_getDecimals_route@21:
+    // kw_token/contract.algo.ts:492
+    // getDecimals(): uint64 { return Uint64(0) } // SSOT: integral kW
+    pushbytes 0x151f7c750000000000000000
+    log
+    intc_1 // 1
+    return
+
+main___algots__.defaultCreate@35:
+    // kw_token/contract.algo.ts:24
+    // export class KWToken extends Contract {
+    txn OnCompletion
+    !
+    txn ApplicationID
+    !
+    &&
+    assert // OnCompletion must be NoOp && can only call when creating
+    intc_1 // 1
+    return
+
+
+// puya-ts::itoa(i: uint64) -> bytes:
+itoa:
+    proto 1 1
+    frame_dig -1
+    pushint 10 // 10
+    <
+    bz itoa_else_body@2
+    bytec 14 // 0x30313233343536373839
+    frame_dig -1
+    intc_1 // 1
+    extract3
+    retsub
+
+itoa_else_body@2:
+    frame_dig -1
+    pushint 10 // 10
+    /
+    callsub itoa
+    frame_dig -1
+    pushint 10 // 10
+    %
+    bytec 14 // 0x30313233343536373839
+    swap
+    intc_1 // 1
+    extract3
+    concat
+    retsub
+
+
+// kw_token/contract.algo.ts::KWToken.create[routing]() -> void:
+create:
+    // kw_token/contract.algo.ts:49
+    // admin = GlobalState<Account>({ initialValue: Txn.sender })
+    bytec 10 // "admin"
+    // kw_token/contract.algo.ts:121
+    // this.admin.value = Txn.sender
+    txn Sender
+    app_global_put
+    // kw_token/contract.algo.ts:38
+    // fcOpen = GlobalState<uint64>({ initialValue: Uint64(1) }) // 1=true until closed
+    bytec_3 // "fcOpen"
+    // kw_token/contract.algo.ts:122
+    // this.fcOpen.value = Uint64(1)
+    intc_1 // 1
+    app_global_put
+    // kw_token/contract.algo.ts:37
+    // fcFinalized = GlobalState<uint64>({ initialValue: Uint64(0) }) // 0=false, 1=true
+    bytec_2 // "fcFinalized"
+    // kw_token/contract.algo.ts:123
+    // this.fcFinalized.value = Uint64(0)
+    intc_0 // 0
+    app_global_put
+    // kw_token/contract.algo.ts:50
+    // transfersEnabled = GlobalState<uint64>({ initialValue: Uint64(0) }) // enabled post-FC
+    bytec 5 // "transfersEnabled"
+    // kw_token/contract.algo.ts:124
+    // this.transfersEnabled.value = Uint64(0) // disabled until FC
+    intc_0 // 0
+    app_global_put
+    // kw_token/contract.algo.ts:34
+    // totalSupply = GlobalState<uint64>({ initialValue: Uint64(0) })
+    bytec_1 // "totalSupply"
+    // kw_token/contract.algo.ts:125
+    // this.totalSupply.value = Uint64(0)
+    intc_0 // 0
+    app_global_put
+    // kw_token/contract.algo.ts:46
+    // currentSnapshotId = GlobalState<uint64>({ initialValue: Uint64(0) })
+    bytec 6 // "currentSnapshotId"
+    // kw_token/contract.algo.ts:126
+    // this.currentSnapshotId.value = Uint64(0)
+    intc_0 // 0
+    app_global_put
+    // kw_token/contract.algo.ts:39
+    // treasuryMinted = GlobalState<uint64>({ initialValue: Uint64(0) })
+    bytec 8 // "treasuryMinted"
+    // kw_token/contract.algo.ts:127
+    // this.treasuryMinted.value = Uint64(0)
+    intc_0 // 0
+    app_global_put
+    // kw_token/contract.algo.ts:40
+    // investorMintedAmount = GlobalState<uint64>({ initialValue: Uint64(0) })
+    bytec 4 // "investorMintedAmount"
+    // kw_token/contract.algo.ts:128
+    // this.investorMintedAmount.value = Uint64(0)
+    intc_0 // 0
+    app_global_put
+    // kw_token/contract.algo.ts:120
+    // create(): void {
+    intc_1 // 1
+    return
+
+
+// kw_token/contract.algo.ts::KWToken.initToken[routing]() -> void:
+initToken:
+    // kw_token/contract.algo.ts:135
+    // initToken(registry: Account, name: bytes, symbol: bytes): string {
+    txna ApplicationArgs 1
+    dup
+    len
+    intc_3 // 32
+    ==
+    assert // invalid number of bytes for arc4.static_array<arc4.uint8, 32>
+    txna ApplicationArgs 2
+    dup
+    intc_0 // 0
+    extract_uint16 // on error: invalid array length header
+    pushint 2 // 2
+    +
+    dig 1
+    len
+    ==
+    assert // invalid number of bytes for arc4.dynamic_array<arc4.uint8>
+    extract 2 0
+    txna ApplicationArgs 3
+    dup
+    intc_0 // 0
+    extract_uint16 // on error: invalid array length header
+    pushint 2 // 2
+    +
+    dig 1
+    len
+    ==
+    assert // invalid number of bytes for arc4.dynamic_array<arc4.uint8>
+    extract 2 0
+    // kw_token/contract.algo.ts:136
+    // this.onlyAdmin()
+    callsub onlyAdmin
+    // kw_token/contract.algo.ts:137
+    // assert(this.registry.value === Global.zeroAddress, 'AlreadyInitialized')
+    intc_0 // 0
+    // kw_token/contract.algo.ts:29
+    // registry = GlobalState<Account>({ initialValue: Global.zeroAddress })
+    bytec 7 // "registry"
+    // kw_token/contract.algo.ts:137
+    // assert(this.registry.value === Global.zeroAddress, 'AlreadyInitialized')
+    app_global_get_ex
+    assert // check GlobalState exists
+    global ZeroAddress
+    ==
+    assert // AlreadyInitialized
+    // kw_token/contract.algo.ts:138
+    // assert(registry !== Global.zeroAddress, 'InvalidAddress')
+    dig 2
+    global ZeroAddress
+    !=
+    assert // InvalidAddress
+    // kw_token/contract.algo.ts:29
+    // registry = GlobalState<Account>({ initialValue: Global.zeroAddress })
+    bytec 7 // "registry"
+    // kw_token/contract.algo.ts:140
+    // this.registry.value = registry
+    uncover 3
+    app_global_put
+    // kw_token/contract.algo.ts:30
+    // tokenName = GlobalState<bytes>({ initialValue: Bytes('') })
+    bytec 11 // "tokenName"
+    // kw_token/contract.algo.ts:141
+    // this.tokenName.value = name
+    uncover 2
+    app_global_put
+    // kw_token/contract.algo.ts:31
+    // tokenSymbol = GlobalState<bytes>({ initialValue: Bytes('') })
+    bytec 12 // "tokenSymbol"
+    // kw_token/contract.algo.ts:142
+    // this.tokenSymbol.value = symbol
+    swap
+    app_global_put
+    // kw_token/contract.algo.ts:135
+    // initToken(registry: Account, name: bytes, symbol: bytes): string {
+    pushbytes 0x151f7c750011546f6b656e20696e697469616c697a6564
+    log
+    intc_1 // 1
+    return
+
+
+// kw_token/contract.algo.ts::KWToken.invest[routing]() -> void:
+invest:
+    // kw_token/contract.algo.ts:162
+    // assert(this.fcOpen.value === Uint64(1), 'InvestmentClosed')
+    intc_0 // 0
+    // kw_token/contract.algo.ts:38
+    // fcOpen = GlobalState<uint64>({ initialValue: Uint64(1) }) // 1=true until closed
+    bytec_3 // "fcOpen"
+    // kw_token/contract.algo.ts:162
+    // assert(this.fcOpen.value === Uint64(1), 'InvestmentClosed')
+    app_global_get_ex
+    assert // check GlobalState exists
+    intc_1 // 1
+    ==
+    assert // InvestmentClosed
+    // kw_token/contract.algo.ts:163
+    // assert(this.fcFinalized.value === Uint64(0), 'FCAlreadyFinalized')
+    intc_0 // 0
+    // kw_token/contract.algo.ts:37
+    // fcFinalized = GlobalState<uint64>({ initialValue: Uint64(0) }) // 0=false, 1=true
+    bytec_2 // "fcFinalized"
+    // kw_token/contract.algo.ts:163
+    // assert(this.fcFinalized.value === Uint64(0), 'FCAlreadyFinalized')
+    app_global_get_ex
+    assert // check GlobalState exists
+    !
+    assert // FCAlreadyFinalized
+    // kw_token/contract.algo.ts:166
+    // assert(Txn.groupIndex === Uint64(1), 'App call must be second transaction in group')
+    txn GroupIndex
+    intc_1 // 1
+    ==
+    assert // App call must be second transaction in group
+    // kw_token/contract.algo.ts:169
+    // const paymentTxn = gtxn.PaymentTxn(0)
+    intc_0 // 0
+    gtxns TypeEnum
+    intc_1 // pay
+    ==
+    assert // transaction type is pay
+    intc_0 // 0
+    // kw_token/contract.algo.ts:172
+    // assert(paymentTxn.sender === Txn.sender, 'Payment sender mismatch')
+    gtxns Sender
+    dup
+    txn Sender
+    ==
+    assert // Payment sender mismatch
+    // kw_token/contract.algo.ts:169
+    // const paymentTxn = gtxn.PaymentTxn(0)
+    intc_0 // 0
+    // kw_token/contract.algo.ts:173
+    // assert(paymentTxn.receiver === Global.currentApplicationAddress, 'PaymentMustGoToContract')
+    gtxns Receiver
+    global CurrentApplicationAddress
+    ==
+    assert // PaymentMustGoToContract
+    // kw_token/contract.algo.ts:169
+    // const paymentTxn = gtxn.PaymentTxn(0)
+    intc_0 // 0
+    // kw_token/contract.algo.ts:174
+    // assert(paymentTxn.amount > Uint64(0), 'ZeroPayment')
+    gtxns Amount
+    dup
+    assert // ZeroPayment
+    // kw_token/contract.algo.ts:179
+    // const kwTokens: uint64 = paymentTxn.amount / Uint64(100_000)
+    dup
+    pushint 100000 // 100000
+    /
+    // kw_token/contract.algo.ts:180
+    // assert(kwTokens > Uint64(0), 'InvestmentTooSmall')
+    dup
+    assert // InvestmentTooSmall
+    // kw_token/contract.algo.ts:184
+    // const currentBal = this.getBalance(investor)
+    dig 2
+    callsub getBalance
+    // kw_token/contract.algo.ts:185
+    // this.setBalance(investor, currentBal + kwTokens)
+    dig 1
+    +
+    uncover 3
+    swap
+    callsub setBalance
+    // kw_token/contract.algo.ts:188
+    // this.investorMintedAmount.value = this.investorMintedAmount.value + kwTokens
+    intc_0 // 0
+    // kw_token/contract.algo.ts:40
+    // investorMintedAmount = GlobalState<uint64>({ initialValue: Uint64(0) })
+    bytec 4 // "investorMintedAmount"
+    // kw_token/contract.algo.ts:188
+    // this.investorMintedAmount.value = this.investorMintedAmount.value + kwTokens
+    app_global_get_ex
+    assert // check GlobalState exists
+    dig 1
+    +
+    // kw_token/contract.algo.ts:40
+    // investorMintedAmount = GlobalState<uint64>({ initialValue: Uint64(0) })
+    bytec 4 // "investorMintedAmount"
+    // kw_token/contract.algo.ts:188
+    // this.investorMintedAmount.value = this.investorMintedAmount.value + kwTokens
+    swap
+    app_global_put
+    // kw_token/contract.algo.ts:191
+    // this.totalSupply.value = this.totalSupply.value + kwTokens
+    intc_0 // 0
+    // kw_token/contract.algo.ts:34
+    // totalSupply = GlobalState<uint64>({ initialValue: Uint64(0) })
+    bytec_1 // "totalSupply"
+    // kw_token/contract.algo.ts:191
+    // this.totalSupply.value = this.totalSupply.value + kwTokens
+    app_global_get_ex
+    assert // check GlobalState exists
+    dig 1
+    +
+    // kw_token/contract.algo.ts:34
+    // totalSupply = GlobalState<uint64>({ initialValue: Uint64(0) })
+    bytec_1 // "totalSupply"
+    // kw_token/contract.algo.ts:191
+    // this.totalSupply.value = this.totalSupply.value + kwTokens
+    swap
+    app_global_put
+    // kw_token/contract.algo.ts:193
+    // return `Invested ${paymentTxn.amount} microALGO, received ${kwTokens} kW`
+    swap
+    callsub itoa
+    pushbytes "Invested "
+    swap
+    concat
+    pushbytes " microALGO, received "
+    concat
+    swap
+    callsub itoa
+    concat
+    pushbytes " kW"
+    concat
+    // kw_token/contract.algo.ts:160
+    // invest(): string {
+    dup
+    len
+    itob
+    extract 6 2
+    swap
+    concat
+    bytec_0 // 0x151f7c75
+    swap
+    concat
+    log
+    intc_1 // 1
+    return
+
+
+// kw_token/contract.algo.ts::KWToken.finalizeFinancialCloseSimple[routing]() -> void:
+finalizeFinancialCloseSimple:
+    // kw_token/contract.algo.ts:213
+    // finalizeFinancialCloseSimple(installedAcKw: uint64, platformKwBps: uint64, treasury: Account, investorAddress: Account): string {
+    txna ApplicationArgs 1
+    dup
+    len
+    intc_2 // 8
+    ==
+    assert // invalid number of bytes for arc4.uint64
+    btoi
+    dup
+    txna ApplicationArgs 2
+    dup
+    len
+    intc_2 // 8
+    ==
+    assert // invalid number of bytes for arc4.uint64
+    btoi
+    txna ApplicationArgs 3
+    dup
+    cover 3
+    dup
+    len
+    intc_3 // 32
+    ==
+    assert // invalid number of bytes for arc4.static_array<arc4.uint8, 32>
+    txna ApplicationArgs 4
+    dup
+    cover 4
+    dup
+    len
+    intc_3 // 32
+    ==
+    assert // invalid number of bytes for arc4.static_array<arc4.uint8, 32>
+    // kw_token/contract.algo.ts:214
+    // this.onlyAdmin()
+    callsub onlyAdmin
+    // kw_token/contract.algo.ts:215
+    // assert(this.fcFinalized.value === Uint64(0), 'FinancialCloseAlreadyFinalized')
+    intc_0 // 0
+    // kw_token/contract.algo.ts:37
+    // fcFinalized = GlobalState<uint64>({ initialValue: Uint64(0) }) // 0=false, 1=true
+    bytec_2 // "fcFinalized"
+    // kw_token/contract.algo.ts:215
+    // assert(this.fcFinalized.value === Uint64(0), 'FinancialCloseAlreadyFinalized')
+    app_global_get_ex
+    assert // check GlobalState exists
+    !
+    assert // FinancialCloseAlreadyFinalized
+    // kw_token/contract.algo.ts:216
+    // assert(this.fcOpen.value === Uint64(1), 'MintingClosed')
+    intc_0 // 0
+    // kw_token/contract.algo.ts:38
+    // fcOpen = GlobalState<uint64>({ initialValue: Uint64(1) }) // 1=true until closed
+    bytec_3 // "fcOpen"
+    // kw_token/contract.algo.ts:216
+    // assert(this.fcOpen.value === Uint64(1), 'MintingClosed')
+    app_global_get_ex
+    assert // check GlobalState exists
+    intc_1 // 1
+    ==
+    assert // MintingClosed
+    // kw_token/contract.algo.ts:217
+    // assert(this.registry.value !== Global.zeroAddress, 'InvalidAddress')
+    intc_0 // 0
+    // kw_token/contract.algo.ts:29
+    // registry = GlobalState<Account>({ initialValue: Global.zeroAddress })
+    bytec 7 // "registry"
+    // kw_token/contract.algo.ts:217
+    // assert(this.registry.value !== Global.zeroAddress, 'InvalidAddress')
+    app_global_get_ex
+    assert // check GlobalState exists
+    global ZeroAddress
+    !=
+    assert // InvalidAddress
+    // kw_token/contract.algo.ts:220
+    // assert(installedAcKw > Uint64(0), 'InstalledAcKwInvalid')
+    dig 3
+    assert // InstalledAcKwInvalid
+    // kw_token/contract.algo.ts:221
+    // assert(platformKwBps <= Uint64(10_000), 'BpsOutOfRange')
+    dig 2
+    intc 4 // 10000
+    <=
+    assert // BpsOutOfRange
+    // kw_token/contract.algo.ts:222
+    // assert(treasury !== Global.zeroAddress, 'InvalidAddress')
+    global ZeroAddress
+    uncover 2
+    !=
+    assert // InvalidAddress
+    // kw_token/contract.algo.ts:223
+    // assert(investorAddress !== Global.zeroAddress, 'InvalidAddress')
+    global ZeroAddress
+    !=
+    assert // InvalidAddress
+    // kw_token/contract.algo.ts:227
+    // const treasuryKw: uint64 = (installedAcKw * platformKwBps) / Uint64(10_000)
+    dig 1
+    *
+    intc 4 // 10000
+    /
+    dup
+    cover 2
+    // kw_token/contract.algo.ts:228
+    // const investorKw: uint64 = installedAcKw - treasuryKw
+    dup2
+    -
+    dup
+    cover 3
+    // kw_token/contract.algo.ts:231
+    // assert(treasuryKw + investorKw === installedAcKw, 'InvalidAllocationSum')
+    dig 1
+    +
+    uncover 2
+    ==
+    assert // InvalidAllocationSum
+    // kw_token/contract.algo.ts:234
+    // if (treasuryKw > Uint64(0)) {
+    bz finalizeFinancialCloseSimple_after_if_else@3
+    // kw_token/contract.algo.ts:235
+    // this.setBalance(treasury, treasuryKw)
+    dig 3
+    dig 2
+    callsub setBalance
+
+finalizeFinancialCloseSimple_after_if_else@3:
+    // kw_token/contract.algo.ts:239
+    // if (investorKw > Uint64(0)) {
+    dup
+    bz finalizeFinancialCloseSimple_after_if_else@5
+    // kw_token/contract.algo.ts:240
+    // this.setBalance(investorAddress, investorKw)
+    dig 2
+    dig 1
+    callsub setBalance
+
+finalizeFinancialCloseSimple_after_if_else@5:
+    // kw_token/contract.algo.ts:34
+    // totalSupply = GlobalState<uint64>({ initialValue: Uint64(0) })
+    bytec_1 // "totalSupply"
+    // kw_token/contract.algo.ts:244
+    // this.totalSupply.value = installedAcKw
+    dig 5
+    app_global_put
+    // kw_token/contract.algo.ts:37
+    // fcFinalized = GlobalState<uint64>({ initialValue: Uint64(0) }) // 0=false, 1=true
+    bytec_2 // "fcFinalized"
+    // kw_token/contract.algo.ts:247
+    // this.fcFinalized.value = Uint64(1)
+    intc_1 // 1
+    app_global_put
+    // kw_token/contract.algo.ts:38
+    // fcOpen = GlobalState<uint64>({ initialValue: Uint64(1) }) // 1=true until closed
+    bytec_3 // "fcOpen"
+    // kw_token/contract.algo.ts:248
+    // this.fcOpen.value = Uint64(0)
+    intc_0 // 0
+    app_global_put
+    // kw_token/contract.algo.ts:50
+    // transfersEnabled = GlobalState<uint64>({ initialValue: Uint64(0) }) // enabled post-FC
+    bytec 5 // "transfersEnabled"
+    // kw_token/contract.algo.ts:249
+    // this.transfersEnabled.value = Uint64(1)
+    intc_1 // 1
+    app_global_put
+    // kw_token/contract.algo.ts:213
+    // finalizeFinancialCloseSimple(installedAcKw: uint64, platformKwBps: uint64, treasury: Account, investorAddress: Account): string {
+    pushbytes 0x151f7c75000c46432066696e616c697a6564
+    log
+    intc_1 // 1
+    return
+
+
+// kw_token/contract.algo.ts::KWToken.mintAllocation[routing]() -> void:
+mintAllocation:
+    // kw_token/contract.algo.ts:263
+    // mintAllocation(to: Account, amount: uint64): string {
+    txna ApplicationArgs 1
+    dup
+    len
+    intc_3 // 32
+    ==
+    assert // invalid number of bytes for arc4.static_array<arc4.uint8, 32>
+    txna ApplicationArgs 2
+    dup
+    len
+    intc_2 // 8
+    ==
+    assert // invalid number of bytes for arc4.uint64
+    btoi
+    // kw_token/contract.algo.ts:264
+    // this.onlyAdmin()
+    callsub onlyAdmin
+    // kw_token/contract.algo.ts:265
+    // assert(this.fcFinalized.value === Uint64(0), 'FinancialCloseAlreadyFinalized')
+    intc_0 // 0
+    // kw_token/contract.algo.ts:37
+    // fcFinalized = GlobalState<uint64>({ initialValue: Uint64(0) }) // 0=false, 1=true
+    bytec_2 // "fcFinalized"
+    // kw_token/contract.algo.ts:265
+    // assert(this.fcFinalized.value === Uint64(0), 'FinancialCloseAlreadyFinalized')
+    app_global_get_ex
+    assert // check GlobalState exists
+    !
+    assert // FinancialCloseAlreadyFinalized
+    // kw_token/contract.algo.ts:266
+    // assert(this.fcOpen.value === Uint64(1), 'MintingClosed')
+    intc_0 // 0
+    // kw_token/contract.algo.ts:38
+    // fcOpen = GlobalState<uint64>({ initialValue: Uint64(1) }) // 1=true until closed
+    bytec_3 // "fcOpen"
+    // kw_token/contract.algo.ts:266
+    // assert(this.fcOpen.value === Uint64(1), 'MintingClosed')
+    app_global_get_ex
+    assert // check GlobalState exists
+    intc_1 // 1
+    ==
+    assert // MintingClosed
+    // kw_token/contract.algo.ts:267
+    // assert(to !== Global.zeroAddress, 'InvalidAddress')
+    dig 1
+    global ZeroAddress
+    !=
+    assert // InvalidAddress
+    // kw_token/contract.algo.ts:268
+    // assert(amount > Uint64(0), 'ZeroAmount')
+    dup
+    assert // ZeroAmount
+    // kw_token/contract.algo.ts:271
+    // const currentBal = this.getBalance(to)
+    dig 1
+    callsub getBalance
+    // kw_token/contract.algo.ts:272
+    // this.setBalance(to, currentBal + amount)
+    dig 1
+    +
+    uncover 2
+    swap
+    callsub setBalance
+    // kw_token/contract.algo.ts:273
+    // this.investorMintedAmount.value = this.investorMintedAmount.value + amount
+    intc_0 // 0
+    // kw_token/contract.algo.ts:40
+    // investorMintedAmount = GlobalState<uint64>({ initialValue: Uint64(0) })
+    bytec 4 // "investorMintedAmount"
+    // kw_token/contract.algo.ts:273
+    // this.investorMintedAmount.value = this.investorMintedAmount.value + amount
+    app_global_get_ex
+    assert // check GlobalState exists
+    dig 1
+    +
+    // kw_token/contract.algo.ts:40
+    // investorMintedAmount = GlobalState<uint64>({ initialValue: Uint64(0) })
+    bytec 4 // "investorMintedAmount"
+    // kw_token/contract.algo.ts:273
+    // this.investorMintedAmount.value = this.investorMintedAmount.value + amount
+    swap
+    app_global_put
+    // kw_token/contract.algo.ts:275
+    // return `Minted ${amount} to investor`
+    callsub itoa
+    pushbytes "Minted "
+    swap
+    concat
+    pushbytes " to investor"
+    concat
+    // kw_token/contract.algo.ts:263
+    // mintAllocation(to: Account, amount: uint64): string {
+    dup
+    len
+    itob
+    extract 6 2
+    swap
+    concat
+    bytec_0 // 0x151f7c75
+    swap
+    concat
+    log
+    intc_1 // 1
+    return
+
+
+// kw_token/contract.algo.ts::KWToken.closeFinancialClose[routing]() -> void:
+closeFinancialClose:
+    // kw_token/contract.algo.ts:288
+    // closeFinancialClose(installedAcKw: uint64, platformKwBps: uint64, treasury: Account): string {
+    txna ApplicationArgs 1
+    dup
+    len
+    intc_2 // 8
+    ==
+    assert // invalid number of bytes for arc4.uint64
+    btoi
+    dup
+    txna ApplicationArgs 2
+    dup
+    len
+    intc_2 // 8
+    ==
+    assert // invalid number of bytes for arc4.uint64
+    btoi
+    txna ApplicationArgs 3
+    dup
+    cover 3
+    dup
+    len
+    intc_3 // 32
+    ==
+    assert // invalid number of bytes for arc4.static_array<arc4.uint8, 32>
+    // kw_token/contract.algo.ts:289
+    // this.onlyAdmin()
+    callsub onlyAdmin
+    // kw_token/contract.algo.ts:290
+    // assert(this.fcFinalized.value === Uint64(0), 'FinancialCloseAlreadyFinalized')
+    intc_0 // 0
+    // kw_token/contract.algo.ts:37
+    // fcFinalized = GlobalState<uint64>({ initialValue: Uint64(0) }) // 0=false, 1=true
+    bytec_2 // "fcFinalized"
+    // kw_token/contract.algo.ts:290
+    // assert(this.fcFinalized.value === Uint64(0), 'FinancialCloseAlreadyFinalized')
+    app_global_get_ex
+    assert // check GlobalState exists
+    !
+    assert // FinancialCloseAlreadyFinalized
+    // kw_token/contract.algo.ts:291
+    // assert(this.fcOpen.value === Uint64(1), 'MintingClosed')
+    intc_0 // 0
+    // kw_token/contract.algo.ts:38
+    // fcOpen = GlobalState<uint64>({ initialValue: Uint64(1) }) // 1=true until closed
+    bytec_3 // "fcOpen"
+    // kw_token/contract.algo.ts:291
+    // assert(this.fcOpen.value === Uint64(1), 'MintingClosed')
+    app_global_get_ex
+    assert // check GlobalState exists
+    intc_1 // 1
+    ==
+    assert // MintingClosed
+    // kw_token/contract.algo.ts:294
+    // assert(installedAcKw > Uint64(0), 'InstalledAcKwInvalid')
+    dig 2
+    assert // InstalledAcKwInvalid
+    // kw_token/contract.algo.ts:295
+    // assert(platformKwBps <= Uint64(10_000), 'BpsOutOfRange')
+    dig 1
+    intc 4 // 10000
+    <=
+    assert // BpsOutOfRange
+    // kw_token/contract.algo.ts:296
+    // assert(treasury !== Global.zeroAddress, 'InvalidAddress')
+    global ZeroAddress
+    !=
+    assert // InvalidAddress
+    // kw_token/contract.algo.ts:299
+    // const treasuryKw: uint64 = (installedAcKw * platformKwBps) / Uint64(10_000)
+    dig 1
+    *
+    intc 4 // 10000
+    /
+    dup
+    cover 2
+    // kw_token/contract.algo.ts:300
+    // const expectedInvestorKw: uint64 = installedAcKw - treasuryKw
+    -
+    // kw_token/contract.algo.ts:303
+    // const actualInvestorKw: uint64 = this.investorMintedAmount.value
+    intc_0 // 0
+    // kw_token/contract.algo.ts:40
+    // investorMintedAmount = GlobalState<uint64>({ initialValue: Uint64(0) })
+    bytec 4 // "investorMintedAmount"
+    // kw_token/contract.algo.ts:303
+    // const actualInvestorKw: uint64 = this.investorMintedAmount.value
+    app_global_get_ex
+    swap
+    dup
+    cover 2
+    cover 3
+    assert // check GlobalState exists
+    // kw_token/contract.algo.ts:304
+    // assert(actualInvestorKw === expectedInvestorKw, 'InvalidAllocationSum')
+    ==
+    assert // InvalidAllocationSum
+    // kw_token/contract.algo.ts:307
+    // if (this.treasuryMinted.value === Uint64(0)) {
+    intc_0 // 0
+    // kw_token/contract.algo.ts:39
+    // treasuryMinted = GlobalState<uint64>({ initialValue: Uint64(0) })
+    bytec 8 // "treasuryMinted"
+    // kw_token/contract.algo.ts:307
+    // if (this.treasuryMinted.value === Uint64(0)) {
+    app_global_get_ex
+    assert // check GlobalState exists
+    bnz closeFinancialClose_after_if_else@5
+    // kw_token/contract.algo.ts:308
+    // if (treasuryKw > Uint64(0)) {
+    dig 1
+    bz closeFinancialClose_after_if_else@4
+    // kw_token/contract.algo.ts:309
+    // const treasuryBal = this.getBalance(treasury)
+    dig 2
+    dup
+    callsub getBalance
+    // kw_token/contract.algo.ts:310
+    // this.setBalance(treasury, treasuryBal + treasuryKw)
+    dig 3
+    +
+    callsub setBalance
+
+closeFinancialClose_after_if_else@4:
+    // kw_token/contract.algo.ts:39
+    // treasuryMinted = GlobalState<uint64>({ initialValue: Uint64(0) })
+    bytec 8 // "treasuryMinted"
+    // kw_token/contract.algo.ts:312
+    // this.treasuryMinted.value = Uint64(1)
+    intc_1 // 1
+    app_global_put
+
+closeFinancialClose_after_if_else@5:
+    // kw_token/contract.algo.ts:34
+    // totalSupply = GlobalState<uint64>({ initialValue: Uint64(0) })
+    bytec_1 // "totalSupply"
+    // kw_token/contract.algo.ts:316
+    // this.totalSupply.value = installedAcKw
+    dig 4
+    dup
+    cover 2
+    app_global_put
+    // kw_token/contract.algo.ts:319
+    // assert(treasuryKw + actualInvestorKw === installedAcKw, 'InvalidAllocationSum')
+    dig 2
+    dig 2
+    +
+    ==
+    assert // InvalidAllocationSum
+    // kw_token/contract.algo.ts:37
+    // fcFinalized = GlobalState<uint64>({ initialValue: Uint64(0) }) // 0=false, 1=true
+    bytec_2 // "fcFinalized"
+    // kw_token/contract.algo.ts:323
+    // this.fcFinalized.value = Uint64(1)
+    intc_1 // 1
+    app_global_put
+    // kw_token/contract.algo.ts:38
+    // fcOpen = GlobalState<uint64>({ initialValue: Uint64(1) }) // 1=true until closed
+    bytec_3 // "fcOpen"
+    // kw_token/contract.algo.ts:324
+    // this.fcOpen.value = Uint64(0)
+    intc_0 // 0
+    app_global_put
+    // kw_token/contract.algo.ts:50
+    // transfersEnabled = GlobalState<uint64>({ initialValue: Uint64(0) }) // enabled post-FC
+    bytec 5 // "transfersEnabled"
+    // kw_token/contract.algo.ts:325
+    // this.transfersEnabled.value = Uint64(1)
+    intc_1 // 1
+    app_global_put
+    // kw_token/contract.algo.ts:288
+    // closeFinancialClose(installedAcKw: uint64, platformKwBps: uint64, treasury: Account): string {
+    pushbytes 0x151f7c750009464320636c6f736564
+    log
+    intc_1 // 1
+    return
+
+
+// kw_token/contract.algo.ts::KWToken.setRevenueVault[routing]() -> void:
+setRevenueVault:
+    // kw_token/contract.algo.ts:336
+    // setRevenueVault(vault: Account): string {
+    txna ApplicationArgs 1
+    dup
+    len
+    intc_3 // 32
+    ==
+    assert // invalid number of bytes for arc4.static_array<arc4.uint8, 32>
+    // kw_token/contract.algo.ts:337
+    // this.onlyAdmin()
+    callsub onlyAdmin
+    // kw_token/contract.algo.ts:338
+    // assert(vault !== Global.zeroAddress, 'InvalidAddress')
+    dup
+    global ZeroAddress
+    !=
+    assert // InvalidAddress
+    // kw_token/contract.algo.ts:43
+    // revenueVault = GlobalState<Account>({ initialValue: Global.zeroAddress })
+    bytec 9 // "revenueVault"
+    // kw_token/contract.algo.ts:339
+    // this.revenueVault.value = vault
+    swap
+    app_global_put
+    // kw_token/contract.algo.ts:336
+    // setRevenueVault(vault: Account): string {
+    pushbytes 0x151f7c750010526576656e75655661756c7420736574
+    log
+    intc_1 // 1
+    return
+
+
+// kw_token/contract.algo.ts::KWToken.toggleTransfers[routing]() -> void:
+toggleTransfers:
+    // kw_token/contract.algo.ts:343
+    // toggleTransfers(enabled: uint64): string {
+    txna ApplicationArgs 1
+    dup
+    len
+    intc_2 // 8
+    ==
+    assert // invalid number of bytes for arc4.uint64
+    btoi
+    // kw_token/contract.algo.ts:344
+    // this.onlyAdmin()
+    callsub onlyAdmin
+    // kw_token/contract.algo.ts:345
+    // this.transfersEnabled.value = enabled !== Uint64(0) ? Uint64(1) : Uint64(0)
+    dup
+    intc_0 // 0
+    !=
+    // kw_token/contract.algo.ts:50
+    // transfersEnabled = GlobalState<uint64>({ initialValue: Uint64(0) }) // enabled post-FC
+    bytec 5 // "transfersEnabled"
+    // kw_token/contract.algo.ts:345
+    // this.transfersEnabled.value = enabled !== Uint64(0) ? Uint64(1) : Uint64(0)
+    swap
+    app_global_put
+    // kw_token/contract.algo.ts:346
+    // return `Transfers ${enabled !== Uint64(0) ? 'enabled' : 'disabled'}`
+    bz toggleTransfers_ternary_false@3
+    pushbytes "enabled"
+
+toggleTransfers_ternary_merge@4:
+    // kw_token/contract.algo.ts:346
+    // return `Transfers ${enabled !== Uint64(0) ? 'enabled' : 'disabled'}`
+    pushbytes "Transfers "
+    swap
+    concat
+    // kw_token/contract.algo.ts:343
+    // toggleTransfers(enabled: uint64): string {
+    dup
+    len
+    itob
+    extract 6 2
+    swap
+    concat
+    bytec_0 // 0x151f7c75
+    swap
+    concat
+    log
+    intc_1 // 1
+    return
+
+toggleTransfers_ternary_false@3:
+    // kw_token/contract.algo.ts:346
+    // return `Transfers ${enabled !== Uint64(0) ? 'enabled' : 'disabled'}`
+    pushbytes "disabled"
+    b toggleTransfers_ternary_merge@4
+
+
+// kw_token/contract.algo.ts::KWToken.updateAdmin[routing]() -> void:
+updateAdmin:
+    // kw_token/contract.algo.ts:349
+    // updateAdmin(newAdmin: Account): string {
+    txna ApplicationArgs 1
+    dup
+    len
+    intc_3 // 32
+    ==
+    assert // invalid number of bytes for arc4.static_array<arc4.uint8, 32>
+    // kw_token/contract.algo.ts:350
+    // this.onlyAdmin()
+    callsub onlyAdmin
+    // kw_token/contract.algo.ts:351
+    // assert(newAdmin !== Global.zeroAddress, 'InvalidAddress')
+    dup
+    global ZeroAddress
+    !=
+    assert // InvalidAddress
+    // kw_token/contract.algo.ts:49
+    // admin = GlobalState<Account>({ initialValue: Txn.sender })
+    bytec 10 // "admin"
+    // kw_token/contract.algo.ts:352
+    // this.admin.value = newAdmin
+    swap
+    app_global_put
+    // kw_token/contract.algo.ts:349
+    // updateAdmin(newAdmin: Account): string {
+    pushbytes 0x151f7c75000d41646d696e2075706461746564
+    log
+    intc_1 // 1
+    return
+
+
+// kw_token/contract.algo.ts::KWToken.snapshotEpoch[routing]() -> void:
+snapshotEpoch:
+    // kw_token/contract.algo.ts:364
+    // snapshotEpoch(epochId: uint64): string {
+    txna ApplicationArgs 1
+    dup
+    len
+    intc_2 // 8
+    ==
+    assert // invalid number of bytes for arc4.uint64
+    btoi
+    // kw_token/contract.algo.ts:79
+    // const vault = this.revenueVault.value
+    intc_0 // 0
+    // kw_token/contract.algo.ts:43
+    // revenueVault = GlobalState<Account>({ initialValue: Global.zeroAddress })
+    bytec 9 // "revenueVault"
+    // kw_token/contract.algo.ts:79
+    // const vault = this.revenueVault.value
+    app_global_get_ex
+    swap
+    dup
+    uncover 2
+    assert // check GlobalState exists
+    // kw_token/contract.algo.ts:80
+    // if (vault === Global.zeroAddress) {
+    global ZeroAddress
+    ==
+    bz snapshotEpoch_else_body@3
+    // kw_token/contract.algo.ts:82
+    // this.onlyAdmin()
+    callsub onlyAdmin
+
+snapshotEpoch_after_if_else@4:
+    // kw_token/contract.algo.ts:368
+    // const existing = this.epochSnapshots(epochId).maybe()
+    dig 1
+    itob
+    // kw_token/contract.algo.ts:63
+    // epochSnapshots = BoxMap<uint64, uint64>({ keyPrefix: Bytes('epoch:') })
+    bytec 15 // "epoch:"
+    swap
+    concat
+    // kw_token/contract.algo.ts:368
+    // const existing = this.epochSnapshots(epochId).maybe()
+    dup
+    box_len
+    bury 1
+    // kw_token/contract.algo.ts:369
+    // assert(existing[1] === false, 'EpochAlreadySnapshotted')
+    !
+    assert // EpochAlreadySnapshotted
+    // kw_token/contract.algo.ts:372
+    // const snapshotId: uint64 = this.currentSnapshotId.value + Uint64(1)
+    intc_0 // 0
+    // kw_token/contract.algo.ts:46
+    // currentSnapshotId = GlobalState<uint64>({ initialValue: Uint64(0) })
+    bytec 6 // "currentSnapshotId"
+    // kw_token/contract.algo.ts:372
+    // const snapshotId: uint64 = this.currentSnapshotId.value + Uint64(1)
+    app_global_get_ex
+    assert // check GlobalState exists
+    intc_1 // 1
+    +
+    // kw_token/contract.algo.ts:46
+    // currentSnapshotId = GlobalState<uint64>({ initialValue: Uint64(0) })
+    bytec 6 // "currentSnapshotId"
+    // kw_token/contract.algo.ts:373
+    // this.currentSnapshotId.value = snapshotId
+    dig 1
+    app_global_put
+    // kw_token/contract.algo.ts:377
+    // epochBox.create({ size: Uint64(8) })
+    dig 1
+    intc_2 // 8
+    box_create
+    pop
+    // kw_token/contract.algo.ts:378
+    // epochBox.value = snapshotId
+    itob
+    swap
+    dig 1
+    box_put
+    // kw_token/contract.algo.ts:69
+    // supplySnapshots = BoxMap<uint64, uint64>({ keyPrefix: Bytes('supply:') })
+    bytec 16 // "supply:"
+    swap
+    concat
+    // kw_token/contract.algo.ts:382
+    // supplyBox.create({ size: Uint64(8) })
+    dup
+    intc_2 // 8
+    box_create
+    pop
+    // kw_token/contract.algo.ts:383
+    // supplyBox.value = this.totalSupply.value
+    intc_0 // 0
+    // kw_token/contract.algo.ts:34
+    // totalSupply = GlobalState<uint64>({ initialValue: Uint64(0) })
+    bytec_1 // "totalSupply"
+    // kw_token/contract.algo.ts:383
+    // supplyBox.value = this.totalSupply.value
+    app_global_get_ex
+    assert // check GlobalState exists
+    itob
+    box_put
+    // kw_token/contract.algo.ts:364
+    // snapshotEpoch(epochId: uint64): string {
+    pushbytes 0x151f7c75001145706f636820736e617073686f74746564
+    log
+    intc_1 // 1
+    return
+
+snapshotEpoch_else_body@3:
+    // kw_token/contract.algo.ts:84
+    // assert(Txn.sender === vault, 'NotRevenueVault')
+    txn Sender
+    dig 1
+    ==
+    assert // NotRevenueVault
+    b snapshotEpoch_after_if_else@4
+
+
+// kw_token/contract.algo.ts::KWToken.transfer[routing]() -> void:
+transfer:
+    // kw_token/contract.algo.ts:417
+    // transfer(to: Account, amount: uint64): string {
+    txna ApplicationArgs 1
+    dup
+    len
+    intc_3 // 32
+    ==
+    assert // invalid number of bytes for arc4.static_array<arc4.uint8, 32>
+    txna ApplicationArgs 2
+    dup
+    len
+    intc_2 // 8
+    ==
+    assert // invalid number of bytes for arc4.uint64
+    btoi
+    // kw_token/contract.algo.ts:418
+    // this.requireTransfersEnabled()
+    callsub requireTransfersEnabled
+    // kw_token/contract.algo.ts:419
+    // assert(to !== Global.zeroAddress, 'InvalidAddress')
+    dig 1
+    global ZeroAddress
+    !=
+    assert // InvalidAddress
+    // kw_token/contract.algo.ts:420
+    // assert(amount > Uint64(0), 'ZeroAmount')
+    dup
+    assert // ZeroAmount
+    // kw_token/contract.algo.ts:422
+    // const sender = Txn.sender
+    txn Sender
+    // kw_token/contract.algo.ts:423
+    // const senderBal = this.getBalance(sender)
+    dup
+    callsub getBalance
+    // kw_token/contract.algo.ts:424
+    // assert(senderBal >= amount, 'InsufficientBalance')
+    dup
+    dig 3
+    >=
+    assert // InsufficientBalance
+    // kw_token/contract.algo.ts:427
+    // this.snapshotAccount(sender)
+    dig 1
+    callsub snapshotAccount
+    // kw_token/contract.algo.ts:428
+    // this.snapshotAccount(to)
+    dig 3
+    callsub snapshotAccount
+    // kw_token/contract.algo.ts:431
+    // this.setBalance(sender, senderBal - amount)
+    dig 2
+    -
+    callsub setBalance
+    // kw_token/contract.algo.ts:432
+    // const receiverBal = this.getBalance(to)
+    dig 1
+    callsub getBalance
+    // kw_token/contract.algo.ts:433
+    // this.setBalance(to, receiverBal + amount)
+    dig 1
+    +
+    uncover 2
+    swap
+    callsub setBalance
+    // kw_token/contract.algo.ts:435
+    // return `Transferred ${amount}`
+    callsub itoa
+    pushbytes "Transferred "
+    swap
+    concat
+    // kw_token/contract.algo.ts:417
+    // transfer(to: Account, amount: uint64): string {
+    dup
+    len
+    itob
+    extract 6 2
+    swap
+    concat
+    bytec_0 // 0x151f7c75
+    swap
+    concat
+    log
+    intc_1 // 1
+    return
+
+
+// kw_token/contract.algo.ts::KWToken.approve[routing]() -> void:
+approve:
+    // kw_token/contract.algo.ts:441
+    // approve(spender: Account, amount: uint64): string {
+    txna ApplicationArgs 1
+    dup
+    len
+    intc_3 // 32
+    ==
+    assert // invalid number of bytes for arc4.static_array<arc4.uint8, 32>
+    txna ApplicationArgs 2
+    dup
+    len
+    intc_2 // 8
+    ==
+    assert // invalid number of bytes for arc4.uint64
+    btoi
+    // kw_token/contract.algo.ts:442
+    // assert(spender !== Global.zeroAddress, 'InvalidAddress')
+    dig 1
+    global ZeroAddress
+    !=
+    assert // InvalidAddress
+    // kw_token/contract.algo.ts:444
+    // const key = this.makeAllowanceKey(Txn.sender, spender)
+    txn Sender
+    // kw_token/contract.algo.ts:105
+    // return owner.bytes.concat(spender.bytes)
+    uncover 2
+    concat
+    // kw_token/contract.algo.ts:60
+    // allowances = BoxMap<bytes, uint64>({ keyPrefix: Bytes('allow:') })
+    bytec 13 // "allow:"
+    swap
+    concat
+    // kw_token/contract.algo.ts:446
+    // allowBox.create({ size: Uint64(8) })
+    dup
+    intc_2 // 8
+    box_create
+    pop
+    // kw_token/contract.algo.ts:447
+    // allowBox.value = amount
+    dig 1
+    itob
+    box_put
+    // kw_token/contract.algo.ts:449
+    // return `Approved ${amount}`
+    callsub itoa
+    pushbytes "Approved "
+    swap
+    concat
+    // kw_token/contract.algo.ts:441
+    // approve(spender: Account, amount: uint64): string {
+    dup
+    len
+    itob
+    extract 6 2
+    swap
+    concat
+    bytec_0 // 0x151f7c75
+    swap
+    concat
+    log
+    intc_1 // 1
+    return
+
+
+// kw_token/contract.algo.ts::KWToken.transferFrom[routing]() -> void:
+transferFrom:
+    // kw_token/contract.algo.ts:455
+    // transferFrom(from: Account, to: Account, amount: uint64): string {
+    txna ApplicationArgs 1
+    dupn 2
+    len
+    intc_3 // 32
+    ==
+    assert // invalid number of bytes for arc4.static_array<arc4.uint8, 32>
+    txna ApplicationArgs 2
+    dup
+    cover 2
+    dup
+    len
+    intc_3 // 32
+    ==
+    assert // invalid number of bytes for arc4.static_array<arc4.uint8, 32>
+    txna ApplicationArgs 3
+    dup
+    len
+    intc_2 // 8
+    ==
+    assert // invalid number of bytes for arc4.uint64
+    btoi
+    dup
+    cover 3
+    // kw_token/contract.algo.ts:456
+    // this.requireTransfersEnabled()
+    callsub requireTransfersEnabled
+    // kw_token/contract.algo.ts:457
+    // assert(from !== Global.zeroAddress, 'InvalidAddress')
+    dig 2
+    global ZeroAddress
+    !=
+    assert // InvalidAddress
+    // kw_token/contract.algo.ts:458
+    // assert(to !== Global.zeroAddress, 'InvalidAddress')
+    global ZeroAddress
+    uncover 2
+    !=
+    assert // InvalidAddress
+    // kw_token/contract.algo.ts:459
+    // assert(amount > Uint64(0), 'ZeroAmount')
+    assert // ZeroAmount
+    // kw_token/contract.algo.ts:462
+    // const key = this.makeAllowanceKey(from, Txn.sender)
+    txn Sender
+    // kw_token/contract.algo.ts:105
+    // return owner.bytes.concat(spender.bytes)
+    concat
+    // kw_token/contract.algo.ts:60
+    // allowances = BoxMap<bytes, uint64>({ keyPrefix: Bytes('allow:') })
+    bytec 13 // "allow:"
+    swap
+    concat
+    dup
+    // kw_token/contract.algo.ts:463
+    // const allowMaybe = this.allowances(key).maybe()
+    box_get
+    swap
+    btoi
+    swap
+    // kw_token/contract.algo.ts:464
+    // const currentAllowance = allowMaybe[1] ? (allowMaybe[0] as uint64) : Uint64(0)
+    bz transferFrom_ternary_false@3
+    dup
+
+transferFrom_ternary_merge@4:
+    // kw_token/contract.algo.ts:465
+    // assert(currentAllowance >= amount, 'ExceedsAllowance')
+    dup
+    dig 4
+    dup
+    cover 2
+    >=
+    assert // ExceedsAllowance
+    // kw_token/contract.algo.ts:468
+    // const fromBal = this.getBalance(from)
+    dig 6
+    dup
+    cover 2
+    callsub getBalance
+    // kw_token/contract.algo.ts:469
+    // assert(fromBal >= amount, 'InsufficientBalance')
+    dup
+    dig 2
+    >=
+    assert // InsufficientBalance
+    // kw_token/contract.algo.ts:472
+    // this.snapshotAccount(from)
+    dig 2
+    callsub snapshotAccount
+    // kw_token/contract.algo.ts:473
+    // this.snapshotAccount(to)
+    dig 7
+    dup
+    cover 2
+    callsub snapshotAccount
+    // kw_token/contract.algo.ts:476
+    // this.setBalance(from, fromBal - amount)
+    dig 2
+    -
+    uncover 3
+    swap
+    callsub setBalance
+    // kw_token/contract.algo.ts:477
+    // const toBal = this.getBalance(to)
+    dup
+    callsub getBalance
+    // kw_token/contract.algo.ts:478
+    // this.setBalance(to, toBal + amount)
+    dig 2
+    +
+    callsub setBalance
+    // kw_token/contract.algo.ts:482
+    // allowBox.value = currentAllowance - amount
+    -
+    itob
+    dig 2
+    swap
+    box_put
+    // kw_token/contract.algo.ts:455
+    // transferFrom(from: Account, to: Account, amount: uint64): string {
+    pushbytes 0x151f7c7500125472616e7366657220636f6d706c65746564
+    log
+    intc_1 // 1
+    return
+
+transferFrom_ternary_false@3:
+    // kw_token/contract.algo.ts:464
+    // const currentAllowance = allowMaybe[1] ? (allowMaybe[0] as uint64) : Uint64(0)
+    intc_0 // 0
+    b transferFrom_ternary_merge@4
+
+
+// kw_token/contract.algo.ts::KWToken.getName[routing]() -> void:
+getName:
+    // kw_token/contract.algo.ts:490
+    // getName(): bytes { return this.tokenName.value }
+    intc_0 // 0
+    // kw_token/contract.algo.ts:30
+    // tokenName = GlobalState<bytes>({ initialValue: Bytes('') })
+    bytec 11 // "tokenName"
+    // kw_token/contract.algo.ts:490
+    // getName(): bytes { return this.tokenName.value }
+    app_global_get_ex
+    assert // check GlobalState exists
+    dup
+    len
+    itob
+    extract 6 2
+    swap
+    concat
+    bytec_0 // 0x151f7c75
+    swap
+    concat
+    log
+    intc_1 // 1
+    return
+
+
+// kw_token/contract.algo.ts::KWToken.getSymbol[routing]() -> void:
+getSymbol:
+    // kw_token/contract.algo.ts:491
+    // getSymbol(): bytes { return this.tokenSymbol.value }
+    intc_0 // 0
+    // kw_token/contract.algo.ts:31
+    // tokenSymbol = GlobalState<bytes>({ initialValue: Bytes('') })
+    bytec 12 // "tokenSymbol"
+    // kw_token/contract.algo.ts:491
+    // getSymbol(): bytes { return this.tokenSymbol.value }
+    app_global_get_ex
+    assert // check GlobalState exists
+    dup
+    len
+    itob
+    extract 6 2
+    swap
+    concat
+    bytec_0 // 0x151f7c75
+    swap
+    concat
+    log
+    intc_1 // 1
+    return
+
+
+// kw_token/contract.algo.ts::KWToken.getTotalSupply[routing]() -> void:
+getTotalSupply:
+    // kw_token/contract.algo.ts:493
+    // getTotalSupply(): uint64 { return this.totalSupply.value }
+    intc_0 // 0
+    // kw_token/contract.algo.ts:34
+    // totalSupply = GlobalState<uint64>({ initialValue: Uint64(0) })
+    bytec_1 // "totalSupply"
+    // kw_token/contract.algo.ts:493
+    // getTotalSupply(): uint64 { return this.totalSupply.value }
+    app_global_get_ex
+    assert // check GlobalState exists
+    itob
+    bytec_0 // 0x151f7c75
+    swap
+    concat
+    log
+    intc_1 // 1
+    return
+
+
+// kw_token/contract.algo.ts::KWToken.balanceOf[routing]() -> void:
+balanceOf:
+    // kw_token/contract.algo.ts:495
+    // balanceOf(account: Account): uint64 {
+    txna ApplicationArgs 1
+    dup
+    len
+    intc_3 // 32
+    ==
+    assert // invalid number of bytes for arc4.static_array<arc4.uint8, 32>
+    // kw_token/contract.algo.ts:496
+    // return this.getBalance(account)
+    callsub getBalance
+    // kw_token/contract.algo.ts:495
+    // balanceOf(account: Account): uint64 {
+    itob
+    bytec_0 // 0x151f7c75
+    swap
+    concat
+    log
+    intc_1 // 1
+    return
+
+
+// kw_token/contract.algo.ts::KWToken.allowance[routing]() -> void:
+allowance:
+    // kw_token/contract.algo.ts:499
+    // allowance(owner: Account, spender: Account): uint64 {
+    txna ApplicationArgs 1
+    dup
+    len
+    intc_3 // 32
+    ==
+    assert // invalid number of bytes for arc4.static_array<arc4.uint8, 32>
+    txna ApplicationArgs 2
+    dup
+    len
+    intc_3 // 32
+    ==
+    assert // invalid number of bytes for arc4.static_array<arc4.uint8, 32>
+    // kw_token/contract.algo.ts:105
+    // return owner.bytes.concat(spender.bytes)
+    concat
+    // kw_token/contract.algo.ts:60
+    // allowances = BoxMap<bytes, uint64>({ keyPrefix: Bytes('allow:') })
+    bytec 13 // "allow:"
+    swap
+    concat
+    // kw_token/contract.algo.ts:501
+    // const maybe = this.allowances(key).maybe()
+    box_get
+    swap
+    btoi
+    swap
+    // kw_token/contract.algo.ts:502
+    // return maybe[1] ? (maybe[0] as uint64) : Uint64(0)
+    bz allowance_ternary_false@3
+    dup
+
+allowance_ternary_merge@4:
+    // kw_token/contract.algo.ts:499
+    // allowance(owner: Account, spender: Account): uint64 {
+    itob
+    bytec_0 // 0x151f7c75
+    swap
+    concat
+    log
+    intc_1 // 1
+    return
+
+allowance_ternary_false@3:
+    // kw_token/contract.algo.ts:502
+    // return maybe[1] ? (maybe[0] as uint64) : Uint64(0)
+    intc_0 // 0
+    b allowance_ternary_merge@4
+
+
+// kw_token/contract.algo.ts::KWToken.getRegistry[routing]() -> void:
+getRegistry:
+    // kw_token/contract.algo.ts:505
+    // getRegistry(): Account { return this.registry.value }
+    intc_0 // 0
+    // kw_token/contract.algo.ts:29
+    // registry = GlobalState<Account>({ initialValue: Global.zeroAddress })
+    bytec 7 // "registry"
+    // kw_token/contract.algo.ts:505
+    // getRegistry(): Account { return this.registry.value }
+    app_global_get_ex
+    assert // check GlobalState exists
+    bytec_0 // 0x151f7c75
+    swap
+    concat
+    log
+    intc_1 // 1
+    return
+
+
+// kw_token/contract.algo.ts::KWToken.getRevenueVault[routing]() -> void:
+getRevenueVault:
+    // kw_token/contract.algo.ts:506
+    // getRevenueVault(): Account { return this.revenueVault.value }
+    intc_0 // 0
+    // kw_token/contract.algo.ts:43
+    // revenueVault = GlobalState<Account>({ initialValue: Global.zeroAddress })
+    bytec 9 // "revenueVault"
+    // kw_token/contract.algo.ts:506
+    // getRevenueVault(): Account { return this.revenueVault.value }
+    app_global_get_ex
+    assert // check GlobalState exists
+    bytec_0 // 0x151f7c75
+    swap
+    concat
+    log
+    intc_1 // 1
+    return
+
+
+// kw_token/contract.algo.ts::KWToken.isFinancialCloseFinalized[routing]() -> void:
+isFinancialCloseFinalized:
+    // kw_token/contract.algo.ts:507
+    // isFinancialCloseFinalized(): uint64 { return this.fcFinalized.value }
+    intc_0 // 0
+    // kw_token/contract.algo.ts:37
+    // fcFinalized = GlobalState<uint64>({ initialValue: Uint64(0) }) // 0=false, 1=true
+    bytec_2 // "fcFinalized"
+    // kw_token/contract.algo.ts:507
+    // isFinancialCloseFinalized(): uint64 { return this.fcFinalized.value }
+    app_global_get_ex
+    assert // check GlobalState exists
+    itob
+    bytec_0 // 0x151f7c75
+    swap
+    concat
+    log
+    intc_1 // 1
+    return
+
+
+// kw_token/contract.algo.ts::KWToken.transfersEnabledStatus[routing]() -> void:
+transfersEnabledStatus:
+    // kw_token/contract.algo.ts:508
+    // transfersEnabledStatus(): uint64 { return this.transfersEnabled.value }
+    intc_0 // 0
+    // kw_token/contract.algo.ts:50
+    // transfersEnabled = GlobalState<uint64>({ initialValue: Uint64(0) }) // enabled post-FC
+    bytec 5 // "transfersEnabled"
+    // kw_token/contract.algo.ts:508
+    // transfersEnabledStatus(): uint64 { return this.transfersEnabled.value }
+    app_global_get_ex
+    assert // check GlobalState exists
+    itob
+    bytec_0 // 0x151f7c75
+    swap
+    concat
+    log
+    intc_1 // 1
+    return
+
+
+// kw_token/contract.algo.ts::KWToken.snapshotIdForEpoch[routing]() -> void:
+snapshotIdForEpoch:
+    // kw_token/contract.algo.ts:514
+    // snapshotIdForEpoch(epochId: uint64): uint64 {
+    txna ApplicationArgs 1
+    dup
+    len
+    intc_2 // 8
+    ==
+    assert // invalid number of bytes for arc4.uint64
+    btoi
+    // kw_token/contract.algo.ts:515
+    // const maybe = this.epochSnapshots(epochId).maybe()
+    itob
+    // kw_token/contract.algo.ts:63
+    // epochSnapshots = BoxMap<uint64, uint64>({ keyPrefix: Bytes('epoch:') })
+    bytec 15 // "epoch:"
+    swap
+    concat
+    // kw_token/contract.algo.ts:515
+    // const maybe = this.epochSnapshots(epochId).maybe()
+    box_get
+    swap
+    btoi
+    swap
+    // kw_token/contract.algo.ts:516
+    // return maybe[1] ? (maybe[0] as uint64) : Uint64(0)
+    bz snapshotIdForEpoch_ternary_false@3
+    dup
+
+snapshotIdForEpoch_ternary_merge@4:
+    // kw_token/contract.algo.ts:514
+    // snapshotIdForEpoch(epochId: uint64): uint64 {
+    itob
+    bytec_0 // 0x151f7c75
+    swap
+    concat
+    log
+    intc_1 // 1
+    return
+
+snapshotIdForEpoch_ternary_false@3:
+    // kw_token/contract.algo.ts:516
+    // return maybe[1] ? (maybe[0] as uint64) : Uint64(0)
+    intc_0 // 0
+    b snapshotIdForEpoch_ternary_merge@4
+
+
+// kw_token/contract.algo.ts::KWToken.balanceOfAt[routing]() -> void:
+balanceOfAt:
+    pushbytes ""
+    // kw_token/contract.algo.ts:523
+    // balanceOfAt(account: Account, snapshotId: uint64): uint64 {
+    txna ApplicationArgs 1
+    dup
+    len
+    intc_3 // 32
+    ==
+    assert // invalid number of bytes for arc4.static_array<arc4.uint8, 32>
+    txna ApplicationArgs 2
+    dup
+    len
+    intc_2 // 8
+    ==
+    assert // invalid number of bytes for arc4.uint64
+    btoi
+    dup
+    // kw_token/contract.algo.ts:524
+    // if (snapshotId === Uint64(0)) return Uint64(0)
+    bnz balanceOfAt_after_if_else@3
+    intc_0 // 0
+
+balanceOfAt_after_inlined_kw_token/contract.algo.ts::KWToken.balanceOfAt@8:
+    // kw_token/contract.algo.ts:523
+    // balanceOfAt(account: Account, snapshotId: uint64): uint64 {
+    itob
+    bytec_0 // 0x151f7c75
+    swap
+    concat
+    log
+    intc_1 // 1
+    return
+
+balanceOfAt_after_if_else@3:
+    // kw_token/contract.algo.ts:110
+    // return account.bytes.concat(Bytes(snapshotId.toString()))
+    dup
+    callsub itoa
+    dig 2
+    swap
+    concat
+    // kw_token/contract.algo.ts:66
+    // accountSnapshotBalances = BoxMap<bytes, uint64>({ keyPrefix: Bytes('snap:') })
+    bytec 17 // "snap:"
+    swap
+    concat
+    // kw_token/contract.algo.ts:527
+    // const maybe = this.accountSnapshotBalances(key).maybe()
+    box_get
+    swap
+    btoi
+    bury 4
+    // kw_token/contract.algo.ts:529
+    // if (maybe[1]) {
+    bz balanceOfAt_after_if_else@5
+    dig 2
+    // kw_token/contract.algo.ts:523
+    // balanceOfAt(account: Account, snapshotId: uint64): uint64 {
+    b balanceOfAt_after_inlined_kw_token/contract.algo.ts::KWToken.balanceOfAt@8
+
+balanceOfAt_after_if_else@5:
+    // kw_token/contract.algo.ts:535
+    // const currentSnap = this.currentSnapshotId.value
+    intc_0 // 0
+    // kw_token/contract.algo.ts:46
+    // currentSnapshotId = GlobalState<uint64>({ initialValue: Uint64(0) })
+    bytec 6 // "currentSnapshotId"
+    // kw_token/contract.algo.ts:535
+    // const currentSnap = this.currentSnapshotId.value
+    app_global_get_ex
+    assert // check GlobalState exists
+    // kw_token/contract.algo.ts:536
+    // if (snapshotId <= currentSnap) {
+    dig 1
+    >=
+    bz balanceOfAt_after_if_else@7
+    // kw_token/contract.algo.ts:537
+    // return this.getBalance(account)
+    dig 1
+    callsub getBalance
+    // kw_token/contract.algo.ts:523
+    // balanceOfAt(account: Account, snapshotId: uint64): uint64 {
+    b balanceOfAt_after_inlined_kw_token/contract.algo.ts::KWToken.balanceOfAt@8
+
+balanceOfAt_after_if_else@7:
+    // kw_token/contract.algo.ts:540
+    // return Uint64(0)
+    intc_0 // 0
+    // kw_token/contract.algo.ts:523
+    // balanceOfAt(account: Account, snapshotId: uint64): uint64 {
+    b balanceOfAt_after_inlined_kw_token/contract.algo.ts::KWToken.balanceOfAt@8
+
+
+// kw_token/contract.algo.ts::KWToken.totalSupplyAt[routing]() -> void:
+totalSupplyAt:
+    pushbytes ""
+    // kw_token/contract.algo.ts:546
+    // totalSupplyAt(snapshotId: uint64): uint64 {
+    txna ApplicationArgs 1
+    dup
+    len
+    intc_2 // 8
+    ==
+    assert // invalid number of bytes for arc4.uint64
+    btoi
+    dup
+    // kw_token/contract.algo.ts:547
+    // if (snapshotId === Uint64(0)) return Uint64(0)
+    bnz totalSupplyAt_after_if_else@3
+    intc_0 // 0
+
+totalSupplyAt_after_inlined_kw_token/contract.algo.ts::KWToken.totalSupplyAt@7:
+    // kw_token/contract.algo.ts:546
+    // totalSupplyAt(snapshotId: uint64): uint64 {
+    itob
+    bytec_0 // 0x151f7c75
+    swap
+    concat
+    log
+    intc_1 // 1
+    return
+
+totalSupplyAt_after_if_else@3:
+    // kw_token/contract.algo.ts:549
+    // const maybe = this.supplySnapshots(snapshotId).maybe()
+    dup
+    itob
+    // kw_token/contract.algo.ts:69
+    // supplySnapshots = BoxMap<uint64, uint64>({ keyPrefix: Bytes('supply:') })
+    bytec 16 // "supply:"
+    swap
+    concat
+    // kw_token/contract.algo.ts:549
+    // const maybe = this.supplySnapshots(snapshotId).maybe()
+    box_get
+    swap
+    btoi
+    bury 3
+    // kw_token/contract.algo.ts:550
+    // return maybe[1] ? (maybe[0] as uint64) : this.totalSupply.value
+    bz totalSupplyAt_ternary_false@5
+    dig 1
+    // kw_token/contract.algo.ts:546
+    // totalSupplyAt(snapshotId: uint64): uint64 {
+    b totalSupplyAt_after_inlined_kw_token/contract.algo.ts::KWToken.totalSupplyAt@7
+
+totalSupplyAt_ternary_false@5:
+    // kw_token/contract.algo.ts:550
+    // return maybe[1] ? (maybe[0] as uint64) : this.totalSupply.value
+    intc_0 // 0
+    // kw_token/contract.algo.ts:34
+    // totalSupply = GlobalState<uint64>({ initialValue: Uint64(0) })
+    bytec_1 // "totalSupply"
+    // kw_token/contract.algo.ts:550
+    // return maybe[1] ? (maybe[0] as uint64) : this.totalSupply.value
+    app_global_get_ex
+    assert // check GlobalState exists
+    // kw_token/contract.algo.ts:546
+    // totalSupplyAt(snapshotId: uint64): uint64 {
+    b totalSupplyAt_after_inlined_kw_token/contract.algo.ts::KWToken.totalSupplyAt@7
+
+
+// kw_token/contract.algo.ts::KWToken.onlyAdmin() -> void:
+onlyAdmin:
+    // kw_token/contract.algo.ts:75
+    // assert(Txn.sender === this.admin.value, 'NotAdmin')
+    txn Sender
+    intc_0 // 0
+    // kw_token/contract.algo.ts:49
+    // admin = GlobalState<Account>({ initialValue: Txn.sender })
+    bytec 10 // "admin"
+    // kw_token/contract.algo.ts:75
+    // assert(Txn.sender === this.admin.value, 'NotAdmin')
+    app_global_get_ex
+    assert // check GlobalState exists
+    ==
+    assert // NotAdmin
+    retsub
+
+
+// kw_token/contract.algo.ts::KWToken.requireTransfersEnabled() -> void:
+requireTransfersEnabled:
+    // kw_token/contract.algo.ts:89
+    // assert(this.transfersEnabled.value === Uint64(1), 'TransfersDisabled')
+    intc_0 // 0
+    // kw_token/contract.algo.ts:50
+    // transfersEnabled = GlobalState<uint64>({ initialValue: Uint64(0) }) // enabled post-FC
+    bytec 5 // "transfersEnabled"
+    // kw_token/contract.algo.ts:89
+    // assert(this.transfersEnabled.value === Uint64(1), 'TransfersDisabled')
+    app_global_get_ex
+    assert // check GlobalState exists
+    intc_1 // 1
+    ==
+    assert // TransfersDisabled
+    retsub
+
+
+// kw_token/contract.algo.ts::KWToken.getBalance(account: bytes) -> uint64:
+getBalance:
+    // kw_token/contract.algo.ts:92
+    // private getBalance(account: Account): uint64 {
+    proto 1 1
+    // kw_token/contract.algo.ts:56
+    // balances = BoxMap<Account, uint64>({ keyPrefix: Bytes('bal:') })
+    bytec 18 // "bal:"
+    frame_dig -1
+    concat
+    // kw_token/contract.algo.ts:93
+    // const maybe = this.balances(account).maybe()
+    box_get
+    swap
+    btoi
+    swap
+    // kw_token/contract.algo.ts:94
+    // return maybe[1] ? (maybe[0] as uint64) : Uint64(0)
+    bz getBalance_ternary_false@2
+    frame_dig 0
+
+getBalance_ternary_merge@3:
+    // kw_token/contract.algo.ts:94
+    // return maybe[1] ? (maybe[0] as uint64) : Uint64(0)
+    swap
+    retsub
+
+getBalance_ternary_false@2:
+    // kw_token/contract.algo.ts:94
+    // return maybe[1] ? (maybe[0] as uint64) : Uint64(0)
+    intc_0 // 0
+    b getBalance_ternary_merge@3
+
+
+// kw_token/contract.algo.ts::KWToken.setBalance(account: bytes, amount: uint64) -> void:
+setBalance:
+    // kw_token/contract.algo.ts:97
+    // private setBalance(account: Account, amount: uint64): void {
+    proto 2 0
+    // kw_token/contract.algo.ts:56
+    // balances = BoxMap<Account, uint64>({ keyPrefix: Bytes('bal:') })
+    bytec 18 // "bal:"
+    frame_dig -2
+    concat
+    // kw_token/contract.algo.ts:99
+    // box.create({ size: Uint64(8) })
+    dup
+    intc_2 // 8
+    box_create
+    pop
+    // kw_token/contract.algo.ts:100
+    // box.value = amount
+    frame_dig -1
+    itob
+    box_put
+    retsub
+
+
+// kw_token/contract.algo.ts::KWToken.snapshotAccount(account: bytes) -> void:
+snapshotAccount:
+    // kw_token/contract.algo.ts:396
+    // private snapshotAccount(account: Account): void {
+    proto 1 0
+    intc_0 // 0
+    // kw_token/contract.algo.ts:397
+    // const snapshotId = this.currentSnapshotId.value
+    dup
+    // kw_token/contract.algo.ts:46
+    // currentSnapshotId = GlobalState<uint64>({ initialValue: Uint64(0) })
+    bytec 6 // "currentSnapshotId"
+    // kw_token/contract.algo.ts:397
+    // const snapshotId = this.currentSnapshotId.value
+    app_global_get_ex
+    swap
+    dup
+    uncover 2
+    assert // check GlobalState exists
+    // kw_token/contract.algo.ts:398
+    // if (snapshotId === Uint64(0)) return // No snapshots yet
+    bnz snapshotAccount_after_if_else@2
+    retsub
+
+snapshotAccount_after_if_else@2:
+    // kw_token/contract.algo.ts:110
+    // return account.bytes.concat(Bytes(snapshotId.toString()))
+    frame_dig 1
+    callsub itoa
+    frame_dig -1
+    swap
+    concat
+    // kw_token/contract.algo.ts:66
+    // accountSnapshotBalances = BoxMap<bytes, uint64>({ keyPrefix: Bytes('snap:') })
+    bytec 17 // "snap:"
+    swap
+    concat
+    dup
+    frame_bury 0
+    // kw_token/contract.algo.ts:404
+    // if (!snapBox.maybe()[1]) {
+    box_len
+    bury 1
+    bnz snapshotAccount_after_if_else@4
+    // kw_token/contract.algo.ts:405
+    // snapBox.create({ size: Uint64(8) })
+    frame_dig 0
+    dup
+    intc_2 // 8
+    box_create
+    pop
+    // kw_token/contract.algo.ts:406
+    // snapBox.value = this.getBalance(account)
+    frame_dig -1
+    callsub getBalance
+    itob
+    box_put
+
+snapshotAccount_after_if_else@4:
+    retsub

@@ -5,6 +5,7 @@ import {
   BoxMap,
   Bytes,
   Txn,
+  gtxn,
   Global,
   assert,
 } from '@algorandfoundation/algorand-typescript'
@@ -141,6 +142,55 @@ export class KWToken extends Contract {
     this.tokenSymbol.value = symbol
 
     return 'Token initialized'
+  }
+
+  // -----------------------
+  // Investment (SSOT: retail investment during FC open period)
+  // -----------------------
+  /**
+   * Invest ALGO to receive kW tokens.
+   * SSOT: Conversion rate = 10 kW per 1 ALGO (0.1 ALGO per kW).
+   * Can only be called when FC is open and not yet finalized.
+   * ALGO is routed to contract balance (admin can withdraw to treasury later).
+   * 
+   * Pattern: User sends grouped transaction:
+   *   gtxn[0] = ALGO payment to this contract
+   *   gtxn[1] = app call to invest()
+   */
+  invest(): string {
+    // Validate FC is open for investment
+    assert(this.fcOpen.value === Uint64(1), 'InvestmentClosed')
+    assert(this.fcFinalized.value === Uint64(0), 'FCAlreadyFinalized')
+    
+    // Enforce strict 2-txn group: payment then app call
+    assert(Txn.groupIndex === Uint64(1), 'App call must be second transaction in group')
+    
+    // Get the payment transaction from the group
+    const paymentTxn = gtxn.PaymentTxn(0)
+    
+    // Validate payment transaction
+    assert(paymentTxn.sender === Txn.sender, 'Payment sender mismatch')
+    assert(paymentTxn.receiver === Global.currentApplicationAddress, 'PaymentMustGoToContract')
+    assert(paymentTxn.amount > Uint64(0), 'ZeroPayment')
+    
+    // Calculate kW tokens: 10 kW per ALGO
+    // paymentTxn.amount is in microALGO (1 ALGO = 1,000,000 microALGO)
+    // So: kW = (microALGO / 1,000,000) * 10 = microALGO / 100,000
+    const kwTokens: uint64 = paymentTxn.amount / Uint64(100_000)
+    assert(kwTokens > Uint64(0), 'InvestmentTooSmall')
+    
+    // Mint tokens to investor
+    const investor = paymentTxn.sender
+    const currentBal = this.getBalance(investor)
+    this.setBalance(investor, currentBal + kwTokens)
+    
+    // Update investor minted amount (tracks pre-FC allocations)
+    this.investorMintedAmount.value = this.investorMintedAmount.value + kwTokens
+    
+    // Update total supply
+    this.totalSupply.value = this.totalSupply.value + kwTokens
+    
+    return `Invested ${paymentTxn.amount} microALGO, received ${kwTokens} kW`
   }
 
   // -----------------------

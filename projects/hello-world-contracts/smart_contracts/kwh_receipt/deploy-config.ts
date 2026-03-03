@@ -1,5 +1,5 @@
 import { AlgorandClient } from '@algorandfoundation/algokit-utils'
-import { KWhReceiptFactory } from '../artifacts/kwh_receipt/KWhReceiptClient'
+import { KWhReceiptFactory } from '../artifacts/kwh_receipt/KWhReceiptClient.ts'
 
 /**
  * Deploy kWh Receipt contract for a Protius project.

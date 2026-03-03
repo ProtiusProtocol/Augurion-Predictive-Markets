@@ -1,0 +1,2307 @@
+#pragma version 11
+#pragma typetrack false
+
+// @algorandfoundation/algorand-typescript/arc4/index.d.ts::Contract.approvalProgram() -> uint64:
+main:
+    intcblock 1 0 8 32
+    bytecblock 0x151f7c75 "paused" ":" "admin" "currentEpochId" "registry" "kwToken" "treasury" "epoch_status:" "Epoch " "epoch_hash:" "epoch_net:" "kwhReceipt" "platformKwhRateBps" "epoch_kw:" "ent_hash:" "ent_amount:" "claimed:" "settlementAssetId" 0x30313233343536373839 "epoch_start:" "epoch_end:" "ent_sum:" "epoch_snap:"
+    txn ApplicationID
+    bnz main_after_if_else@2
+    // revenue_vault/contract.algo.ts:77
+    // admin = GlobalState<Account>({ initialValue: Txn.sender })
+    bytec_3 // "admin"
+    txn Sender
+    app_global_put
+    // revenue_vault/contract.algo.ts:78
+    // registry = GlobalState<Account>({ initialValue: Global.zeroAddress })
+    bytec 5 // "registry"
+    global ZeroAddress
+    app_global_put
+    // revenue_vault/contract.algo.ts:79
+    // kwToken = GlobalState<Account>({ initialValue: Global.zeroAddress })
+    bytec 6 // "kwToken"
+    global ZeroAddress
+    app_global_put
+    // revenue_vault/contract.algo.ts:80
+    // kwhReceipt = GlobalState<Account>({ initialValue: Global.zeroAddress })
+    bytec 12 // "kwhReceipt"
+    global ZeroAddress
+    app_global_put
+    // revenue_vault/contract.algo.ts:81
+    // treasury = GlobalState<Account>({ initialValue: Global.zeroAddress })
+    bytec 7 // "treasury"
+    global ZeroAddress
+    app_global_put
+    // revenue_vault/contract.algo.ts:84
+    // settlementAssetId = GlobalState<uint64>({ initialValue: Uint64(0) })
+    bytec 18 // "settlementAssetId"
+    intc_1 // 0
+    app_global_put
+    // revenue_vault/contract.algo.ts:87
+    // platformKwhRateBps = GlobalState<uint64>({ initialValue: Uint64(0) })
+    bytec 13 // "platformKwhRateBps"
+    intc_1 // 0
+    app_global_put
+    // revenue_vault/contract.algo.ts:90
+    // paused = GlobalState<uint64>({ initialValue: Uint64(0) })
+    bytec_1 // "paused"
+    intc_1 // 0
+    app_global_put
+    // revenue_vault/contract.algo.ts:93
+    // currentEpochId = GlobalState<uint64>({ initialValue: Uint64(0) })
+    bytec 4 // "currentEpochId"
+    intc_1 // 0
+    app_global_put
+
+main_after_if_else@2:
+    // revenue_vault/contract.algo.ts:73
+    // export class RevenueVault extends Contract {
+    txn NumAppArgs
+    bz main___algots__.defaultCreate@36
+    txn OnCompletion
+    !
+    assert // OnCompletion must be NoOp
+    txn ApplicationID
+    assert
+    pushbytess 0x4c5c61ba 0x45b77660 0x62a8776d 0xe760ebeb 0x3aae217a 0x9d6807cc 0x76c6e5d5 0x38ca31a6 0x522bc3f6 0x02f6a142 0x29807e42 0x76459369 0x2679ba88 0x708cc88f 0x3e66c8b2 0x7b0d34c2 0xceadad59 0x84fa2964 0x32d78867 0x7d3b6d4f 0x9e7508d0 0xb473c726 0xde6d856e 0x01c631cd 0xac8b24de 0x2871b87c 0xedc210ce // method "create()void", method "initVault(address,address,address,address,uint64,uint64)string", method "createEpoch(uint64,uint64,uint64)string", method "closeEpoch(uint64)string", method "anchorAccrualReport(uint64,byte[])string", method "depositNetRevenue(uint64,uint64)string", method "computeRevenuePerKw(uint64)string", method "anchorEntitlements(uint64,byte[])string", method "setEntitlement(uint64,address,uint64)string", method "settleEpochEntitlements(uint64)string", method "claim(uint64)string", method "viewClaimable(uint64,address)uint64", method "pauseClaims()string", method "unpauseClaims()string", method "updateAdmin(address)string", method "updateTreasury(address)string", method "getEpochInfo(uint64)(uint64,uint64,uint64,uint64,uint64,uint64,uint64)", method "getEpochReportHash(uint64)byte[]", method "hasClaimed(uint64,address)uint64", method "getRegistry()address", method "getKwToken()address", method "getKwhReceipt()address", method "getTreasury()address", method "getPlatformKwhRateBps()uint64", method "getAdmin()address", method "isPaused()uint64", method "getCurrentEpochId()uint64"
+    txna ApplicationArgs 0
+    match create initVault createEpoch closeEpoch anchorAccrualReport depositNetRevenue computeRevenuePerKw anchorEntitlements setEntitlement settleEpochEntitlements claim viewClaimable pauseClaims unpauseClaims updateAdmin updateTreasury getEpochInfo getEpochReportHash hasClaimed getRegistry getKwToken getKwhReceipt getTreasury getPlatformKwhRateBps getAdmin isPaused getCurrentEpochId
+    err
+
+main___algots__.defaultCreate@36:
+    // revenue_vault/contract.algo.ts:73
+    // export class RevenueVault extends Contract {
+    txn OnCompletion
+    !
+    txn ApplicationID
+    !
+    &&
+    assert // OnCompletion must be NoOp && can only call when creating
+    intc_0 // 1
+    return
+
+
+// puya-ts::itoa(i: uint64) -> bytes:
+itoa:
+    proto 1 1
+    frame_dig -1
+    pushint 10 // 10
+    <
+    bz itoa_else_body@2
+    bytec 19 // 0x30313233343536373839
+    frame_dig -1
+    intc_0 // 1
+    extract3
+    retsub
+
+itoa_else_body@2:
+    frame_dig -1
+    pushint 10 // 10
+    /
+    callsub itoa
+    frame_dig -1
+    pushint 10 // 10
+    %
+    bytec 19 // 0x30313233343536373839
+    swap
+    intc_0 // 1
+    extract3
+    concat
+    retsub
+
+
+// revenue_vault/contract.algo.ts::RevenueVault.create[routing]() -> void:
+create:
+    // revenue_vault/contract.algo.ts:77
+    // admin = GlobalState<Account>({ initialValue: Txn.sender })
+    bytec_3 // "admin"
+    // revenue_vault/contract.algo.ts:180
+    // this.admin.value = Txn.sender
+    txn Sender
+    app_global_put
+    // revenue_vault/contract.algo.ts:90
+    // paused = GlobalState<uint64>({ initialValue: Uint64(0) })
+    bytec_1 // "paused"
+    // revenue_vault/contract.algo.ts:181
+    // this.paused.value = Uint64(0)
+    intc_1 // 0
+    app_global_put
+    // revenue_vault/contract.algo.ts:93
+    // currentEpochId = GlobalState<uint64>({ initialValue: Uint64(0) })
+    bytec 4 // "currentEpochId"
+    // revenue_vault/contract.algo.ts:182
+    // this.currentEpochId.value = Uint64(0)
+    intc_1 // 0
+    app_global_put
+    // revenue_vault/contract.algo.ts:179
+    // create(): void {
+    intc_0 // 1
+    return
+
+
+// revenue_vault/contract.algo.ts::RevenueVault.initVault[routing]() -> void:
+initVault:
+    // revenue_vault/contract.algo.ts:189-196
+    // initVault(
+    //   registry: Account,
+    //   kwToken: Account,
+    //   kwhReceipt: Account,
+    //   treasury: Account,
+    //   settlementAssetId: uint64,
+    //   platformKwhRateBps: uint64
+    // ): string {
+    txna ApplicationArgs 1
+    dup
+    len
+    intc_3 // 32
+    ==
+    assert // invalid number of bytes for arc4.static_array<arc4.uint8, 32>
+    txna ApplicationArgs 2
+    dup
+    len
+    intc_3 // 32
+    ==
+    assert // invalid number of bytes for arc4.static_array<arc4.uint8, 32>
+    txna ApplicationArgs 3
+    dup
+    len
+    intc_3 // 32
+    ==
+    assert // invalid number of bytes for arc4.static_array<arc4.uint8, 32>
+    txna ApplicationArgs 4
+    dup
+    len
+    intc_3 // 32
+    ==
+    assert // invalid number of bytes for arc4.static_array<arc4.uint8, 32>
+    txna ApplicationArgs 5
+    dup
+    len
+    intc_2 // 8
+    ==
+    assert // invalid number of bytes for arc4.uint64
+    btoi
+    txna ApplicationArgs 6
+    dup
+    len
+    intc_2 // 8
+    ==
+    assert // invalid number of bytes for arc4.uint64
+    btoi
+    // revenue_vault/contract.algo.ts:197
+    // this.onlyAdmin()
+    callsub onlyAdmin
+    // revenue_vault/contract.algo.ts:198
+    // assert(this.registry.value === Global.zeroAddress, 'AlreadyInitialized')
+    intc_1 // 0
+    // revenue_vault/contract.algo.ts:78
+    // registry = GlobalState<Account>({ initialValue: Global.zeroAddress })
+    bytec 5 // "registry"
+    // revenue_vault/contract.algo.ts:198
+    // assert(this.registry.value === Global.zeroAddress, 'AlreadyInitialized')
+    app_global_get_ex
+    assert // check GlobalState exists
+    global ZeroAddress
+    ==
+    assert // AlreadyInitialized
+    // revenue_vault/contract.algo.ts:199
+    // assert(registry !== Global.zeroAddress, 'InvalidRegistry')
+    dig 5
+    global ZeroAddress
+    !=
+    assert // InvalidRegistry
+    // revenue_vault/contract.algo.ts:200
+    // assert(kwToken !== Global.zeroAddress, 'InvalidKwToken')
+    dig 4
+    global ZeroAddress
+    !=
+    assert // InvalidKwToken
+    // revenue_vault/contract.algo.ts:201
+    // assert(kwhReceipt !== Global.zeroAddress, 'InvalidKwhReceipt')
+    dig 3
+    global ZeroAddress
+    !=
+    assert // InvalidKwhReceipt
+    // revenue_vault/contract.algo.ts:202
+    // assert(treasury !== Global.zeroAddress, 'InvalidTreasury')
+    dig 2
+    global ZeroAddress
+    !=
+    assert // InvalidTreasury
+    // revenue_vault/contract.algo.ts:203
+    // assert(platformKwhRateBps <= Uint64(10000), 'InvalidAlphaBps')
+    dup
+    pushint 10000 // 10000
+    <=
+    assert // InvalidAlphaBps
+    // revenue_vault/contract.algo.ts:78
+    // registry = GlobalState<Account>({ initialValue: Global.zeroAddress })
+    bytec 5 // "registry"
+    // revenue_vault/contract.algo.ts:205
+    // this.registry.value = registry
+    uncover 6
+    app_global_put
+    // revenue_vault/contract.algo.ts:79
+    // kwToken = GlobalState<Account>({ initialValue: Global.zeroAddress })
+    bytec 6 // "kwToken"
+    // revenue_vault/contract.algo.ts:206
+    // this.kwToken.value = kwToken
+    uncover 5
+    app_global_put
+    // revenue_vault/contract.algo.ts:80
+    // kwhReceipt = GlobalState<Account>({ initialValue: Global.zeroAddress })
+    bytec 12 // "kwhReceipt"
+    // revenue_vault/contract.algo.ts:207
+    // this.kwhReceipt.value = kwhReceipt
+    uncover 4
+    app_global_put
+    // revenue_vault/contract.algo.ts:81
+    // treasury = GlobalState<Account>({ initialValue: Global.zeroAddress })
+    bytec 7 // "treasury"
+    // revenue_vault/contract.algo.ts:208
+    // this.treasury.value = treasury
+    uncover 3
+    app_global_put
+    // revenue_vault/contract.algo.ts:84
+    // settlementAssetId = GlobalState<uint64>({ initialValue: Uint64(0) })
+    bytec 18 // "settlementAssetId"
+    // revenue_vault/contract.algo.ts:209
+    // this.settlementAssetId.value = settlementAssetId
+    uncover 2
+    app_global_put
+    // revenue_vault/contract.algo.ts:87
+    // platformKwhRateBps = GlobalState<uint64>({ initialValue: Uint64(0) })
+    bytec 13 // "platformKwhRateBps"
+    // revenue_vault/contract.algo.ts:210
+    // this.platformKwhRateBps.value = platformKwhRateBps
+    swap
+    app_global_put
+    // revenue_vault/contract.algo.ts:189-196
+    // initVault(
+    //   registry: Account,
+    //   kwToken: Account,
+    //   kwhReceipt: Account,
+    //   treasury: Account,
+    //   settlementAssetId: uint64,
+    //   platformKwhRateBps: uint64
+    // ): string {
+    pushbytes 0x151f7c750018526576656e75655661756c7420696e697469616c697a6564
+    log
+    intc_0 // 1
+    return
+
+
+// revenue_vault/contract.algo.ts::RevenueVault.createEpoch[routing]() -> void:
+createEpoch:
+    // revenue_vault/contract.algo.ts:227
+    // createEpoch(epochId: uint64, startTs: uint64, endTs: uint64): string {
+    txna ApplicationArgs 1
+    dup
+    len
+    intc_2 // 8
+    ==
+    assert // invalid number of bytes for arc4.uint64
+    btoi
+    dup
+    txna ApplicationArgs 2
+    dup
+    len
+    intc_2 // 8
+    ==
+    assert // invalid number of bytes for arc4.uint64
+    btoi
+    txna ApplicationArgs 3
+    dup
+    len
+    intc_2 // 8
+    ==
+    assert // invalid number of bytes for arc4.uint64
+    btoi
+    // revenue_vault/contract.algo.ts:228
+    // this.onlyAdmin()
+    callsub onlyAdmin
+    // revenue_vault/contract.algo.ts:231
+    // assert(epochId > Uint64(0), 'InvalidEpochId')
+    dig 2
+    assert // InvalidEpochId
+    // revenue_vault/contract.algo.ts:232
+    // assert(startTs < endTs, 'InvalidTimeRange')
+    dup2
+    <
+    assert // InvalidTimeRange
+    // revenue_vault/contract.algo.ts:235
+    // const status = this.getEpochStatus(epochId)
+    dig 2
+    callsub getEpochStatus
+    // revenue_vault/contract.algo.ts:236
+    // assert(status === this.getStatusNone(), 'EpochAlreadyExists')
+    !
+    assert // EpochAlreadyExists
+    // revenue_vault/contract.algo.ts:239
+    // const statusBox = this.epochStatus(epochId)
+    dig 2
+    itob
+    // revenue_vault/contract.algo.ts:108
+    // epochStatus = BoxMap<uint64, uint64>({ keyPrefix: Bytes('epoch_status:') })
+    bytec 8 // "epoch_status:"
+    dig 1
+    concat
+    // revenue_vault/contract.algo.ts:240
+    // statusBox.create({ size: Uint64(8) })
+    dup
+    intc_2 // 8
+    box_create
+    pop
+    // revenue_vault/contract.algo.ts:99
+    // private getStatusOpen(): uint64 { return Uint64(1) }
+    intc_0 // 1
+    // revenue_vault/contract.algo.ts:241
+    // statusBox.value = this.getStatusOpen()
+    itob
+    box_put
+    // revenue_vault/contract.algo.ts:109
+    // epochStartTs = BoxMap<uint64, uint64>({ keyPrefix: Bytes('epoch_start:') })
+    bytec 20 // "epoch_start:"
+    dig 1
+    concat
+    // revenue_vault/contract.algo.ts:244
+    // startBox.create({ size: Uint64(8) })
+    dup
+    intc_2 // 8
+    box_create
+    pop
+    // revenue_vault/contract.algo.ts:245
+    // startBox.value = startTs
+    uncover 3
+    itob
+    box_put
+    // revenue_vault/contract.algo.ts:110
+    // epochEndTs = BoxMap<uint64, uint64>({ keyPrefix: Bytes('epoch_end:') })
+    bytec 21 // "epoch_end:"
+    swap
+    concat
+    // revenue_vault/contract.algo.ts:248
+    // endBox.create({ size: Uint64(8) })
+    dup
+    intc_2 // 8
+    box_create
+    pop
+    // revenue_vault/contract.algo.ts:249
+    // endBox.value = endTs
+    swap
+    itob
+    box_put
+    // revenue_vault/contract.algo.ts:252
+    // if (epochId > this.currentEpochId.value) {
+    intc_1 // 0
+    // revenue_vault/contract.algo.ts:93
+    // currentEpochId = GlobalState<uint64>({ initialValue: Uint64(0) })
+    bytec 4 // "currentEpochId"
+    // revenue_vault/contract.algo.ts:252
+    // if (epochId > this.currentEpochId.value) {
+    app_global_get_ex
+    assert // check GlobalState exists
+    >
+    bz createEpoch_after_if_else@3
+    // revenue_vault/contract.algo.ts:93
+    // currentEpochId = GlobalState<uint64>({ initialValue: Uint64(0) })
+    bytec 4 // "currentEpochId"
+    // revenue_vault/contract.algo.ts:253
+    // this.currentEpochId.value = epochId
+    dig 1
+    app_global_put
+
+createEpoch_after_if_else@3:
+    // revenue_vault/contract.algo.ts:256
+    // return `Epoch ${epochId} created`
+    dup
+    callsub itoa
+    bytec 9 // "Epoch "
+    swap
+    concat
+    pushbytes " created"
+    concat
+    // revenue_vault/contract.algo.ts:227
+    // createEpoch(epochId: uint64, startTs: uint64, endTs: uint64): string {
+    dup
+    len
+    itob
+    extract 6 2
+    swap
+    concat
+    bytec_0 // 0x151f7c75
+    swap
+    concat
+    log
+    intc_0 // 1
+    return
+
+
+// revenue_vault/contract.algo.ts::RevenueVault.closeEpoch[routing]() -> void:
+closeEpoch:
+    // revenue_vault/contract.algo.ts:267
+    // closeEpoch(epochId: uint64): string {
+    txna ApplicationArgs 1
+    dup
+    len
+    intc_2 // 8
+    ==
+    assert // invalid number of bytes for arc4.uint64
+    btoi
+    // revenue_vault/contract.algo.ts:268
+    // this.onlyAdmin()
+    callsub onlyAdmin
+    // revenue_vault/contract.algo.ts:271
+    // const status = this.getEpochStatus(epochId)
+    dup
+    callsub getEpochStatus
+    // revenue_vault/contract.algo.ts:99
+    // private getStatusOpen(): uint64 { return Uint64(1) }
+    intc_0 // 1
+    // revenue_vault/contract.algo.ts:272
+    // assert(status === this.getStatusOpen(), 'EpochNotOpen')
+    ==
+    assert // EpochNotOpen
+    // revenue_vault/contract.algo.ts:275
+    // this.epochStatus(epochId).value = this.getStatusClosed()
+    dup
+    itob
+    // revenue_vault/contract.algo.ts:108
+    // epochStatus = BoxMap<uint64, uint64>({ keyPrefix: Bytes('epoch_status:') })
+    bytec 8 // "epoch_status:"
+    swap
+    concat
+    // revenue_vault/contract.algo.ts:100
+    // private getStatusClosed(): uint64 { return Uint64(2) }
+    pushint 2 // 2
+    // revenue_vault/contract.algo.ts:275
+    // this.epochStatus(epochId).value = this.getStatusClosed()
+    itob
+    box_put
+    // revenue_vault/contract.algo.ts:277
+    // return `Epoch ${epochId} closed`
+    callsub itoa
+    bytec 9 // "Epoch "
+    swap
+    concat
+    pushbytes " closed"
+    concat
+    // revenue_vault/contract.algo.ts:267
+    // closeEpoch(epochId: uint64): string {
+    dup
+    len
+    itob
+    extract 6 2
+    swap
+    concat
+    bytec_0 // 0x151f7c75
+    swap
+    concat
+    log
+    intc_0 // 1
+    return
+
+
+// revenue_vault/contract.algo.ts::RevenueVault.anchorAccrualReport[routing]() -> void:
+anchorAccrualReport:
+    // revenue_vault/contract.algo.ts:289
+    // anchorAccrualReport(epochId: uint64, reportHash: bytes): string {
+    txna ApplicationArgs 1
+    dup
+    len
+    intc_2 // 8
+    ==
+    assert // invalid number of bytes for arc4.uint64
+    btoi
+    txna ApplicationArgs 2
+    dup
+    intc_1 // 0
+    extract_uint16 // on error: invalid array length header
+    pushint 2 // 2
+    +
+    dig 1
+    len
+    ==
+    assert // invalid number of bytes for arc4.dynamic_array<arc4.uint8>
+    extract 2 0
+    // revenue_vault/contract.algo.ts:290
+    // this.onlyAdmin()
+    callsub onlyAdmin
+    // revenue_vault/contract.algo.ts:293
+    // const status = this.getEpochStatus(epochId)
+    dig 1
+    callsub getEpochStatus
+    // revenue_vault/contract.algo.ts:100
+    // private getStatusClosed(): uint64 { return Uint64(2) }
+    pushint 2 // 2
+    // revenue_vault/contract.algo.ts:294
+    // assert(status === this.getStatusClosed(), 'EpochNotClosed')
+    ==
+    assert // EpochNotClosed
+    // revenue_vault/contract.algo.ts:297
+    // assert(reportHash.length > Uint64(0), 'InvalidReportHash')
+    dup
+    len
+    assert // InvalidReportHash
+    // revenue_vault/contract.algo.ts:300
+    // const existingHash = this.epochReportHash(epochId).maybe()
+    dig 1
+    itob
+    // revenue_vault/contract.algo.ts:111
+    // epochReportHash = BoxMap<uint64, bytes>({ keyPrefix: Bytes('epoch_hash:') })
+    bytec 10 // "epoch_hash:"
+    swap
+    concat
+    // revenue_vault/contract.algo.ts:300
+    // const existingHash = this.epochReportHash(epochId).maybe()
+    dup
+    box_len
+    bury 1
+    // revenue_vault/contract.algo.ts:301
+    // assert(existingHash[1] === false, 'ReportAlreadyAnchored')
+    !
+    assert // ReportAlreadyAnchored
+    // revenue_vault/contract.algo.ts:305
+    // hashBox.create({ size: Uint64(32) })
+    dup
+    intc_3 // 32
+    box_create
+    pop
+    // revenue_vault/contract.algo.ts:306
+    // hashBox.value = reportHash
+    dup
+    box_del
+    pop
+    swap
+    box_put
+    // revenue_vault/contract.algo.ts:308
+    // return `Accrual report anchored for epoch ${epochId}`
+    callsub itoa
+    pushbytes "Accrual report anchored for epoch "
+    swap
+    concat
+    // revenue_vault/contract.algo.ts:289
+    // anchorAccrualReport(epochId: uint64, reportHash: bytes): string {
+    dup
+    len
+    itob
+    extract 6 2
+    swap
+    concat
+    bytec_0 // 0x151f7c75
+    swap
+    concat
+    log
+    intc_0 // 1
+    return
+
+
+// revenue_vault/contract.algo.ts::RevenueVault.depositNetRevenue[routing]() -> void:
+depositNetRevenue:
+    // revenue_vault/contract.algo.ts:331
+    // depositNetRevenue(epochId: uint64, amount: uint64): string {
+    txna ApplicationArgs 1
+    dup
+    len
+    intc_2 // 8
+    ==
+    assert // invalid number of bytes for arc4.uint64
+    btoi
+    dup
+    txna ApplicationArgs 2
+    dup
+    len
+    intc_2 // 8
+    ==
+    assert // invalid number of bytes for arc4.uint64
+    btoi
+    dup
+    uncover 2
+    // revenue_vault/contract.algo.ts:332
+    // this.onlyAdmin()
+    callsub onlyAdmin
+    // revenue_vault/contract.algo.ts:335
+    // const status = this.getEpochStatus(epochId)
+    dup
+    callsub getEpochStatus
+    // revenue_vault/contract.algo.ts:100
+    // private getStatusClosed(): uint64 { return Uint64(2) }
+    pushint 2 // 2
+    // revenue_vault/contract.algo.ts:336
+    // assert(status === this.getStatusClosed(), 'EpochNotClosed')
+    ==
+    assert // EpochNotClosed
+    // revenue_vault/contract.algo.ts:339
+    // const hashMaybe = this.epochReportHash(epochId).maybe()
+    itob
+    // revenue_vault/contract.algo.ts:111
+    // epochReportHash = BoxMap<uint64, bytes>({ keyPrefix: Bytes('epoch_hash:') })
+    bytec 10 // "epoch_hash:"
+    dig 1
+    concat
+    // revenue_vault/contract.algo.ts:339
+    // const hashMaybe = this.epochReportHash(epochId).maybe()
+    box_len
+    bury 1
+    // revenue_vault/contract.algo.ts:340
+    // assert(hashMaybe[1], 'ReportNotAnchored')
+    assert // ReportNotAnchored
+    // revenue_vault/contract.algo.ts:343
+    // assert(amount > Uint64(0), 'InvalidDepositAmount')
+    swap
+    assert // InvalidDepositAmount
+    // revenue_vault/contract.algo.ts:112
+    // epochNetDeposited = BoxMap<uint64, uint64>({ keyPrefix: Bytes('epoch_net:') })
+    bytec 11 // "epoch_net:"
+    swap
+    concat
+    dup
+    // revenue_vault/contract.algo.ts:346
+    // const existingDeposit = this.epochNetDeposited(epochId).maybe()
+    box_get
+    swap
+    btoi
+    swap
+    // revenue_vault/contract.algo.ts:348
+    // if (isAlreadyDeposited) {
+    bz depositNetRevenue_after_if_else@5
+    // revenue_vault/contract.algo.ts:351
+    // if (existingAmount !== amount) {
+    dup
+    dig 3
+    !=
+    bz depositNetRevenue_after_if_else@4
+    // revenue_vault/contract.algo.ts:352
+    // return `WARNING: Deposit amount mismatch for epoch ${epochId}: existing=${existingAmount}, new=${amount}`
+    dig 3
+    callsub itoa
+    pushbytes "WARNING: Deposit amount mismatch for epoch "
+    swap
+    concat
+    pushbytes ": existing="
+    concat
+    dig 1
+    callsub itoa
+    concat
+    pushbytes ", new="
+    concat
+    dig 3
+    callsub itoa
+    concat
+
+depositNetRevenue_after_inlined_revenue_vault/contract.algo.ts::RevenueVault.depositNetRevenue@8:
+    // revenue_vault/contract.algo.ts:331
+    // depositNetRevenue(epochId: uint64, amount: uint64): string {
+    dup
+    len
+    itob
+    extract 6 2
+    swap
+    concat
+    bytec_0 // 0x151f7c75
+    swap
+    concat
+    log
+    intc_0 // 1
+    return
+
+depositNetRevenue_after_if_else@4:
+    // revenue_vault/contract.algo.ts:354
+    // return `Net revenue already deposited for epoch ${epochId} (idempotent)`
+    dig 3
+    callsub itoa
+    pushbytes "Net revenue already deposited for epoch "
+    swap
+    concat
+    pushbytes " (idempotent)"
+    concat
+    // revenue_vault/contract.algo.ts:331
+    // depositNetRevenue(epochId: uint64, amount: uint64): string {
+    b depositNetRevenue_after_inlined_revenue_vault/contract.algo.ts::RevenueVault.depositNetRevenue@8
+
+depositNetRevenue_after_if_else@5:
+    // revenue_vault/contract.algo.ts:368
+    // const existingDepositBox = depositBox.maybe()
+    dig 1
+    box_len
+    bury 1
+    // revenue_vault/contract.algo.ts:369
+    // if (!existingDepositBox[1]) {
+    bnz depositNetRevenue_after_if_else@7
+    // revenue_vault/contract.algo.ts:370
+    // depositBox.create({ size: Uint64(8) })
+    dig 1
+    intc_2 // 8
+    box_create
+    pop
+
+depositNetRevenue_after_if_else@7:
+    // revenue_vault/contract.algo.ts:372
+    // depositBox.value = amount
+    dig 2
+    dup
+    itob
+    dig 3
+    swap
+    box_put
+    // revenue_vault/contract.algo.ts:374
+    // return `Net revenue ${amount} deposited for epoch ${epochId}`
+    callsub itoa
+    pushbytes "Net revenue "
+    swap
+    concat
+    pushbytes " deposited for epoch "
+    concat
+    dig 4
+    callsub itoa
+    concat
+    // revenue_vault/contract.algo.ts:331
+    // depositNetRevenue(epochId: uint64, amount: uint64): string {
+    b depositNetRevenue_after_inlined_revenue_vault/contract.algo.ts::RevenueVault.depositNetRevenue@8
+
+
+// revenue_vault/contract.algo.ts::RevenueVault.computeRevenuePerKw[routing]() -> void:
+computeRevenuePerKw:
+    intc_1 // 0
+    pushbytes ""
+    dup
+    // revenue_vault/contract.algo.ts:394
+    // computeRevenuePerKw(epochId: uint64): string {
+    txna ApplicationArgs 1
+    dup
+    len
+    intc_2 // 8
+    ==
+    assert // invalid number of bytes for arc4.uint64
+    btoi
+    dup
+    // revenue_vault/contract.algo.ts:395
+    // this.onlyAdmin()
+    callsub onlyAdmin
+    // revenue_vault/contract.algo.ts:398
+    // const status = this.getEpochStatus(epochId)
+    dup
+    callsub getEpochStatus
+    // revenue_vault/contract.algo.ts:100
+    // private getStatusClosed(): uint64 { return Uint64(2) }
+    pushint 2 // 2
+    // revenue_vault/contract.algo.ts:399
+    // assert(status === this.getStatusClosed(), 'EpochNotClosed')
+    ==
+    assert // EpochNotClosed
+    // revenue_vault/contract.algo.ts:402
+    // const netMaybe = this.epochNetDeposited(epochId).maybe()
+    itob
+    dup
+    // revenue_vault/contract.algo.ts:112
+    // epochNetDeposited = BoxMap<uint64, uint64>({ keyPrefix: Bytes('epoch_net:') })
+    bytec 11 // "epoch_net:"
+    dig 1
+    concat
+    // revenue_vault/contract.algo.ts:402
+    // const netMaybe = this.epochNetDeposited(epochId).maybe()
+    box_get
+    swap
+    btoi
+    cover 2
+    // revenue_vault/contract.algo.ts:403
+    // assert(netMaybe[1], 'RevenueNotDeposited')
+    assert // RevenueNotDeposited
+    // revenue_vault/contract.algo.ts:117
+    // epochSettled = BoxMap<uint64, uint64>({ keyPrefix: Bytes('epoch_set:') })
+    pushbytes "epoch_set:"
+    swap
+    concat
+    dup
+    // revenue_vault/contract.algo.ts:407
+    // const settledMaybe = this.epochSettled(epochId).maybe()
+    box_len
+    bury 1
+    // revenue_vault/contract.algo.ts:408
+    // if (settledMaybe[1]) {
+    bz computeRevenuePerKw_after_if_else@3
+    // revenue_vault/contract.algo.ts:409
+    // return `Epoch ${epochId} already settled`
+    dig 3
+    callsub itoa
+    bytec 9 // "Epoch "
+    swap
+    concat
+    pushbytes " already settled"
+    concat
+
+computeRevenuePerKw_after_inlined_revenue_vault/contract.algo.ts::RevenueVault.computeRevenuePerKw@11:
+    // revenue_vault/contract.algo.ts:394
+    // computeRevenuePerKw(epochId: uint64): string {
+    dup
+    len
+    itob
+    extract 6 2
+    swap
+    concat
+    bytec_0 // 0x151f7c75
+    swap
+    concat
+    log
+    intc_0 // 1
+    return
+
+computeRevenuePerKw_after_if_else@3:
+    // revenue_vault/contract.algo.ts:413
+    // const kwToken = this.kwToken.value
+    intc_1 // 0
+    // revenue_vault/contract.algo.ts:79
+    // kwToken = GlobalState<Account>({ initialValue: Global.zeroAddress })
+    bytec 6 // "kwToken"
+    // revenue_vault/contract.algo.ts:413
+    // const kwToken = this.kwToken.value
+    app_global_get_ex
+    assert // check GlobalState exists
+    // revenue_vault/contract.algo.ts:414
+    // assert(kwToken !== Global.zeroAddress, 'KwTokenNotSet')
+    global ZeroAddress
+    !=
+    assert // KwTokenNotSet
+    // revenue_vault/contract.algo.ts:114
+    // epochTotalKw = BoxMap<uint64, uint64>({ keyPrefix: Bytes('epoch_kw:') })
+    bytec 14 // "epoch_kw:"
+    dig 3
+    concat
+    // revenue_vault/contract.algo.ts:422
+    // const totalKwMaybe = this.epochTotalKw(epochId).maybe()
+    box_get
+    swap
+    btoi
+    bury 6
+    // revenue_vault/contract.algo.ts:425
+    // if (totalKwMaybe[1]) {
+    bz computeRevenuePerKw_else_body@5
+    dig 4
+
+computeRevenuePerKw_after_if_else@6:
+    // revenue_vault/contract.algo.ts:435
+    // assert(totalKw > Uint64(0), 'InvalidTotalKw')
+    dup
+    assert // InvalidTotalKw
+    // revenue_vault/contract.algo.ts:439
+    // const revenuePerKw: uint64 = netDeposited / totalKw
+    dig 2
+    swap
+    /
+    bury 6
+    // revenue_vault/contract.algo.ts:116
+    // epochRevenuePerKw = BoxMap<uint64, uint64>({ keyPrefix: Bytes('epoch_rev_kw:') })
+    pushbytes "epoch_rev_kw:"
+    dig 3
+    concat
+    dup
+    bury 8
+    // revenue_vault/contract.algo.ts:443
+    // const existingRevBox = revBox.maybe()
+    box_len
+    bury 1
+    // revenue_vault/contract.algo.ts:444
+    // if (!existingRevBox[1]) {
+    bnz computeRevenuePerKw_after_if_else@8
+    // revenue_vault/contract.algo.ts:445
+    // revBox.create({ size: Uint64(8) })
+    dig 6
+    intc_2 // 8
+    box_create
+    pop
+
+computeRevenuePerKw_after_if_else@8:
+    // revenue_vault/contract.algo.ts:447
+    // revBox.value = revenuePerKw
+    dig 5
+    itob
+    dig 7
+    swap
+    box_put
+    // revenue_vault/contract.algo.ts:451
+    // const existingSettledBox = settledBox.maybe()
+    dup
+    box_len
+    bury 1
+    // revenue_vault/contract.algo.ts:452
+    // if (!existingSettledBox[1]) {
+    bnz computeRevenuePerKw_after_if_else@10
+    // revenue_vault/contract.algo.ts:453
+    // settledBox.create({ size: Uint64(8) })
+    dup
+    intc_2 // 8
+    box_create
+    pop
+
+computeRevenuePerKw_after_if_else@10:
+    // revenue_vault/contract.algo.ts:455
+    // settledBox.value = Uint64(1)
+    intc_0 // 1
+    itob
+    dig 1
+    swap
+    box_put
+    // revenue_vault/contract.algo.ts:457
+    // return `Entitlements settled for epoch ${epochId}: computeRevenuePerKw complete`
+    dig 3
+    callsub itoa
+    pushbytes "Entitlements settled for epoch "
+    swap
+    concat
+    pushbytes ": computeRevenuePerKw complete"
+    concat
+    // revenue_vault/contract.algo.ts:394
+    // computeRevenuePerKw(epochId: uint64): string {
+    b computeRevenuePerKw_after_inlined_revenue_vault/contract.algo.ts::RevenueVault.computeRevenuePerKw@11
+
+computeRevenuePerKw_else_body@5:
+    // revenue_vault/contract.algo.ts:432
+    // totalKw = Uint64(1000)
+    pushint 1000 // 1000
+    b computeRevenuePerKw_after_if_else@6
+
+
+// revenue_vault/contract.algo.ts::RevenueVault.anchorEntitlements[routing]() -> void:
+anchorEntitlements:
+    // revenue_vault/contract.algo.ts:491
+    // anchorEntitlements(epochId: uint64, entHash: bytes): string {
+    txna ApplicationArgs 1
+    dup
+    len
+    intc_2 // 8
+    ==
+    assert // invalid number of bytes for arc4.uint64
+    btoi
+    txna ApplicationArgs 2
+    dup
+    intc_1 // 0
+    extract_uint16 // on error: invalid array length header
+    pushint 2 // 2
+    +
+    dig 1
+    len
+    ==
+    assert // invalid number of bytes for arc4.dynamic_array<arc4.uint8>
+    extract 2 0
+    // revenue_vault/contract.algo.ts:492
+    // this.onlyAdmin()
+    callsub onlyAdmin
+    // revenue_vault/contract.algo.ts:495
+    // const status = this.getEpochStatus(epochId)
+    dig 1
+    callsub getEpochStatus
+    // revenue_vault/contract.algo.ts:100
+    // private getStatusClosed(): uint64 { return Uint64(2) }
+    pushint 2 // 2
+    // revenue_vault/contract.algo.ts:496
+    // assert(status === this.getStatusClosed(), 'EpochNotClosed')
+    ==
+    assert // EpochNotClosed
+    // revenue_vault/contract.algo.ts:499
+    // const existingHash = this.entitlementsHash(epochId).maybe()
+    dig 1
+    itob
+    // revenue_vault/contract.algo.ts:146
+    // entitlementsHash = BoxMap<uint64, bytes>({ keyPrefix: Bytes('ent_hash:') })
+    bytec 15 // "ent_hash:"
+    swap
+    concat
+    // revenue_vault/contract.algo.ts:499
+    // const existingHash = this.entitlementsHash(epochId).maybe()
+    dup
+    box_len
+    bury 1
+    // revenue_vault/contract.algo.ts:500
+    // assert(existingHash[1] === false, 'EntitlementsAlreadyAnchored')
+    !
+    assert // EntitlementsAlreadyAnchored
+    // revenue_vault/contract.algo.ts:503
+    // assert(entHash.length > Uint64(0), 'InvalidEntitlementsHash')
+    dig 1
+    len
+    assert // InvalidEntitlementsHash
+    // revenue_vault/contract.algo.ts:507
+    // hashBox.create({ size: Uint64(32) })
+    dup
+    intc_3 // 32
+    box_create
+    pop
+    // revenue_vault/contract.algo.ts:508
+    // hashBox.value = entHash
+    dup
+    box_del
+    pop
+    swap
+    box_put
+    // revenue_vault/contract.algo.ts:510
+    // return `Entitlements hash anchored for epoch ${epochId}`
+    callsub itoa
+    pushbytes "Entitlements hash anchored for epoch "
+    swap
+    concat
+    // revenue_vault/contract.algo.ts:491
+    // anchorEntitlements(epochId: uint64, entHash: bytes): string {
+    dup
+    len
+    itob
+    extract 6 2
+    swap
+    concat
+    bytec_0 // 0x151f7c75
+    swap
+    concat
+    log
+    intc_0 // 1
+    return
+
+
+// revenue_vault/contract.algo.ts::RevenueVault.setEntitlement[routing]() -> void:
+setEntitlement:
+    pushbytes ""
+    // revenue_vault/contract.algo.ts:536
+    // setEntitlement(epochId: uint64, account: Account, amount: uint64): string {
+    txna ApplicationArgs 1
+    dup
+    len
+    intc_2 // 8
+    ==
+    assert // invalid number of bytes for arc4.uint64
+    btoi
+    dup
+    txna ApplicationArgs 2
+    dup
+    len
+    intc_3 // 32
+    ==
+    assert // invalid number of bytes for arc4.static_array<arc4.uint8, 32>
+    txna ApplicationArgs 3
+    dup
+    len
+    intc_2 // 8
+    ==
+    assert // invalid number of bytes for arc4.uint64
+    btoi
+    dup
+    cover 2
+    cover 3
+    // revenue_vault/contract.algo.ts:537
+    // this.onlyAdmin()
+    callsub onlyAdmin
+    // revenue_vault/contract.algo.ts:540
+    // const status = this.getEpochStatus(epochId)
+    dig 2
+    callsub getEpochStatus
+    // revenue_vault/contract.algo.ts:100
+    // private getStatusClosed(): uint64 { return Uint64(2) }
+    pushint 2 // 2
+    // revenue_vault/contract.algo.ts:541
+    // assert(status === this.getStatusClosed(), 'EpochNotClosed')
+    ==
+    assert // EpochNotClosed
+    // revenue_vault/contract.algo.ts:544
+    // const hashMaybe = this.entitlementsHash(epochId).maybe()
+    dig 2
+    itob
+    // revenue_vault/contract.algo.ts:146
+    // entitlementsHash = BoxMap<uint64, bytes>({ keyPrefix: Bytes('ent_hash:') })
+    bytec 15 // "ent_hash:"
+    dig 1
+    concat
+    // revenue_vault/contract.algo.ts:544
+    // const hashMaybe = this.entitlementsHash(epochId).maybe()
+    box_len
+    bury 1
+    // revenue_vault/contract.algo.ts:545
+    // assert(hashMaybe[1], 'EntitlementsNotAnchored')
+    assert // EntitlementsNotAnchored
+    // revenue_vault/contract.algo.ts:583
+    // return Bytes(epochId.toString()).concat(Bytes(':')).concat(Bytes(account.bytes))
+    uncover 3
+    callsub itoa
+    bytec_2 // ":"
+    concat
+    uncover 2
+    concat
+    // revenue_vault/contract.algo.ts:147
+    // entitledAmount = BoxMap<bytes, uint64>({ keyPrefix: Bytes('ent_amount:') })
+    bytec 16 // "ent_amount:"
+    swap
+    concat
+    // revenue_vault/contract.algo.ts:552
+    // const existingAmount = this.entitledAmount(entitlementKey).maybe()
+    dup
+    box_len
+    bury 1
+    // revenue_vault/contract.algo.ts:553
+    // assert(existingAmount[1] === false, 'EntitlementAlreadySet')
+    !
+    assert // EntitlementAlreadySet
+    // revenue_vault/contract.algo.ts:557
+    // amountBox.create({ size: Uint64(8) })
+    dup
+    intc_2 // 8
+    box_create
+    pop
+    // revenue_vault/contract.algo.ts:558
+    // amountBox.value = amount
+    uncover 2
+    itob
+    box_put
+    // revenue_vault/contract.algo.ts:148
+    // sumEntitlements = BoxMap<uint64, uint64>({ keyPrefix: Bytes('ent_sum:') })
+    bytec 22 // "ent_sum:"
+    swap
+    concat
+    dup
+    cover 2
+    // revenue_vault/contract.algo.ts:562
+    // const sumMaybe = sumBox.maybe()
+    box_get
+    dup
+    cover 2
+    cover 3
+    btoi
+    cover 2
+    // revenue_vault/contract.algo.ts:565
+    // if (sumMaybe[1]) {
+    bnz setEntitlement_if_body@2
+    bury 5
+
+setEntitlement_after_if_else@3:
+    // revenue_vault/contract.algo.ts:569
+    // if (sumMaybe[1]) {
+    dig 1
+    bz setEntitlement_else_body@5
+    // revenue_vault/contract.algo.ts:570
+    // sumBox.value = newSum
+    dig 4
+    itob
+    dig 3
+    swap
+    box_put
+
+setEntitlement_after_if_else@6:
+    // revenue_vault/contract.algo.ts:576
+    // return `Entitlement set for epoch ${epochId}. Running sum: ${newSum}`
+    dig 3
+    callsub itoa
+    pushbytes "Entitlement set for epoch "
+    swap
+    concat
+    pushbytes ". Running sum: "
+    concat
+    dig 5
+    callsub itoa
+    concat
+    // revenue_vault/contract.algo.ts:536
+    // setEntitlement(epochId: uint64, account: Account, amount: uint64): string {
+    dup
+    len
+    itob
+    extract 6 2
+    swap
+    concat
+    bytec_0 // 0x151f7c75
+    swap
+    concat
+    log
+    intc_0 // 1
+    return
+
+setEntitlement_else_body@5:
+    // revenue_vault/contract.algo.ts:572
+    // sumBox.create({ size: Uint64(8) })
+    dig 2
+    dup
+    intc_2 // 8
+    box_create
+    pop
+    // revenue_vault/contract.algo.ts:573
+    // sumBox.value = newSum
+    dig 5
+    itob
+    box_put
+    b setEntitlement_after_if_else@6
+
+setEntitlement_if_body@2:
+    // revenue_vault/contract.algo.ts:566
+    // newSum = (sumMaybe[0] as uint64) + amount
+    dig 1
+    +
+    bury 5
+    b setEntitlement_after_if_else@3
+
+
+// revenue_vault/contract.algo.ts::RevenueVault.settleEpochEntitlements[routing]() -> void:
+settleEpochEntitlements:
+    // revenue_vault/contract.algo.ts:608
+    // settleEpochEntitlements(epochId: uint64): string {
+    txna ApplicationArgs 1
+    dup
+    len
+    intc_2 // 8
+    ==
+    assert // invalid number of bytes for arc4.uint64
+    btoi
+    // revenue_vault/contract.algo.ts:609
+    // this.onlyAdmin()
+    callsub onlyAdmin
+    // revenue_vault/contract.algo.ts:612
+    // const status = this.getEpochStatus(epochId)
+    dup
+    callsub getEpochStatus
+    // revenue_vault/contract.algo.ts:100
+    // private getStatusClosed(): uint64 { return Uint64(2) }
+    pushint 2 // 2
+    // revenue_vault/contract.algo.ts:613
+    // assert(status === this.getStatusClosed(), 'EpochNotClosed')
+    ==
+    assert // EpochNotClosed
+    // revenue_vault/contract.algo.ts:616
+    // const reportHashMaybe = this.epochReportHash(epochId).maybe()
+    dup
+    itob
+    // revenue_vault/contract.algo.ts:111
+    // epochReportHash = BoxMap<uint64, bytes>({ keyPrefix: Bytes('epoch_hash:') })
+    bytec 10 // "epoch_hash:"
+    dig 1
+    concat
+    // revenue_vault/contract.algo.ts:616
+    // const reportHashMaybe = this.epochReportHash(epochId).maybe()
+    box_len
+    bury 1
+    // revenue_vault/contract.algo.ts:617
+    // assert(reportHashMaybe[1], 'ReportNotAnchored')
+    assert // ReportNotAnchored
+    // revenue_vault/contract.algo.ts:112
+    // epochNetDeposited = BoxMap<uint64, uint64>({ keyPrefix: Bytes('epoch_net:') })
+    bytec 11 // "epoch_net:"
+    dig 1
+    concat
+    // revenue_vault/contract.algo.ts:620
+    // const netDepositedMaybe = this.epochNetDeposited(epochId).maybe()
+    box_get
+    swap
+    btoi
+    // revenue_vault/contract.algo.ts:621
+    // assert(netDepositedMaybe[1], 'RevenueNotDeposited')
+    swap
+    assert // RevenueNotDeposited
+    // revenue_vault/contract.algo.ts:623
+    // assert(netDeposited > Uint64(0), 'InvalidNetRevenue')
+    dup
+    assert // InvalidNetRevenue
+    // revenue_vault/contract.algo.ts:146
+    // entitlementsHash = BoxMap<uint64, bytes>({ keyPrefix: Bytes('ent_hash:') })
+    bytec 15 // "ent_hash:"
+    dig 2
+    concat
+    // revenue_vault/contract.algo.ts:626
+    // const entHashMaybe = this.entitlementsHash(epochId).maybe()
+    box_len
+    bury 1
+    // revenue_vault/contract.algo.ts:627
+    // assert(entHashMaybe[1], 'EntitlementsNotAnchored')
+    assert // EntitlementsNotAnchored
+    // revenue_vault/contract.algo.ts:148
+    // sumEntitlements = BoxMap<uint64, uint64>({ keyPrefix: Bytes('ent_sum:') })
+    bytec 22 // "ent_sum:"
+    dig 2
+    concat
+    // revenue_vault/contract.algo.ts:630
+    // const sumEntMaybe = this.sumEntitlements(epochId).maybe()
+    box_get
+    swap
+    btoi
+    // revenue_vault/contract.algo.ts:631
+    // assert(sumEntMaybe[1], 'EntitlementsNotSet')
+    swap
+    assert // EntitlementsNotSet
+    // revenue_vault/contract.algo.ts:636
+    // assert(sumEnt === netDeposited, 'EntitlementsSumMismatch')
+    dup
+    dig 2
+    ==
+    assert // EntitlementsSumMismatch
+    // revenue_vault/contract.algo.ts:113
+    // epochSnapshotId = BoxMap<uint64, uint64>({ keyPrefix: Bytes('epoch_snap:') })
+    bytec 23 // "epoch_snap:"
+    dig 3
+    concat
+    // revenue_vault/contract.algo.ts:641
+    // snapBox.create({ size: Uint64(8) })
+    dup
+    intc_2 // 8
+    box_create
+    pop
+    // revenue_vault/contract.algo.ts:642
+    // snapBox.value = epochId // Placeholder: snapshotId is conceptual in V1
+    dig 3
+    box_put
+    // revenue_vault/contract.algo.ts:114
+    // epochTotalKw = BoxMap<uint64, uint64>({ keyPrefix: Bytes('epoch_kw:') })
+    bytec 14 // "epoch_kw:"
+    dig 3
+    concat
+    // revenue_vault/contract.algo.ts:646
+    // finalizedBox.create({ size: Uint64(8) })
+    dup
+    intc_2 // 8
+    box_create
+    pop
+    // revenue_vault/contract.algo.ts:647
+    // finalizedBox.value = netDeposited // Store netDeposited for reference
+    dig 2
+    itob
+    box_put
+    // revenue_vault/contract.algo.ts:108
+    // epochStatus = BoxMap<uint64, uint64>({ keyPrefix: Bytes('epoch_status:') })
+    bytec 8 // "epoch_status:"
+    uncover 3
+    concat
+    // revenue_vault/contract.algo.ts:101
+    // private getStatusSettled(): uint64 { return Uint64(3) }
+    pushint 3 // 3
+    // revenue_vault/contract.algo.ts:650
+    // this.epochStatus(epochId).value = this.getStatusSettled()
+    itob
+    box_put
+    // revenue_vault/contract.algo.ts:652
+    // return `Epoch ${epochId} settled. Entitlements sum ${sumEnt} matches netDeposited ${netDeposited}.`
+    uncover 2
+    callsub itoa
+    bytec 9 // "Epoch "
+    swap
+    concat
+    pushbytes " settled. Entitlements sum "
+    concat
+    swap
+    callsub itoa
+    concat
+    pushbytes " matches netDeposited "
+    concat
+    swap
+    callsub itoa
+    concat
+    pushbytes "."
+    concat
+    // revenue_vault/contract.algo.ts:608
+    // settleEpochEntitlements(epochId: uint64): string {
+    dup
+    len
+    itob
+    extract 6 2
+    swap
+    concat
+    bytec_0 // 0x151f7c75
+    swap
+    concat
+    log
+    intc_0 // 1
+    return
+
+
+// revenue_vault/contract.algo.ts::RevenueVault.claim[routing]() -> void:
+claim:
+    // revenue_vault/contract.algo.ts:694
+    // claim(epochId: uint64): string {
+    txna ApplicationArgs 1
+    dup
+    len
+    intc_2 // 8
+    ==
+    assert // invalid number of bytes for arc4.uint64
+    btoi
+    // revenue_vault/contract.algo.ts:158
+    // assert(this.paused.value === Uint64(0), 'ContractPaused')
+    intc_1 // 0
+    // revenue_vault/contract.algo.ts:90
+    // paused = GlobalState<uint64>({ initialValue: Uint64(0) })
+    bytec_1 // "paused"
+    // revenue_vault/contract.algo.ts:158
+    // assert(this.paused.value === Uint64(0), 'ContractPaused')
+    app_global_get_ex
+    assert // check GlobalState exists
+    !
+    assert // ContractPaused
+    // revenue_vault/contract.algo.ts:698
+    // const status = this.getEpochStatus(epochId)
+    dup
+    callsub getEpochStatus
+    // revenue_vault/contract.algo.ts:101
+    // private getStatusSettled(): uint64 { return Uint64(3) }
+    pushint 3 // 3
+    // revenue_vault/contract.algo.ts:699
+    // assert(status === this.getStatusSettled(), 'EpochNotSettled')
+    ==
+    assert // EpochNotSettled
+    // revenue_vault/contract.algo.ts:702
+    // const claimKey = this.makeClaimKey(epochId, Txn.sender)
+    txn Sender
+    // revenue_vault/contract.algo.ts:165
+    // return Bytes(epochId.toString()).concat(Bytes(':')).concat(Bytes(account.bytes))
+    dig 1
+    callsub itoa
+    bytec_2 // ":"
+    concat
+    swap
+    concat
+    // revenue_vault/contract.algo.ts:124
+    // epochClaimed = BoxMap<bytes, uint64>({ keyPrefix: Bytes('claimed:') })
+    bytec 17 // "claimed:"
+    swap
+    concat
+    // revenue_vault/contract.algo.ts:703
+    // const claimedMaybe = this.epochClaimed(claimKey).maybe()
+    dup
+    box_len
+    bury 1
+    // revenue_vault/contract.algo.ts:704
+    // assert(claimedMaybe[1] === false, 'AlreadyClaimed')
+    !
+    assert // AlreadyClaimed
+    // revenue_vault/contract.algo.ts:707
+    // const entitlementKey = this.makeEntitlementKey(epochId, Txn.sender)
+    txn Sender
+    // revenue_vault/contract.algo.ts:583
+    // return Bytes(epochId.toString()).concat(Bytes(':')).concat(Bytes(account.bytes))
+    dig 2
+    callsub itoa
+    bytec_2 // ":"
+    concat
+    swap
+    concat
+    // revenue_vault/contract.algo.ts:147
+    // entitledAmount = BoxMap<bytes, uint64>({ keyPrefix: Bytes('ent_amount:') })
+    bytec 16 // "ent_amount:"
+    swap
+    concat
+    // revenue_vault/contract.algo.ts:708
+    // const entitlementMaybe = this.entitledAmount(entitlementKey).maybe()
+    box_get
+    swap
+    btoi
+    // revenue_vault/contract.algo.ts:711
+    // assert(entitlementMaybe[1], 'NoEntitlementFound')
+    swap
+    assert // NoEntitlementFound
+    // revenue_vault/contract.algo.ts:713
+    // assert(claimAmount > Uint64(0), 'NothingToClaim')
+    dup
+    assert // NothingToClaim
+    // revenue_vault/contract.algo.ts:717
+    // claimBox.create({ size: Uint64(8) })
+    dig 1
+    intc_2 // 8
+    box_create
+    pop
+    // revenue_vault/contract.algo.ts:718
+    // claimBox.value = Uint64(1)
+    intc_0 // 1
+    itob
+    uncover 2
+    swap
+    box_put
+    // revenue_vault/contract.algo.ts:734
+    // return `Claimed ${claimAmount} for epoch ${epochId}`
+    callsub itoa
+    pushbytes "Claimed "
+    swap
+    concat
+    pushbytes " for epoch "
+    concat
+    swap
+    callsub itoa
+    concat
+    // revenue_vault/contract.algo.ts:694
+    // claim(epochId: uint64): string {
+    dup
+    len
+    itob
+    extract 6 2
+    swap
+    concat
+    bytec_0 // 0x151f7c75
+    swap
+    concat
+    log
+    intc_0 // 1
+    return
+
+
+// revenue_vault/contract.algo.ts::RevenueVault.viewClaimable[routing]() -> void:
+viewClaimable:
+    pushbytes ""
+    // revenue_vault/contract.algo.ts:747
+    // viewClaimable(epochId: uint64, account: Account): uint64 {
+    txna ApplicationArgs 1
+    dup
+    len
+    intc_2 // 8
+    ==
+    assert // invalid number of bytes for arc4.uint64
+    btoi
+    dup
+    txna ApplicationArgs 2
+    dup
+    cover 2
+    len
+    intc_3 // 32
+    ==
+    assert // invalid number of bytes for arc4.static_array<arc4.uint8, 32>
+    // revenue_vault/contract.algo.ts:749
+    // const status = this.getEpochStatus(epochId)
+    callsub getEpochStatus
+    // revenue_vault/contract.algo.ts:101
+    // private getStatusSettled(): uint64 { return Uint64(3) }
+    pushint 3 // 3
+    // revenue_vault/contract.algo.ts:750
+    // if (status !== this.getStatusSettled()) {
+    !=
+    bz viewClaimable_after_if_else@3
+    // revenue_vault/contract.algo.ts:751
+    // return Uint64(0)
+    intc_1 // 0
+
+viewClaimable_after_inlined_revenue_vault/contract.algo.ts::RevenueVault.viewClaimable@8:
+    // revenue_vault/contract.algo.ts:747
+    // viewClaimable(epochId: uint64, account: Account): uint64 {
+    itob
+    bytec_0 // 0x151f7c75
+    swap
+    concat
+    log
+    intc_0 // 1
+    return
+
+viewClaimable_after_if_else@3:
+    // revenue_vault/contract.algo.ts:165
+    // return Bytes(epochId.toString()).concat(Bytes(':')).concat(Bytes(account.bytes))
+    dig 1
+    callsub itoa
+    bytec_2 // ":"
+    concat
+    dig 1
+    concat
+    // revenue_vault/contract.algo.ts:124
+    // epochClaimed = BoxMap<bytes, uint64>({ keyPrefix: Bytes('claimed:') })
+    bytec 17 // "claimed:"
+    swap
+    concat
+    // revenue_vault/contract.algo.ts:756
+    // const claimedMaybe = this.epochClaimed(claimKey).maybe()
+    box_len
+    bury 1
+    // revenue_vault/contract.algo.ts:757
+    // if (claimedMaybe[1]) {
+    bz viewClaimable_after_if_else@5
+    // revenue_vault/contract.algo.ts:758
+    // return Uint64(0) // Already claimed
+    intc_1 // 0
+    // revenue_vault/contract.algo.ts:747
+    // viewClaimable(epochId: uint64, account: Account): uint64 {
+    b viewClaimable_after_inlined_revenue_vault/contract.algo.ts::RevenueVault.viewClaimable@8
+
+viewClaimable_after_if_else@5:
+    // revenue_vault/contract.algo.ts:583
+    // return Bytes(epochId.toString()).concat(Bytes(':')).concat(Bytes(account.bytes))
+    dig 1
+    callsub itoa
+    bytec_2 // ":"
+    concat
+    dig 1
+    concat
+    // revenue_vault/contract.algo.ts:147
+    // entitledAmount = BoxMap<bytes, uint64>({ keyPrefix: Bytes('ent_amount:') })
+    bytec 16 // "ent_amount:"
+    swap
+    concat
+    // revenue_vault/contract.algo.ts:763
+    // const entitlementMaybe = this.entitledAmount(entitlementKey).maybe()
+    box_get
+    swap
+    btoi
+    bury 4
+    // revenue_vault/contract.algo.ts:765
+    // if (entitlementMaybe[1]) {
+    bz viewClaimable_after_if_else@7
+    dig 2
+    // revenue_vault/contract.algo.ts:747
+    // viewClaimable(epochId: uint64, account: Account): uint64 {
+    b viewClaimable_after_inlined_revenue_vault/contract.algo.ts::RevenueVault.viewClaimable@8
+
+viewClaimable_after_if_else@7:
+    // revenue_vault/contract.algo.ts:769
+    // return Uint64(0) // No entitlement found
+    intc_1 // 0
+    // revenue_vault/contract.algo.ts:747
+    // viewClaimable(epochId: uint64, account: Account): uint64 {
+    b viewClaimable_after_inlined_revenue_vault/contract.algo.ts::RevenueVault.viewClaimable@8
+
+
+// revenue_vault/contract.algo.ts::RevenueVault.pauseClaims[routing]() -> void:
+pauseClaims:
+    // revenue_vault/contract.algo.ts:779
+    // this.onlyAdmin()
+    callsub onlyAdmin
+    // revenue_vault/contract.algo.ts:90
+    // paused = GlobalState<uint64>({ initialValue: Uint64(0) })
+    bytec_1 // "paused"
+    // revenue_vault/contract.algo.ts:780
+    // this.paused.value = Uint64(1)
+    intc_0 // 1
+    app_global_put
+    // revenue_vault/contract.algo.ts:778
+    // pauseClaims(): string {
+    pushbytes 0x151f7c75000d436c61696d7320706175736564
+    log
+    intc_0 // 1
+    return
+
+
+// revenue_vault/contract.algo.ts::RevenueVault.unpauseClaims[routing]() -> void:
+unpauseClaims:
+    // revenue_vault/contract.algo.ts:788
+    // this.onlyAdmin()
+    callsub onlyAdmin
+    // revenue_vault/contract.algo.ts:90
+    // paused = GlobalState<uint64>({ initialValue: Uint64(0) })
+    bytec_1 // "paused"
+    // revenue_vault/contract.algo.ts:789
+    // this.paused.value = Uint64(0)
+    intc_1 // 0
+    app_global_put
+    // revenue_vault/contract.algo.ts:787
+    // unpauseClaims(): string {
+    pushbytes 0x151f7c75000e436c61696d7320726573756d6564
+    log
+    intc_0 // 1
+    return
+
+
+// revenue_vault/contract.algo.ts::RevenueVault.updateAdmin[routing]() -> void:
+updateAdmin:
+    // revenue_vault/contract.algo.ts:796
+    // updateAdmin(newAdmin: Account): string {
+    txna ApplicationArgs 1
+    dup
+    len
+    intc_3 // 32
+    ==
+    assert // invalid number of bytes for arc4.static_array<arc4.uint8, 32>
+    // revenue_vault/contract.algo.ts:797
+    // this.onlyAdmin()
+    callsub onlyAdmin
+    // revenue_vault/contract.algo.ts:798
+    // assert(newAdmin !== Global.zeroAddress, 'InvalidAddress')
+    dup
+    global ZeroAddress
+    !=
+    assert // InvalidAddress
+    // revenue_vault/contract.algo.ts:77
+    // admin = GlobalState<Account>({ initialValue: Txn.sender })
+    bytec_3 // "admin"
+    // revenue_vault/contract.algo.ts:799
+    // this.admin.value = newAdmin
+    swap
+    app_global_put
+    // revenue_vault/contract.algo.ts:796
+    // updateAdmin(newAdmin: Account): string {
+    pushbytes 0x151f7c75000d41646d696e2075706461746564
+    log
+    intc_0 // 1
+    return
+
+
+// revenue_vault/contract.algo.ts::RevenueVault.updateTreasury[routing]() -> void:
+updateTreasury:
+    // revenue_vault/contract.algo.ts:806
+    // updateTreasury(newTreasury: Account): string {
+    txna ApplicationArgs 1
+    dup
+    len
+    intc_3 // 32
+    ==
+    assert // invalid number of bytes for arc4.static_array<arc4.uint8, 32>
+    // revenue_vault/contract.algo.ts:807
+    // this.onlyAdmin()
+    callsub onlyAdmin
+    // revenue_vault/contract.algo.ts:808
+    // assert(newTreasury !== Global.zeroAddress, 'InvalidAddress')
+    dup
+    global ZeroAddress
+    !=
+    assert // InvalidAddress
+    // revenue_vault/contract.algo.ts:81
+    // treasury = GlobalState<Account>({ initialValue: Global.zeroAddress })
+    bytec 7 // "treasury"
+    // revenue_vault/contract.algo.ts:809
+    // this.treasury.value = newTreasury
+    swap
+    app_global_put
+    // revenue_vault/contract.algo.ts:806
+    // updateTreasury(newTreasury: Account): string {
+    pushbytes 0x151f7c75001054726561737572792075706461746564
+    log
+    intc_0 // 1
+    return
+
+
+// revenue_vault/contract.algo.ts::RevenueVault.getEpochInfo[routing]() -> void:
+getEpochInfo:
+    pushbytes ""
+    dupn 4
+    // revenue_vault/contract.algo.ts:819-827
+    // getEpochInfo(epochId: uint64): {
+    //   status: uint64
+    //   startTs: uint64
+    //   endTs: uint64
+    //   netDeposited: uint64
+    //   snapshotId: uint64
+    //   totalKw: uint64
+    //   alphaBps: uint64
+    // } {
+    txna ApplicationArgs 1
+    dup
+    len
+    intc_2 // 8
+    ==
+    assert // invalid number of bytes for arc4.uint64
+    btoi
+    // revenue_vault/contract.algo.ts:828
+    // const status = this.getEpochStatus(epochId)
+    dup
+    callsub getEpochStatus
+    swap
+    // revenue_vault/contract.algo.ts:829
+    // const startMaybe = this.epochStartTs(epochId).maybe()
+    itob
+    // revenue_vault/contract.algo.ts:109
+    // epochStartTs = BoxMap<uint64, uint64>({ keyPrefix: Bytes('epoch_start:') })
+    bytec 20 // "epoch_start:"
+    dig 1
+    concat
+    // revenue_vault/contract.algo.ts:829
+    // const startMaybe = this.epochStartTs(epochId).maybe()
+    box_get
+    swap
+    btoi
+    cover 2
+    // revenue_vault/contract.algo.ts:110
+    // epochEndTs = BoxMap<uint64, uint64>({ keyPrefix: Bytes('epoch_end:') })
+    bytec 21 // "epoch_end:"
+    dig 2
+    concat
+    // revenue_vault/contract.algo.ts:830
+    // const endMaybe = this.epochEndTs(epochId).maybe()
+    box_get
+    cover 3
+    btoi
+    cover 2
+    // revenue_vault/contract.algo.ts:112
+    // epochNetDeposited = BoxMap<uint64, uint64>({ keyPrefix: Bytes('epoch_net:') })
+    bytec 11 // "epoch_net:"
+    dig 2
+    concat
+    // revenue_vault/contract.algo.ts:831
+    // const netMaybe = this.epochNetDeposited(epochId).maybe()
+    box_get
+    cover 3
+    btoi
+    cover 2
+    // revenue_vault/contract.algo.ts:113
+    // epochSnapshotId = BoxMap<uint64, uint64>({ keyPrefix: Bytes('epoch_snap:') })
+    bytec 23 // "epoch_snap:"
+    dig 2
+    concat
+    // revenue_vault/contract.algo.ts:832
+    // const snapMaybe = this.epochSnapshotId(epochId).maybe()
+    box_get
+    cover 3
+    btoi
+    cover 2
+    // revenue_vault/contract.algo.ts:114
+    // epochTotalKw = BoxMap<uint64, uint64>({ keyPrefix: Bytes('epoch_kw:') })
+    bytec 14 // "epoch_kw:"
+    dig 2
+    concat
+    // revenue_vault/contract.algo.ts:833
+    // const kwMaybe = this.epochTotalKw(epochId).maybe()
+    box_get
+    cover 3
+    btoi
+    cover 2
+    // revenue_vault/contract.algo.ts:115
+    // epochAlphaBps = BoxMap<uint64, uint64>({ keyPrefix: Bytes('epoch_alpha:') })
+    pushbytes "epoch_alpha:"
+    uncover 2
+    concat
+    // revenue_vault/contract.algo.ts:834
+    // const alphaMaybe = this.epochAlphaBps(epochId).maybe()
+    box_get
+    cover 2
+    btoi
+    swap
+    // revenue_vault/contract.algo.ts:838
+    // startTs: startMaybe[1] ? (startMaybe[0] as uint64) : Uint64(0),
+    bz getEpochInfo_ternary_false@3
+    dig 10
+    bury 17
+
+getEpochInfo_ternary_merge@4:
+    // revenue_vault/contract.algo.ts:839
+    // endTs: endMaybe[1] ? (endMaybe[0] as uint64) : Uint64(0),
+    dig 9
+    bz getEpochInfo_ternary_false@6
+    dig 8
+    bury 16
+
+getEpochInfo_ternary_merge@7:
+    // revenue_vault/contract.algo.ts:840
+    // netDeposited: netMaybe[1] ? (netMaybe[0] as uint64) : Uint64(0),
+    dig 7
+    bz getEpochInfo_ternary_false@9
+    dig 6
+    bury 15
+
+getEpochInfo_ternary_merge@10:
+    // revenue_vault/contract.algo.ts:841
+    // snapshotId: snapMaybe[1] ? (snapMaybe[0] as uint64) : Uint64(0),
+    dig 5
+    bz getEpochInfo_ternary_false@12
+    dig 4
+    bury 14
+
+getEpochInfo_ternary_merge@13:
+    // revenue_vault/contract.algo.ts:842
+    // totalKw: kwMaybe[1] ? (kwMaybe[0] as uint64) : Uint64(0),
+    dig 3
+    bz getEpochInfo_ternary_false@15
+    dig 2
+    bury 13
+
+getEpochInfo_ternary_merge@16:
+    // revenue_vault/contract.algo.ts:843
+    // alphaBps: alphaMaybe[1] ? (alphaMaybe[0] as uint64) : Uint64(0),
+    dig 1
+    bz getEpochInfo_ternary_false@18
+    dup
+
+getEpochInfo_ternary_merge@19:
+    // revenue_vault/contract.algo.ts:836-844
+    // return {
+    //   status,
+    //   startTs: startMaybe[1] ? (startMaybe[0] as uint64) : Uint64(0),
+    //   endTs: endMaybe[1] ? (endMaybe[0] as uint64) : Uint64(0),
+    //   netDeposited: netMaybe[1] ? (netMaybe[0] as uint64) : Uint64(0),
+    //   snapshotId: snapMaybe[1] ? (snapMaybe[0] as uint64) : Uint64(0),
+    //   totalKw: kwMaybe[1] ? (kwMaybe[0] as uint64) : Uint64(0),
+    //   alphaBps: alphaMaybe[1] ? (alphaMaybe[0] as uint64) : Uint64(0),
+    // }
+    dig 12
+    itob
+    dig 18
+    itob
+    concat
+    dig 17
+    itob
+    concat
+    dig 16
+    itob
+    concat
+    dig 15
+    itob
+    concat
+    dig 14
+    itob
+    concat
+    swap
+    itob
+    concat
+    // revenue_vault/contract.algo.ts:819-827
+    // getEpochInfo(epochId: uint64): {
+    //   status: uint64
+    //   startTs: uint64
+    //   endTs: uint64
+    //   netDeposited: uint64
+    //   snapshotId: uint64
+    //   totalKw: uint64
+    //   alphaBps: uint64
+    // } {
+    bytec_0 // 0x151f7c75
+    swap
+    concat
+    log
+    intc_0 // 1
+    return
+
+getEpochInfo_ternary_false@18:
+    // revenue_vault/contract.algo.ts:843
+    // alphaBps: alphaMaybe[1] ? (alphaMaybe[0] as uint64) : Uint64(0),
+    intc_1 // 0
+    b getEpochInfo_ternary_merge@19
+
+getEpochInfo_ternary_false@15:
+    // revenue_vault/contract.algo.ts:842
+    // totalKw: kwMaybe[1] ? (kwMaybe[0] as uint64) : Uint64(0),
+    intc_1 // 0
+    bury 13
+    b getEpochInfo_ternary_merge@16
+
+getEpochInfo_ternary_false@12:
+    // revenue_vault/contract.algo.ts:841
+    // snapshotId: snapMaybe[1] ? (snapMaybe[0] as uint64) : Uint64(0),
+    intc_1 // 0
+    bury 14
+    b getEpochInfo_ternary_merge@13
+
+getEpochInfo_ternary_false@9:
+    // revenue_vault/contract.algo.ts:840
+    // netDeposited: netMaybe[1] ? (netMaybe[0] as uint64) : Uint64(0),
+    intc_1 // 0
+    bury 15
+    b getEpochInfo_ternary_merge@10
+
+getEpochInfo_ternary_false@6:
+    // revenue_vault/contract.algo.ts:839
+    // endTs: endMaybe[1] ? (endMaybe[0] as uint64) : Uint64(0),
+    intc_1 // 0
+    bury 16
+    b getEpochInfo_ternary_merge@7
+
+getEpochInfo_ternary_false@3:
+    // revenue_vault/contract.algo.ts:838
+    // startTs: startMaybe[1] ? (startMaybe[0] as uint64) : Uint64(0),
+    intc_1 // 0
+    bury 17
+    b getEpochInfo_ternary_merge@4
+
+
+// revenue_vault/contract.algo.ts::RevenueVault.getEpochReportHash[routing]() -> void:
+getEpochReportHash:
+    // revenue_vault/contract.algo.ts:850
+    // getEpochReportHash(epochId: uint64): bytes {
+    txna ApplicationArgs 1
+    dup
+    len
+    intc_2 // 8
+    ==
+    assert // invalid number of bytes for arc4.uint64
+    btoi
+    // revenue_vault/contract.algo.ts:851
+    // const maybe = this.epochReportHash(epochId).maybe()
+    itob
+    // revenue_vault/contract.algo.ts:111
+    // epochReportHash = BoxMap<uint64, bytes>({ keyPrefix: Bytes('epoch_hash:') })
+    bytec 10 // "epoch_hash:"
+    swap
+    concat
+    // revenue_vault/contract.algo.ts:851
+    // const maybe = this.epochReportHash(epochId).maybe()
+    box_get
+    // revenue_vault/contract.algo.ts:852
+    // return maybe[1] ? (maybe[0] as bytes) : Bytes('')
+    bz getEpochReportHash_ternary_false@3
+    dup
+
+getEpochReportHash_ternary_merge@4:
+    // revenue_vault/contract.algo.ts:850
+    // getEpochReportHash(epochId: uint64): bytes {
+    dup
+    len
+    itob
+    extract 6 2
+    swap
+    concat
+    bytec_0 // 0x151f7c75
+    swap
+    concat
+    log
+    intc_0 // 1
+    return
+
+getEpochReportHash_ternary_false@3:
+    // revenue_vault/contract.algo.ts:852
+    // return maybe[1] ? (maybe[0] as bytes) : Bytes('')
+    pushbytes ""
+    b getEpochReportHash_ternary_merge@4
+
+
+// revenue_vault/contract.algo.ts::RevenueVault.hasClaimed[routing]() -> void:
+hasClaimed:
+    // revenue_vault/contract.algo.ts:858
+    // hasClaimed(epochId: uint64, account: Account): uint64 {
+    txna ApplicationArgs 1
+    dup
+    len
+    intc_2 // 8
+    ==
+    assert // invalid number of bytes for arc4.uint64
+    btoi
+    txna ApplicationArgs 2
+    dup
+    len
+    intc_3 // 32
+    ==
+    assert // invalid number of bytes for arc4.static_array<arc4.uint8, 32>
+    // revenue_vault/contract.algo.ts:165
+    // return Bytes(epochId.toString()).concat(Bytes(':')).concat(Bytes(account.bytes))
+    swap
+    callsub itoa
+    bytec_2 // ":"
+    concat
+    swap
+    concat
+    // revenue_vault/contract.algo.ts:124
+    // epochClaimed = BoxMap<bytes, uint64>({ keyPrefix: Bytes('claimed:') })
+    bytec 17 // "claimed:"
+    swap
+    concat
+    // revenue_vault/contract.algo.ts:860
+    // const maybe = this.epochClaimed(claimKey).maybe()
+    box_len
+    bury 1
+    // revenue_vault/contract.algo.ts:858
+    // hasClaimed(epochId: uint64, account: Account): uint64 {
+    itob
+    bytec_0 // 0x151f7c75
+    swap
+    concat
+    log
+    intc_0 // 1
+    return
+
+
+// revenue_vault/contract.algo.ts::RevenueVault.getRegistry[routing]() -> void:
+getRegistry:
+    // revenue_vault/contract.algo.ts:868
+    // return this.registry.value
+    intc_1 // 0
+    // revenue_vault/contract.algo.ts:78
+    // registry = GlobalState<Account>({ initialValue: Global.zeroAddress })
+    bytec 5 // "registry"
+    // revenue_vault/contract.algo.ts:868
+    // return this.registry.value
+    app_global_get_ex
+    assert // check GlobalState exists
+    // revenue_vault/contract.algo.ts:867
+    // getRegistry(): Account {
+    bytec_0 // 0x151f7c75
+    swap
+    concat
+    log
+    intc_0 // 1
+    return
+
+
+// revenue_vault/contract.algo.ts::RevenueVault.getKwToken[routing]() -> void:
+getKwToken:
+    // revenue_vault/contract.algo.ts:872
+    // return this.kwToken.value
+    intc_1 // 0
+    // revenue_vault/contract.algo.ts:79
+    // kwToken = GlobalState<Account>({ initialValue: Global.zeroAddress })
+    bytec 6 // "kwToken"
+    // revenue_vault/contract.algo.ts:872
+    // return this.kwToken.value
+    app_global_get_ex
+    assert // check GlobalState exists
+    // revenue_vault/contract.algo.ts:871
+    // getKwToken(): Account {
+    bytec_0 // 0x151f7c75
+    swap
+    concat
+    log
+    intc_0 // 1
+    return
+
+
+// revenue_vault/contract.algo.ts::RevenueVault.getKwhReceipt[routing]() -> void:
+getKwhReceipt:
+    // revenue_vault/contract.algo.ts:876
+    // return this.kwhReceipt.value
+    intc_1 // 0
+    // revenue_vault/contract.algo.ts:80
+    // kwhReceipt = GlobalState<Account>({ initialValue: Global.zeroAddress })
+    bytec 12 // "kwhReceipt"
+    // revenue_vault/contract.algo.ts:876
+    // return this.kwhReceipt.value
+    app_global_get_ex
+    assert // check GlobalState exists
+    // revenue_vault/contract.algo.ts:875
+    // getKwhReceipt(): Account {
+    bytec_0 // 0x151f7c75
+    swap
+    concat
+    log
+    intc_0 // 1
+    return
+
+
+// revenue_vault/contract.algo.ts::RevenueVault.getTreasury[routing]() -> void:
+getTreasury:
+    // revenue_vault/contract.algo.ts:880
+    // return this.treasury.value
+    intc_1 // 0
+    // revenue_vault/contract.algo.ts:81
+    // treasury = GlobalState<Account>({ initialValue: Global.zeroAddress })
+    bytec 7 // "treasury"
+    // revenue_vault/contract.algo.ts:880
+    // return this.treasury.value
+    app_global_get_ex
+    assert // check GlobalState exists
+    // revenue_vault/contract.algo.ts:879
+    // getTreasury(): Account {
+    bytec_0 // 0x151f7c75
+    swap
+    concat
+    log
+    intc_0 // 1
+    return
+
+
+// revenue_vault/contract.algo.ts::RevenueVault.getPlatformKwhRateBps[routing]() -> void:
+getPlatformKwhRateBps:
+    // revenue_vault/contract.algo.ts:884
+    // return this.platformKwhRateBps.value
+    intc_1 // 0
+    // revenue_vault/contract.algo.ts:87
+    // platformKwhRateBps = GlobalState<uint64>({ initialValue: Uint64(0) })
+    bytec 13 // "platformKwhRateBps"
+    // revenue_vault/contract.algo.ts:884
+    // return this.platformKwhRateBps.value
+    app_global_get_ex
+    assert // check GlobalState exists
+    // revenue_vault/contract.algo.ts:883
+    // getPlatformKwhRateBps(): uint64 {
+    itob
+    bytec_0 // 0x151f7c75
+    swap
+    concat
+    log
+    intc_0 // 1
+    return
+
+
+// revenue_vault/contract.algo.ts::RevenueVault.getAdmin[routing]() -> void:
+getAdmin:
+    // revenue_vault/contract.algo.ts:888
+    // return this.admin.value
+    intc_1 // 0
+    // revenue_vault/contract.algo.ts:77
+    // admin = GlobalState<Account>({ initialValue: Txn.sender })
+    bytec_3 // "admin"
+    // revenue_vault/contract.algo.ts:888
+    // return this.admin.value
+    app_global_get_ex
+    assert // check GlobalState exists
+    // revenue_vault/contract.algo.ts:887
+    // getAdmin(): Account {
+    bytec_0 // 0x151f7c75
+    swap
+    concat
+    log
+    intc_0 // 1
+    return
+
+
+// revenue_vault/contract.algo.ts::RevenueVault.isPaused[routing]() -> void:
+isPaused:
+    // revenue_vault/contract.algo.ts:892
+    // return this.paused.value
+    intc_1 // 0
+    // revenue_vault/contract.algo.ts:90
+    // paused = GlobalState<uint64>({ initialValue: Uint64(0) })
+    bytec_1 // "paused"
+    // revenue_vault/contract.algo.ts:892
+    // return this.paused.value
+    app_global_get_ex
+    assert // check GlobalState exists
+    // revenue_vault/contract.algo.ts:891
+    // isPaused(): uint64 {
+    itob
+    bytec_0 // 0x151f7c75
+    swap
+    concat
+    log
+    intc_0 // 1
+    return
+
+
+// revenue_vault/contract.algo.ts::RevenueVault.getCurrentEpochId[routing]() -> void:
+getCurrentEpochId:
+    // revenue_vault/contract.algo.ts:896
+    // return this.currentEpochId.value
+    intc_1 // 0
+    // revenue_vault/contract.algo.ts:93
+    // currentEpochId = GlobalState<uint64>({ initialValue: Uint64(0) })
+    bytec 4 // "currentEpochId"
+    // revenue_vault/contract.algo.ts:896
+    // return this.currentEpochId.value
+    app_global_get_ex
+    assert // check GlobalState exists
+    // revenue_vault/contract.algo.ts:895
+    // getCurrentEpochId(): uint64 {
+    itob
+    bytec_0 // 0x151f7c75
+    swap
+    concat
+    log
+    intc_0 // 1
+    return
+
+
+// revenue_vault/contract.algo.ts::RevenueVault.onlyAdmin() -> void:
+onlyAdmin:
+    // revenue_vault/contract.algo.ts:154
+    // assert(Txn.sender === this.admin.value, 'NotAdmin')
+    txn Sender
+    intc_1 // 0
+    // revenue_vault/contract.algo.ts:77
+    // admin = GlobalState<Account>({ initialValue: Txn.sender })
+    bytec_3 // "admin"
+    // revenue_vault/contract.algo.ts:154
+    // assert(Txn.sender === this.admin.value, 'NotAdmin')
+    app_global_get_ex
+    assert // check GlobalState exists
+    ==
+    assert // NotAdmin
+    retsub
+
+
+// revenue_vault/contract.algo.ts::RevenueVault.getEpochStatus(epochId: uint64) -> uint64:
+getEpochStatus:
+    // revenue_vault/contract.algo.ts:171
+    // private getEpochStatus(epochId: uint64): uint64 {
+    proto 1 1
+    // revenue_vault/contract.algo.ts:172
+    // const maybe = this.epochStatus(epochId).maybe()
+    frame_dig -1
+    itob
+    // revenue_vault/contract.algo.ts:108
+    // epochStatus = BoxMap<uint64, uint64>({ keyPrefix: Bytes('epoch_status:') })
+    bytec 8 // "epoch_status:"
+    swap
+    concat
+    // revenue_vault/contract.algo.ts:172
+    // const maybe = this.epochStatus(epochId).maybe()
+    box_get
+    swap
+    btoi
+    swap
+    // revenue_vault/contract.algo.ts:173
+    // return maybe[1] ? (maybe[0] as uint64) : this.getStatusNone()
+    bz getEpochStatus_ternary_false@2
+    frame_dig 0
+
+getEpochStatus_ternary_merge@3:
+    // revenue_vault/contract.algo.ts:173
+    // return maybe[1] ? (maybe[0] as uint64) : this.getStatusNone()
+    swap
+    retsub
+
+getEpochStatus_ternary_false@2:
+    // revenue_vault/contract.algo.ts:98
+    // private getStatusNone(): uint64 { return Uint64(0) }
+    intc_1 // 0
+    b getEpochStatus_ternary_merge@3

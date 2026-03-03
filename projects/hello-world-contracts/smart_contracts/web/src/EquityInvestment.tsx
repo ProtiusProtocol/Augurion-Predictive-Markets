@@ -1,14 +1,8 @@
 import { useState, useEffect } from 'react'
 import algosdk from 'algosdk'
 import { getWalletAdapter } from './wallet-adapter'
-
-const CONFIG = {
-  algodToken: 'a'.repeat(64),
-  algodServer: 'http://127.0.0.1',
-  algodPort: 4001,
-  projectRegistryAppId: 1003,
-  kwTokenAppId: 1003,
-}
+import { CONFIG } from './config'
+import { DEFAULT_PROJECT } from './projects'
 
 interface ProjectInfo {
   projectId: string
@@ -31,6 +25,8 @@ interface InvestmentState {
   currentKwBalance: bigint
   error: string | null
   txId: string | null
+  asaId: number // ASA ID of the kW token (different from App ID)
+  fcFinalisedAt: number | null // unix timestamp from ProjectRegistry
 }
 
 /**
@@ -57,60 +53,116 @@ export default function EquityInvestment() {
     currentKwBalance: 0n,
     error: null,
     txId: null,
+    asaId: 0,
+    fcFinalisedAt: null,
   })
 
   const algodClient = new algosdk.Algodv2(CONFIG.algodToken, CONFIG.algodServer, CONFIG.algodPort)
   const walletAdapter = getWalletAdapter()
+
+  // Fetch fcFinalisedAt timestamp from ProjectRegistry on mount
+  useEffect(() => {
+    const fetchFcTimestamp = async () => {
+      try {
+        const app = await algodClient.getApplicationByID(DEFAULT_PROJECT.registryAppId).do()
+        const gs: any[] = (app.params as any)['global-state'] || []
+        const entry = gs.find((e: any) => {
+          try { return atob(e.key) === 'fcFinalisedAt' } catch { return false }
+        })
+        const ts = entry ? Number(entry.value.uint) : 0
+        setState(prev => ({ ...prev, fcFinalisedAt: ts > 0 ? ts : null }))
+      } catch { /* silent — not critical */ }
+    }
+    fetchFcTimestamp()
+  }, [])
 
   // Check if wallet is already connected
   useEffect(() => {
     if (walletAdapter.isConnected()) {
       const accounts = walletAdapter.getAccounts()
       if (accounts.length > 0) {
-        setState(prev => ({ ...prev, wallet: accounts[0] }))
-        loadProjectInfo()
+        const address = accounts[0]
+        setState(prev => ({ ...prev, wallet: address }))
+        loadProjectInfo().then(() => loadInvestorBalance(address))
       }
     }
   }, [])
 
+  // Helper: decode global state from algosdk response (handles both old and new API formats)
+  const parseGlobalState = (rawState: any[]): Record<string, any> => {
+    const result: Record<string, any> = {}
+    if (!Array.isArray(rawState)) return result
+    for (const item of rawState) {
+      try {
+        const key = Buffer.from(item.key, 'base64').toString('utf-8')
+        const val = item.value
+        if (val.type === 1 || val.type === 'bytes') {
+          result[key] = Buffer.from(val.bytes || '', 'base64')
+        } else {
+          result[key] = val.uint ?? val
+        }
+      } catch { /* skip unparseable entries */ }
+    }
+    return result
+  }
+
   // Load project information from blockchain
-  const loadProjectInfo = async () => {
+  const loadProjectInfo = async (preserveStatus = false) => {
     try {
-      setState(prev => ({ ...prev, status: 'loading' }))
+      if (!preserveStatus) setState(prev => ({ ...prev, status: 'loading' }))
 
-      // Read ProjectRegistry global state
-      const registryApp = await algodClient.getApplicationByID(CONFIG.projectRegistryAppId).do()
-      const registryState = registryApp.params['global-state'] || []
-
-      // Read kWToken global state
+      // Read kWToken global state to get the ASA ID
       const kwTokenApp = await algodClient.getApplicationByID(CONFIG.kwTokenAppId).do()
-      const kwTokenState = kwTokenApp.params['global-state'] || []
+      const kwRaw = kwTokenApp.params?.['global-state'] ?? kwTokenApp.params?.globalState ?? []
+      const kwState = parseGlobalState(kwRaw)
 
-      // Parse state (simplified - in production use proper decoder)
-      const getStateValue = (state: any[], key: string): any => {
-        const item = state.find((s: any) => {
-          const keyBytes = Buffer.from(s.key, 'base64').toString('utf-8')
-          return keyBytes === key
-        })
-        return item ? item.value : null
-      }
+      // The ASA ID is stored in the contract's global state as 'asset_id'
+      const asaId = Number(kwState['asset_id'] ?? 0)
 
       const projectInfo: ProjectInfo = {
-        projectId: 'PROTIUS-001', // Simplified
-        installedAcKw: 1000n, // Would parse from registry
-        treasury: '', // Would parse from registry
-        platformKwBps: 500n, // Would parse from registry
-        platformKwhRateBps: 100n, // Would parse from registry
-        fcFinalized: false, // Would parse from kwToken
-        fcOpen: true, // Would parse from kwToken
-        totalSupply: 0n, // Would parse from kwToken
-        availableForInvestment: 1000n, // installedAcKw - totalSupply
+        projectId: 'PROTIUS-001',
+        installedAcKw: 1000n,
+        treasury: '',
+        platformKwBps: 500n,
+        platformKwhRateBps: 100n,
+        fcFinalized: false,
+        fcOpen: true,
+        totalSupply: 0n,
+        availableForInvestment: 1000n,
       }
 
-      setState(prev => ({ ...prev, projectInfo, status: 'ready', error: null }))
+      setState(prev => ({
+        ...prev,
+        projectInfo,
+        error: null,
+        asaId,
+        // Don't overwrite success/error status when called after investment
+        status: preserveStatus ? prev.status : 'ready',
+      }))
     } catch (error) {
       const msg = error instanceof Error ? error.message : String(error)
-      setState(prev => ({ ...prev, error: `Failed to load project: ${msg}`, status: 'error' }))
+      if (!preserveStatus) setState(prev => ({ ...prev, error: `Failed to load project: ${msg}`, status: 'error' }))
+    }
+  }
+
+  // Read investor's kW token balance from on-chain box storage
+  const loadInvestorBalance = async (address: string) => {
+    if (!address) return
+    try {
+      const investorPubKey = algosdk.decodeAddress(address).publicKey
+      const balPrefix = new TextEncoder().encode('bal:')
+      const boxName = new Uint8Array(balPrefix.length + investorPubKey.length)
+      boxName.set(balPrefix, 0)
+      boxName.set(investorPubKey, balPrefix.length)
+
+      const boxResult = await algodClient.getApplicationBoxByName(CONFIG.kwTokenAppId, boxName).do()
+      // Box value is 8 bytes big-endian uint64
+      const valueBytes: Uint8Array = (boxResult as any).value
+      const balance = BigInt('0x' + Buffer.from(valueBytes).toString('hex'))
+      setState(prev => ({ ...prev, currentKwBalance: balance }))
+    } catch {
+      // Box doesn't exist yet = 0 balance
+      setState(prev => ({ ...prev, currentKwBalance: 0n }))
     }
   }
 
@@ -128,19 +180,30 @@ export default function EquityInvestment() {
       const address = accounts[0]
       setState(prev => ({ ...prev, wallet: address }))
 
-      // Read current kW token balance
-      try {
-        const accountInfo = await algodClient.accountAssetInformation(address, CONFIG.kwTokenAppId).do()
-        const balance = BigInt(accountInfo['asset-holding']['amount'] || 0)
-        setState(prev => ({ ...prev, currentKwBalance: balance }))
-      } catch {
-        setState(prev => ({ ...prev, currentKwBalance: 0n }))
-      }
-
       await loadProjectInfo()
+      await loadInvestorBalance(address)
     } catch (error) {
       const msg = error instanceof Error ? error.message : String(error)
       setState(prev => ({ ...prev, error: msg, status: 'error' }))
+    }
+  }
+
+  // Disconnect wallet
+  const disconnectWallet = async () => {
+    try {
+      await walletAdapter.disconnect()
+      setState(prev => ({
+        ...prev,
+        wallet: '',
+        projectInfo: null,
+        currentKwBalance: 0n,
+        status: 'idle',
+        error: null,
+        txId: null,
+      }))
+    } catch (error) {
+      const msg = error instanceof Error ? error.message : String(error)
+      setState(prev => ({ ...prev, error: msg }))
     }
   }
 
@@ -184,26 +247,75 @@ export default function EquityInvestment() {
       const suggestedParams = await algodClient.getTransactionParams().do()
       const algoMicroalgos = BigInt(Math.floor(parseFloat(state.investmentAmount) * 1_000_000))
 
-      // TODO: This is placeholder logic
-      // In production, you would:
-      // 1. Create payment transaction (ALGO to project treasury or escrow)
-      // 2. Call kWToken.mintAllocation() to mint tokens to investor
-      // 3. Group these transactions atomically
+      // Debug log for App ID
+      console.log('CONFIG.kwTokenAppId:', CONFIG.kwTokenAppId)
+      console.log('state.wallet:', state.wallet)
 
-      // For now, just log the intent
-      console.log('Investment Details:', {
-        investor: state.wallet,
-        amount: algoMicroalgos.toString(),
-        estimatedTokens: state.estimatedKwTokens.toString(),
-      })
+      if (!state.wallet) {
+        throw new Error('Wallet not connected - please connect your wallet first')
+      }
 
-      // Simulate success
+      // Get contract address as string
+      const contractAddress = algosdk.getApplicationAddress(CONFIG.kwTokenAppId).toString()
+      console.log('contractAddress:', contractAddress)
+
+      // Create payment transaction to KWToken contract (algosdk v3: sender/receiver)
+      const paymentTxn = algosdk.makePaymentTxnWithSuggestedParamsFromObject({
+        sender: state.wallet,
+        receiver: contractAddress,
+        amount: Number(algoMicroalgos),
+        suggestedParams,
+      } as any)
+
+      // Create app call transaction to KWToken.invest()
+      // ARC-4 ABI method selector for invest()string = 0x7b78bbc1
+      const methodSelector = new Uint8Array([0x7b, 0x78, 0xbb, 0xc1])
+
+      // Box reference for the investor's balance: key = "bal:" + address public key
+      const investorPubKey = algosdk.decodeAddress(state.wallet).publicKey
+      const balPrefix = new TextEncoder().encode('bal:')
+      const balBoxName = new Uint8Array(balPrefix.length + investorPubKey.length)
+      balBoxName.set(balPrefix, 0)
+      balBoxName.set(investorPubKey, balPrefix.length)
+
+      const appCallTxn = algosdk.makeApplicationNoOpTxnFromObject({
+        sender: state.wallet,
+        appIndex: CONFIG.kwTokenAppId,
+        appArgs: [methodSelector],
+        boxes: [{ appIndex: 0, name: balBoxName }],
+        suggestedParams,
+      } as any)
+
+      // Group transactions atomically
+      const txnGroup = algosdk.assignGroupID([paymentTxn, appCallTxn])
+
+      // Convert grouped transactions to bytes
+      const txnGroupBytes = txnGroup.map(txn => algosdk.encodeUnsignedTransaction(txn))
+
+      // Sign transactions with wallet
+      const signedTxnBytes = await walletAdapter.signTransaction(txnGroupBytes)
+
+      // Submit to network (algodClient expects concatenated signed transactions)
+      const sendResult = await algodClient.sendRawTransaction(signedTxnBytes).do()
+      // algosdk v3 returns { txid } lowercase; v2 returns { txId }
+      const txId = (sendResult as any).txid || (sendResult as any).txId
+
+      // Wait for confirmation
+      console.log('Waiting for confirmation, txId:', txId)
+      await algosdk.waitForConfirmation(algodClient, txId, 8)
+
       setState(prev => ({
         ...prev,
         status: 'success',
-        txId: 'SIMULATED_TX_' + Date.now(),
+        txId: txId,
         error: null,
       }))
+
+      // Reload balance from chain (preserveStatus=true keeps 'success' visible)
+      setTimeout(() => {
+        loadProjectInfo(true)
+        loadInvestorBalance(state.wallet)
+      }, 2000)
     } catch (error) {
       const msg = error instanceof Error ? error.message : String(error)
       setState(prev => ({ ...prev, error: `Investment failed: ${msg}`, status: 'error' }))
@@ -218,6 +330,64 @@ export default function EquityInvestment() {
       </p>
 
       <hr />
+
+      {/* Project Information Panel */}
+      <section style={{ marginBottom: '20px', backgroundColor: '#f8f9fa', border: '1px solid #dee2e6', borderRadius: '6px', padding: '16px' }}>
+        <h2 style={{ margin: '0 0 12px 0', fontSize: '16px' }}>📋 Project Information</h2>
+        <table border={0} cellPadding="6" style={{ width: '100%', fontSize: '13px' }}>
+          <tbody>
+            <tr>
+              <td style={{ fontWeight: 'bold', width: '220px', color: '#555' }}>Project</td>
+              <td>{DEFAULT_PROJECT.name} — {DEFAULT_PROJECT.location}</td>
+            </tr>
+            <tr>
+              <td style={{ fontWeight: 'bold', color: '#555' }}>Expected COD Date</td>
+              <td>{DEFAULT_PROJECT.expectedCodDate
+                ? new Date(DEFAULT_PROJECT.expectedCodDate).toLocaleDateString(undefined, { year: 'numeric', month: 'long', day: 'numeric' })
+                : '—'}
+              </td>
+            </tr>
+            <tr>
+              <td style={{ fontWeight: 'bold', color: '#555' }}>Provisional Acceptance</td>
+              <td>
+                {DEFAULT_PROJECT.expectedCodDate
+                  ? (() => {
+                      const paOffset = DEFAULT_PROJECT.provisionalAcceptanceOffsetDays ?? 30
+                      const paDate = new Date(DEFAULT_PROJECT.expectedCodDate)
+                      paDate.setDate(paDate.getDate() + paOffset)
+                      return `${paDate.toLocaleDateString(undefined, { year: 'numeric', month: 'long', day: 'numeric' })} (COD + ${paOffset} days)`
+                    })()
+                  : '—'}
+              </td>
+            </tr>
+            <tr>
+              <td style={{ fontWeight: 'bold', color: '#555' }}>Equity Claim Available</td>
+              <td>
+                {DEFAULT_PROJECT.expectedCodDate
+                  ? (() => {
+                      const paOffset = DEFAULT_PROJECT.provisionalAcceptanceOffsetDays ?? 30
+                      const claimDate = new Date(DEFAULT_PROJECT.expectedCodDate)
+                      claimDate.setDate(claimDate.getDate() + paOffset + 30)
+                      return `${claimDate.toLocaleDateString(undefined, { year: 'numeric', month: 'long', day: 'numeric' })} (Provisional Acceptance + 30 days)`
+                    })()
+                  : 'Available 30 days after Provisional Acceptance'}
+              </td>
+            </tr>
+            <tr>
+              <td style={{ fontWeight: 'bold', color: '#555' }}>Project Manager</td>
+              <td>{DEFAULT_PROJECT.managerName ?? '—'}</td>
+            </tr>
+            <tr>
+              <td style={{ fontWeight: 'bold', color: '#555' }}>Manager Contact</td>
+              <td>
+                {DEFAULT_PROJECT.managerContact
+                  ? <a href={`mailto:${DEFAULT_PROJECT.managerContact}`} style={{ color: '#1565c0' }}>{DEFAULT_PROJECT.managerContact}</a>
+                  : '—'}
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </section>
 
       {/* Warning Banner */}
       <div style={{ 
@@ -259,6 +429,21 @@ export default function EquityInvestment() {
             <strong>Connected Wallet:</strong> <code>{state.wallet}</code>
             <br />
             <strong>Current kW Balance:</strong> {state.currentKwBalance.toString()} kW
+            <br /><br />
+            <button
+              onClick={disconnectWallet}
+              style={{
+                padding: '8px 16px',
+                backgroundColor: '#f44336',
+                color: '#fff',
+                border: 'none',
+                borderRadius: '4px',
+                cursor: 'pointer',
+                fontSize: '13px'
+              }}
+            >
+              🔌 Disconnect Wallet
+            </button>
           </div>
         )}
       </section>
@@ -300,9 +485,65 @@ export default function EquityInvestment() {
 
           <hr />
 
+          {/* Your Holdings */}
+          {state.wallet && (
+            <section style={{ marginBottom: '20px' }}>
+              <h2>3. Your Holdings</h2>
+              <div style={{
+                backgroundColor: state.currentKwBalance > 0n ? '#e8f5e9' : '#f5f5f5',
+                border: `1px solid ${state.currentKwBalance > 0n ? '#4caf50' : '#ccc'}`,
+                borderRadius: '4px',
+                padding: '16px',
+              }}>
+                <table border={0} cellPadding="6" style={{ width: '100%' }}>
+                  <tbody>
+                    <tr>
+                      <td style={{ fontWeight: 'bold', width: '200px' }}>kW Token Balance</td>
+                      <td style={{ fontSize: '20px', color: state.currentKwBalance > 0n ? '#2e7d32' : '#666' }}>
+                        <strong>{state.currentKwBalance.toString()} kW</strong>
+                      </td>
+                    </tr>
+                    <tr>
+                      <td style={{ fontWeight: 'bold' }}>Wallet</td>
+                      <td style={{ fontSize: '12px', fontFamily: 'monospace' }}>{state.wallet}</td>
+                    </tr>
+                    <tr>
+                      <td style={{ fontWeight: 'bold' }}>Transaction History</td>
+                      <td>
+                        <a
+                          href={`https://testnet.explorer.perawallet.app/address/${state.wallet}/`}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          style={{ color: '#1565c0', fontSize: '13px' }}
+                        >
+                          View on Pera Explorer →
+                        </a>
+                      </td>
+                    </tr>
+                    <tr>
+                      <td style={{ fontWeight: 'bold' }}>Contract</td>
+                      <td>
+                        <a
+                          href={`https://testnet.explorer.perawallet.app/application/${CONFIG.kwTokenAppId}/`}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          style={{ color: '#1565c0', fontSize: '13px' }}
+                        >
+                          App ID {CONFIG.kwTokenAppId} →
+                        </a>
+                      </td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+            </section>
+          )}
+
+          <hr />
+
           {/* Investment Form */}
           <section style={{ marginBottom: '20px' }}>
-            <h2>3. Make Investment</h2>
+            <h2>4. Make Investment</h2>
             
             {!state.projectInfo.fcOpen ? (
               <div style={{ backgroundColor: '#ffebee', padding: '12px', borderRadius: '4px', color: '#c62828' }}>
@@ -391,19 +632,41 @@ export default function EquityInvestment() {
       {state.status === 'success' && state.txId && (
         <div style={{ 
           backgroundColor: '#e8f5e9', 
-          border: '1px solid #4caf50',
+          border: '2px solid #4caf50',
           borderRadius: '4px',
-          padding: '12px',
+          padding: '16px',
           color: '#2e7d32',
           marginTop: '20px'
         }}>
-          <strong>✅ Investment Successful!</strong>
-          <p style={{ margin: '8px 0 0 0', fontSize: '12px' }}>
-            Transaction ID: <code>{state.txId}</code>
+          <strong style={{ fontSize: '16px' }}>✅ Investment Successful!</strong>
+          <p style={{ margin: '8px 0 4px 0', fontSize: '13px' }}>
+            Transaction ID:{' '}
+            <a
+              href={`https://testnet.explorer.perawallet.app/tx/${state.txId}`}
+              target="_blank"
+              rel="noopener noreferrer"
+              style={{ color: '#1b5e20', fontFamily: 'monospace', fontSize: '12px' }}
+            >
+              {state.txId}
+            </a>
           </p>
-          <p style={{ margin: '8px 0 0 0', fontSize: '12px' }}>
-            You will receive <strong>{state.estimatedKwTokens.toString()} kW tokens</strong> once the transaction is confirmed.
+          <p style={{ margin: '4px 0 12px 0', fontSize: '13px' }}>
+            You invested and received <strong>{state.estimatedKwTokens.toString()} kW tokens</strong> representing your equity share.
           </p>
+          <button
+            onClick={() => setState(prev => ({ ...prev, status: 'ready', txId: null, investmentAmount: '', estimatedKwTokens: 0n }))}
+            style={{
+              padding: '8px 16px',
+              backgroundColor: '#4caf50',
+              color: 'white',
+              border: 'none',
+              borderRadius: '4px',
+              cursor: 'pointer',
+              fontSize: '13px',
+            }}
+          >
+            Make Another Investment
+          </button>
         </div>
       )}
 

@@ -1,12 +1,7 @@
 import { useState, useEffect } from 'react'
 import algosdk from 'algosdk'
 import { getWalletAdapter } from './wallet-adapter'
-
-const CONFIG = {
-  algodToken: 'a'.repeat(64),
-  algodServer: 'http://127.0.0.1',
-  algodPort: 4001,
-}
+import { CONFIG } from './config'
 
 interface EntitlementState {
   address: string

@@ -1,5 +1,5 @@
 import { AlgorandClient } from '@algorandfoundation/algokit-utils'
-import { RevenueVaultFactory } from '../artifacts/revenue_vault/RevenueVaultClient'
+import { RevenueVaultFactory } from '../artifacts/revenue_vault/RevenueVaultClient.ts'
 
 /**
  * Protius V1 Core: RevenueVault — Entitlements Settlement Workflow

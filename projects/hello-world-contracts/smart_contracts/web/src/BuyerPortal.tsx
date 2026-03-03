@@ -1,15 +1,10 @@
 import { useState, useEffect } from 'react'
 import algosdk from 'algosdk'
 import ProjectStatusPanel from './ProjectStatusPanel'
+import { CONFIG } from './config'
 
-// Config
-const CONFIG = {
-  algodServer: 'http://127.0.0.1',
-  algodPort: 4001,
-  algodToken: 'a'.repeat(64),
-  ppaContractAppId: 1006, // Update with actual PPA contract app ID
-  projectRegistryAppId: 1003,
-}
+// PPA-specific app ID (can be overridden via VITE_PPA_CONTRACT_APP_ID env var)
+const PPA_CONTRACT_APP_ID = Number(import.meta.env.VITE_PPA_CONTRACT_APP_ID) || 1006
 
 interface PPAAllocation {
   agreementId: number

@@ -1,17 +1,7 @@
 import { useState, useEffect } from 'react'
 import algosdk from 'algosdk'
 import ProjectStatusPanel from './ProjectStatusPanel'
-
-// Hardcoded config - matches deployed localnet contracts
-const CONFIG = {
-  algodServer: 'http://127.0.0.1',
-  algodPort: 4001,
-  algodToken: 'a'.repeat(64),
-  registryAppId: 1002,
-  kwTokenAppId: 1003,
-  kwhReceiptAppId: 1004,
-  revenueVaultAppId: 1005,
-}
+import { CONFIG } from './config'
 
 interface EpochState {
   epochId: number

@@ -1,5 +1,5 @@
 import { AlgorandClient } from '@algorandfoundation/algokit-utils'
-import { KwTokenFactory } from '../artifacts/kw_token/KWTokenClient'
+import { KwTokenFactory } from '../artifacts/kw_token/KWTokenClient.ts'
 import { ProjectRegistryFactory } from '../artifacts/project_registry/ProjectRegistryClient'
 
 /**
